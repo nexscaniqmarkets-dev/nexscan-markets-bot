@@ -1,0 +1,6 @@
+{
+  "name": "NexScan IQ Markets",
+  "description": "Real-time scanner and auto-trading bot for Deriv volatility indices with custom risk parameters.",
+  "requestFramePermissions": ["notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
