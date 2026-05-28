@@ -41,7 +41,7 @@ export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatu
     onAuthorize(tokenInput.trim());
   };
 
-  // Fixed: use Telegram-compatible navigation + auto-login via token
+  // Bulletproof navigation - works in Telegram, browser, and mobile
   const openDerivCashier = (type: 'deposit' | 'withdrawal') => {
     setActiveAction(type);
     const acct = account?.loginid || '';
@@ -52,11 +52,21 @@ export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatu
       : 'https://app.deriv.com/cashier/withdrawal';
     const url = `${base}?acct=${acct}&token=${token}&cur=${cur}`;
 
-    // Works in Telegram Mini App AND regular browser
-    if (window.Telegram?.WebApp?.openLink) {
-      window.Telegram.WebApp.openLink(url);
-    } else {
-      window.open(url, '_blank', 'noopener,noreferrer');
+    try {
+      const tg = (window as any).Telegram;
+      if (tg && tg.WebApp && tg.WebApp.openLink) {
+        tg.WebApp.openLink(url);
+      } else {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    } catch {
+      window.location.href = url;
     }
 
     setTimeout(() => setActiveAction(null), 2000);
@@ -218,20 +228,17 @@ export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatu
             <div className="grid grid-cols-2 gap-4">
 
               {/* Deposit Funds */}
-              <button
-                onClick={() => openDerivCashier('deposit')}
-                disabled={activeAction === 'deposit'}
-                className="group relative overflow-hidden p-5 bg-gradient-to-br from-indigo-950/60 to-slate-900 hover:from-indigo-900/60 border border-indigo-800/50 hover:border-indigo-600/70 rounded-2xl text-left cursor-pointer transition-all active:scale-95 flex flex-col justify-between h-36 shadow-lg shadow-indigo-950/30"
+              <a
+                href={`https://app.deriv.com/cashier/deposit?acct=${account?.loginid || ''}&token=${apiToken || ''}&cur=${account?.currency || 'USD'}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative overflow-hidden p-5 bg-gradient-to-br from-indigo-950/60 to-slate-900 hover:from-indigo-900/60 border border-indigo-800/50 hover:border-indigo-600/70 rounded-2xl text-left cursor-pointer transition-all active:scale-95 flex flex-col justify-between h-36 shadow-lg shadow-indigo-950/30 no-underline"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="absolute -top-4 -right-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all pointer-events-none" />
 
                 <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
-                  {activeAction === 'deposit' ? (
-                    <RefreshCw className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <ArrowDownLeft className="w-5 h-5" />
-                  )}
+                  <ArrowDownLeft className="w-5 h-5" />
                 </div>
 
                 <div className="relative z-10">
@@ -241,23 +248,20 @@ export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatu
                   </div>
                   <p className="text-[10px] text-slate-500 mt-0.5">Add money to your account</p>
                 </div>
-              </button>
+              </a>
 
               {/* Withdraw Funds */}
-              <button
-                onClick={() => openDerivCashier('withdrawal')}
-                disabled={activeAction === 'withdraw'}
-                className="group relative overflow-hidden p-5 bg-gradient-to-br from-emerald-950/60 to-slate-900 hover:from-emerald-900/60 border border-emerald-800/50 hover:border-emerald-600/70 rounded-2xl text-left cursor-pointer transition-all active:scale-95 flex flex-col justify-between h-36 shadow-lg shadow-emerald-950/30"
+              <a
+                href={`https://app.deriv.com/cashier/withdrawal?acct=${account?.loginid || ''}&token=${apiToken || ''}&cur=${account?.currency || 'USD'}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative overflow-hidden p-5 bg-gradient-to-br from-emerald-950/60 to-slate-900 hover:from-emerald-900/60 border border-emerald-800/50 hover:border-emerald-600/70 rounded-2xl text-left cursor-pointer transition-all active:scale-95 flex flex-col justify-between h-36 shadow-lg shadow-emerald-950/30 no-underline"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 <div className="absolute -top-4 -right-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
 
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                  {activeAction === 'withdraw' ? (
-                    <RefreshCw className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <ArrowUpRight className="w-5 h-5" />
-                  )}
+                  <ArrowUpRight className="w-5 h-5" />
                 </div>
 
                 <div className="relative z-10">
@@ -267,7 +271,7 @@ export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatu
                   </div>
                   <p className="text-[10px] text-slate-500 mt-0.5">Transfer to your local method</p>
                 </div>
-              </button>
+              </a>
             </div>
 
             {/* Footer note */}
