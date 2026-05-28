@@ -204,7 +204,7 @@ export default function App() {
           lastGlobalSignalsRef.current = data.globalSignals;
         }
 
-        // 2. Monitor Live result chimes and Monetization / licensing blocks
+        // 2. Monitor Live result chimes
         if (data.botState.tradesCount > lastTradesCountRef.current) {
           if (lastTradesCountRef.current > 0) {
             const isWin = data.botState.lastTradeResult === 'win';
@@ -213,16 +213,16 @@ export default function App() {
             } else {
               playLossChime();
             }
-
-            // Target realized triggers
-            if (data.botState.status === 'won_limit' && !sessionCompleteShownRef.current) {
-              sessionCompleteShownRef.current = true;
-              playTargetReachedChime();
-              triggerPushNotification('🏆 Session Completed!', `Target profit of +$${data.botState.profit.toFixed(2)} met.`);
-              setSessionCompleteOpen(true);
-            }
           }
           lastTradesCountRef.current = data.botState.tradesCount;
+        }
+
+        // 3. Session complete popup — checked every poll, independent of trade count
+        if (data.botState.status === 'won_limit' && !sessionCompleteShownRef.current) {
+          sessionCompleteShownRef.current = true;
+          playTargetReachedChime();
+          triggerPushNotification('🏆 Session Completed!', `Target profit of +$${data.botState.profit.toFixed(2)} met.`);
+          setSessionCompleteOpen(true);
         }
       } catch (err) {
         // Handle network connection drops gracefully without spamming error consoles with raw TypeError: "Failed to fetch"
