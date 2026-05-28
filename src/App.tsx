@@ -15,6 +15,7 @@ import { AdContainer } from './components/AdContainer';
 import { TermsAgreementModal } from './components/TermsAgreementModal';
 import { CashierTab } from './components/CashierTab';
 import { SessionCompleteModal } from './components/SessionCompleteModal';
+import { SessionLostModal } from './components/SessionLostModal';
 import { 
   playWinChime, playLossChime, playTargetReachedChime 
 } from './utils/audio';
@@ -47,6 +48,7 @@ export default function App() {
   const [adOpen, setAdOpen] = useState(false);
   const [adminHubOpen, setAdminHubOpen] = useState(false);
   const [sessionCompleteOpen, setSessionCompleteOpen] = useState(false);
+  const [sessionLostOpen, setSessionLostOpen] = useState(false);
   const [globalTicks, setGlobalTicks] = useState(0);
   const [globalSignals, setGlobalSignals] = useState(0);
   const [sessionTime, setSessionTime] = useState('00:00:00');
@@ -114,6 +116,7 @@ export default function App() {
   const lastTradesCountRef = useRef<number>(0);
   const lastGlobalSignalsRef = useRef<number>(0);
   const sessionCompleteShownRef = useRef<boolean>(false);
+  const sessionLostShownRef = useRef<boolean>(false);
 
   // Telegram WebApp detection state
   const [isTelegram, setIsTelegram] = useState(false);
@@ -224,6 +227,15 @@ export default function App() {
           playTargetReachedChime();
           triggerPushNotification('🏆 Session Completed!', `Target profit of +$${data.botState.profit.toFixed(2)} met.`);
           setTimeout(() => setSessionCompleteOpen(true), 100);
+        }
+
+        // 4. Session lost popup — 5 consecutive losses
+        if (data.botState.status === 'lost_limit' && !sessionLostShownRef.current) {
+          console.log('🛡️ LOST LIMIT DETECTED — showing loss popup');
+          sessionLostShownRef.current = true;
+          playLossChime();
+          triggerPushNotification('🛡️ Session Stopped', '5 consecutive losses. Bot stopped to protect your capital.');
+          setTimeout(() => setSessionLostOpen(true), 100);
         }
       } catch (err) {
         // Handle network connection drops gracefully without spamming error consoles with raw TypeError: "Failed to fetch"
@@ -344,6 +356,7 @@ export default function App() {
   const handleStartBot = async () => {
     if (!account) return;
     sessionCompleteShownRef.current = false; // Reset so popup can show again next session
+    sessionLostShownRef.current = false;
     try {
       await fetch('/api/start', { method: 'POST' });
     } catch(e) {
@@ -603,10 +616,22 @@ export default function App() {
         onClose={async () => {
           setSessionCompleteOpen(false);
           sessionCompleteShownRef.current = false;
-          // Reset wins/losses/profit for new session
-          try {
-            await fetch('/api/restart-scanning', { method: 'POST' });
-          } catch(e) {}
+          try { await fetch('/api/restart-scanning', { method: 'POST' }); } catch(e) {}
+        }}
+      />
+
+      {/* Session Lost Popup */}
+      <SessionLostModal
+        isOpen={sessionLostOpen}
+        profit={botState.profit}
+        wins={botState.wins}
+        losses={botState.losses}
+        stake={botConfig.stake}
+        currency={account?.currency || 'USD'}
+        onClose={async () => {
+          setSessionLostOpen(false);
+          sessionLostShownRef.current = false;
+          try { await fetch('/api/restart-scanning', { method: 'POST' }); } catch(e) {}
         }}
       />
     </div>
