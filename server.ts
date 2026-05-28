@@ -534,7 +534,12 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
     lastTradeResult: isWin ? 'win' : 'loss',
   };
 
-  // Balance updated automatically via Deriv real-time balance subscription — no manual update needed
+  // Update balance:
+  // - Simulator/sandbox accounts: update manually (no Deriv real-time feed)
+  // - Live/Demo Deriv accounts: updated automatically via Deriv balance subscription
+  if (account && (!botConfig.apiToken || account.fullname.toLowerCase().includes('sandbox'))) {
+    account.balance = parseFloat((account.balance + profitValue).toFixed(2));
+  }
 
   // Update creator/owner markup metrics dynamically
   adminSettings.totalClientVolume = parseFloat((adminSettings.totalClientVolume + buyPrice).toFixed(2));
