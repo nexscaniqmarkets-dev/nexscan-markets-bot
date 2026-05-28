@@ -219,10 +219,11 @@ export default function App() {
 
         // 3. Session complete popup — checked every poll, independent of trade count
         if (data.botState.status === 'won_limit' && !sessionCompleteShownRef.current) {
+          console.log('🏆 WON LIMIT DETECTED — showing popup');
           sessionCompleteShownRef.current = true;
           playTargetReachedChime();
           triggerPushNotification('🏆 Session Completed!', `Target profit of +$${data.botState.profit.toFixed(2)} met.`);
-          setSessionCompleteOpen(true);
+          setTimeout(() => setSessionCompleteOpen(true), 100);
         }
       } catch (err) {
         // Handle network connection drops gracefully without spamming error consoles with raw TypeError: "Failed to fetch"
@@ -599,9 +600,13 @@ export default function App() {
         losses={botState.losses}
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
-        onClose={() => {
+        onClose={async () => {
           setSessionCompleteOpen(false);
           sessionCompleteShownRef.current = false;
+          // Reset wins/losses/profit for new session
+          try {
+            await fetch('/api/restart-scanning', { method: 'POST' });
+          } catch(e) {}
         }}
       />
     </div>
