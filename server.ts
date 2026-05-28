@@ -85,13 +85,12 @@ interface AdminSettings {
 }
 
 const ADMIN_CONFIG_PATH = path.join(process.cwd(), 'admin-config.json');
-const TRADES_HISTORY_PATH = path.join(process.cwd(), 'trades-history.json');
 
 let adminSettings: AdminSettings = {
-  appId: 1089,
-  markupPercent: 1.5,
-  affiliateToken: '',
-  creatorToken: '',
+  appId: Number(process.env.DERIV_APP_ID) || 1089,
+  markupPercent: Number(process.env.MARKUP_PERCENT) || 1.5,
+  affiliateToken: process.env.AFFILIATE_TOKEN || '',
+  creatorToken: process.env.CREATOR_TOKEN || '',
   totalClientVolume: 0,
   totalMarkupEarnings: 0,
 };
@@ -102,10 +101,10 @@ function loadAdminSettings() {
       const data = fs.readFileSync(ADMIN_CONFIG_PATH, 'utf8');
       const parsed = JSON.parse(data);
       adminSettings = {
-        appId: Number(parsed.appId) || 1089,
-         markupPercent: parsed.markupPercent !== undefined ? Number(parsed.markupPercent) : 1.5,
-        affiliateToken: parsed.affiliateToken || '',
-        creatorToken: parsed.creatorToken || '',
+        appId: Number(parsed.appId) || Number(process.env.DERIV_APP_ID) || 1089,
+        markupPercent: parsed.markupPercent !== undefined ? Number(parsed.markupPercent) : (Number(process.env.MARKUP_PERCENT) || 1.5),
+        affiliateToken: parsed.affiliateToken || process.env.AFFILIATE_TOKEN || '',
+        creatorToken: parsed.creatorToken || process.env.CREATOR_TOKEN || '',
         totalClientVolume: Number(parsed.totalClientVolume) || 0,
         totalMarkupEarnings: Number(parsed.totalMarkupEarnings) || 0,
       };
@@ -128,32 +127,6 @@ function saveAdminSettings() {
 
 // Bootstrap admin configs immediately
 loadAdminSettings();
-
-function loadTradesHistory() {
-  try {
-    if (fs.existsSync(TRADES_HISTORY_PATH)) {
-      const data = fs.readFileSync(TRADES_HISTORY_PATH, 'utf8');
-      const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) {
-        pastTrades = parsed;
-        console.log(`Loaded ${pastTrades.length} trades from history.`);
-      }
-    }
-  } catch (err) {
-    console.error('Failed to load trades history:', err);
-  }
-}
-
-function saveTradesHistory() {
-  try {
-    fs.writeFileSync(TRADES_HISTORY_PATH, JSON.stringify(pastTrades, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Failed to save trades history:', err);
-  }
-}
-
-// Load trade history on startup
-loadTradesHistory();
 
 const SYMBOLS: SymbolInfo[] = [
   { id: 'R_10', name: 'Volatility 10 Index', short: 'V10', vol: 10, tier: 'STD', pip: 0.001 },
@@ -488,9 +461,6 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
     profit: profitValue,
     description: description,
   });
-
-  // Persist history to disk so it survives restarts/logouts
-  saveTradesHistory();
 
   addLog(
     isWin ? 'success' : 'trade',
@@ -848,7 +818,6 @@ async function run() {
   // API Route: Clear past trades history
   app.post('/api/clear-trades', (req, res) => {
     pastTrades = [];
-    saveTradesHistory();
     addLog('info', '🗑️ Past trading history cleared.');
     res.json({ success: true });
   });
