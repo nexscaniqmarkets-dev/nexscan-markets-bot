@@ -14,6 +14,7 @@ import { OnboardingGuide } from './components/OnboardingGuide';
 import { AdContainer } from './components/AdContainer';
 import { TermsAgreementModal } from './components/TermsAgreementModal';
 import { CashierTab } from './components/CashierTab';
+import { SessionCompleteModal } from './components/SessionCompleteModal';
 import { 
   playWinChime, playLossChime, playTargetReachedChime 
 } from './utils/audio';
@@ -45,6 +46,7 @@ export default function App() {
   });
   const [adOpen, setAdOpen] = useState(false);
   const [adminHubOpen, setAdminHubOpen] = useState(false);
+  const [sessionCompleteOpen, setSessionCompleteOpen] = useState(false);
   const [globalTicks, setGlobalTicks] = useState(0);
   const [globalSignals, setGlobalSignals] = useState(0);
   const [sessionTime, setSessionTime] = useState('00:00:00');
@@ -215,6 +217,7 @@ export default function App() {
             if (data.botState.status === 'won_limit') {
               playTargetReachedChime();
               triggerPushNotification('🏆 Session Completed!', `Target profit of +$${data.botState.profit.toFixed(2)} met.`);
+              setSessionCompleteOpen(true);
             }
           }
           lastTradesCountRef.current = data.botState.tradesCount;
@@ -584,6 +587,17 @@ export default function App() {
       <AdminHubModal
         isOpen={adminHubOpen}
         onClose={() => setAdminHubOpen(false)}
+      />
+
+      {/* Session Complete Popup */}
+      <SessionCompleteModal
+        isOpen={sessionCompleteOpen}
+        profit={botState.profit}
+        wins={botState.wins}
+        losses={botState.losses}
+        stake={botConfig.stake}
+        currency={account?.currency || 'USD'}
+        onClose={() => setSessionCompleteOpen(false)}
       />
     </div>
   );
