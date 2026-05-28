@@ -15,7 +15,7 @@ import { AdContainer } from './components/AdContainer';
 import { TermsAgreementModal } from './components/TermsAgreementModal';
 import { CashierTab } from './components/CashierTab';
 import { 
-  playWinChime, playLossChime, playTargetReachedChime 
+  playSignalChime, playWinChime, playLossChime, playTargetReachedChime 
 } from './utils/audio';
 import { 
   Compass, Trophy, Cpu, ShieldAlert, Sparkles, AlertCircle, RefreshCw, Crown, Coins, X, History, Wallet
@@ -196,7 +196,7 @@ export default function App() {
         // 1. Monitor Signal sound chimes
         if (data.globalSignals > lastGlobalSignalsRef.current) {
           if (lastGlobalSignalsRef.current > 0) {
-
+            playSignalChime();
             triggerPushNotification('🎯 Setup Identified!', 'A high-probabilistic Rise-direction signal was sourced!');
           }
           lastGlobalSignalsRef.current = data.globalSignals;
@@ -558,6 +558,7 @@ export default function App() {
               pastTrades={pastTrades}
               onAuthorize={handleAuthorize}
               authorizedWsStatus={authorizedWsStatus}
+              apiToken={botConfig.apiToken}
             />
           )}
         </div>
