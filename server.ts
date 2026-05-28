@@ -134,24 +134,14 @@ function loadTradesHistory() {
     if (fs.existsSync(TRADES_HISTORY_PATH)) {
       const data = fs.readFileSync(TRADES_HISTORY_PATH, 'utf8');
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) {
-        pastTrades = parsed;
-        console.log(`Loaded ${pastTrades.length} trades from history.`);
-      }
+      if (Array.isArray(parsed)) { pastTrades = parsed; }
     }
-  } catch (err) {
-    console.error('Failed to load trades history:', err);
-  }
+  } catch (err) { console.error('Failed to load trades history:', err); }
 }
-
 function saveTradesHistory() {
-  try {
-    fs.writeFileSync(TRADES_HISTORY_PATH, JSON.stringify(pastTrades, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Failed to save trades history:', err);
-  }
+  try { fs.writeFileSync(TRADES_HISTORY_PATH, JSON.stringify(pastTrades, null, 2), 'utf8'); }
+  catch (err) { console.error('Failed to save trades history:', err); }
 }
-
 loadTradesHistory();
 
 const SYMBOLS: SymbolInfo[] = [
@@ -534,9 +524,7 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
     lastTradeResult: isWin ? 'win' : 'loss',
   };
 
-  // Update balance:
-  // - Simulator/sandbox accounts: update manually (no Deriv real-time feed)
-  // - Live/Demo Deriv accounts: updated automatically via Deriv balance subscription
+  // Simulator: update balance manually. Live Deriv: updated via real-time balance subscription
   if (account && (!botConfig.apiToken || account.fullname.toLowerCase().includes('sandbox'))) {
     account.balance = parseFloat((account.balance + profitValue).toFixed(2));
   }
@@ -858,6 +846,19 @@ async function run() {
     sessionStartTime = Date.now();
     globalTicks = 0;
     globalSignals = 0;
+    // Reset botState for fresh session
+    botState = {
+      isRunning: false,
+      symbol: botState.symbol,
+      currentStake: botConfig.stake,
+      consecutiveLosses: 0,
+      wins: 0,
+      losses: 0,
+      profit: 0,
+      tradesCount: 0,
+      status: 'idle',
+      lastTradeResult: null,
+    };
     Object.keys(symbolsState).forEach((key) => {
       symbolsState[key].ticks = 0;
       symbolsState[key].signals = 0;
