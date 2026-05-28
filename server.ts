@@ -841,6 +841,25 @@ async function run() {
     res.json({ success: true });
   });
 
+  // API Route: Start a new session — resets ONLY bot performance stats (wins, losses, profit, stake)
+  // Does NOT touch scanner data (globalTicks, globalSignals, symbolsState)
+  app.post('/api/new-session', (req, res) => {
+    botState = {
+      isRunning: false,
+      symbol: botState.symbol,
+      currentStake: botConfig.stake,
+      consecutiveLosses: 0,
+      wins: 0,
+      losses: 0,
+      profit: 0,
+      tradesCount: 0,
+      status: 'idle',
+      lastTradeResult: null,
+    };
+    addLog('success', '🔄 New session started. Performance stats reset. Scanner continues running uninterrupted.');
+    res.json({ success: true, botState });
+  });
+
   // API Route: Restart scanning and reset all statistics
   app.post('/api/restart-scanning', (req, res) => {
     sessionStartTime = Date.now();
