@@ -113,6 +113,7 @@ export default function App() {
   // Keep tracking refs for background notification state comparisons
   const lastTradesCountRef = useRef<number>(0);
   const lastGlobalSignalsRef = useRef<number>(0);
+  const sessionCompleteShownRef = useRef<boolean>(false);
 
   // Telegram WebApp detection state
   const [isTelegram, setIsTelegram] = useState(false);
@@ -214,7 +215,8 @@ export default function App() {
             }
 
             // Target realized triggers
-            if (data.botState.status === 'won_limit') {
+            if (data.botState.status === 'won_limit' && !sessionCompleteShownRef.current) {
+              sessionCompleteShownRef.current = true;
               playTargetReachedChime();
               triggerPushNotification('🏆 Session Completed!', `Target profit of +$${data.botState.profit.toFixed(2)} met.`);
               setSessionCompleteOpen(true);
@@ -340,7 +342,7 @@ export default function App() {
 
   const handleStartBot = async () => {
     if (!account) return;
-
+    sessionCompleteShownRef.current = false; // Reset so popup can show again next session
     try {
       await fetch('/api/start', { method: 'POST' });
     } catch(e) {
@@ -597,7 +599,10 @@ export default function App() {
         losses={botState.losses}
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
-        onClose={() => setSessionCompleteOpen(false)}
+        onClose={() => {
+          setSessionCompleteOpen(false);
+          sessionCompleteShownRef.current = false;
+        }}
       />
     </div>
   );
