@@ -11,9 +11,10 @@ interface CashierTabProps {
   pastTrades: PastTrade[];
   onAuthorize: (token: string) => void;
   authorizedWsStatus: 'idle' | 'authorizing' | 'authorized' | 'error';
+  apiToken?: string;
 }
 
-export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatus }: CashierTabProps) {
+export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatus, apiToken = '' }: CashierTabProps) {
   const [tokenInput, setTokenInput] = useState('');
   const [authError, setAuthError] = useState('');
   const [animBalance, setAnimBalance] = useState(false);
@@ -40,12 +41,16 @@ export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatu
     onAuthorize(tokenInput.trim());
   };
 
-  // Fixed: use Telegram-compatible navigation
+  // Fixed: use Telegram-compatible navigation + auto-login via token
   const openDerivCashier = (type: 'deposit' | 'withdrawal') => {
     setActiveAction(type);
-    const url = type === 'deposit'
+    const acct = account?.loginid || '';
+    const cur = account?.currency || 'USD';
+    const token = apiToken || '';
+    const base = type === 'deposit'
       ? 'https://app.deriv.com/cashier/deposit'
       : 'https://app.deriv.com/cashier/withdrawal';
+    const url = `${base}?acct=${acct}&token=${token}&cur=${cur}`;
 
     // Works in Telegram Mini App AND regular browser
     if (window.Telegram?.WebApp?.openLink) {
