@@ -616,7 +616,7 @@ export default function App() {
         onClose={async () => {
           setSessionCompleteOpen(false);
           sessionCompleteShownRef.current = false;
-          try { await fetch('/api/restart-scanning', { method: 'POST' }); } catch(e) {}
+          try { await fetch('/api/new-session', { method: 'POST' }); } catch(e) {}
         }}
       />
 
@@ -631,7 +631,7 @@ export default function App() {
         onClose={async () => {
           setSessionLostOpen(false);
           sessionLostShownRef.current = false;
-          try { await fetch('/api/restart-scanning', { method: 'POST' }); } catch(e) {}
+          try { await fetch('/api/new-session', { method: 'POST' }); } catch(e) {}
         }}
       />
     </div>
