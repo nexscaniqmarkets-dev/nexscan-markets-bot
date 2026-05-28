@@ -229,7 +229,7 @@ export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatu
 
               {/* Deposit Funds */}
               <a
-                href={`https://app.deriv.com/cashier/deposit?acct=${account?.loginid || ''}&token=${apiToken || ''}&cur=${account?.currency || 'USD'}`}
+                href={`https://oauth.deriv.com/oauth2/authorize?app_id=${134680}&redirect_uri=https://app.deriv.com/cashier/deposit`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative overflow-hidden p-5 bg-gradient-to-br from-indigo-950/60 to-slate-900 hover:from-indigo-900/60 border border-indigo-800/50 hover:border-indigo-600/70 rounded-2xl text-left cursor-pointer transition-all active:scale-95 flex flex-col justify-between h-36 shadow-lg shadow-indigo-950/30 no-underline"
@@ -252,7 +252,7 @@ export function CashierTab({ account, pastTrades, onAuthorize, authorizedWsStatu
 
               {/* Withdraw Funds */}
               <a
-                href={`https://app.deriv.com/cashier/withdrawal?acct=${account?.loginid || ''}&token=${apiToken || ''}&cur=${account?.currency || 'USD'}`}
+                href={`https://oauth.deriv.com/oauth2/authorize?app_id=${134680}&redirect_uri=https://app.deriv.com/cashier/withdrawal`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative overflow-hidden p-5 bg-gradient-to-br from-emerald-950/60 to-slate-900 hover:from-emerald-900/60 border border-emerald-800/50 hover:border-emerald-600/70 rounded-2xl text-left cursor-pointer transition-all active:scale-95 flex flex-col justify-between h-36 shadow-lg shadow-emerald-950/30 no-underline"
