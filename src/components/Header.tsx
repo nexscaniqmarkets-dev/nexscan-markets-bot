@@ -1,5 +1,6 @@
 import { Shield, Sparkles, Activity, Clock, Wifi, User, HelpCircle, Send } from 'lucide-react';
 import { AccountInfo } from '../types';
+import nexscanLogo from '../assets/images/nexscan_iq_logo_1779881138833.png';
 
 interface HeaderProps {
   ticksCount: number;
@@ -49,7 +50,7 @@ export function Header({
       <div className="flex items-center gap-3">
         <div className="relative">
           <img
-            src="/src/assets/images/nexscan_iq_logo_1779881138833.png"
+            src={nexscanLogo}
             alt="NexScan IQ Markets Logo"
             className="w-10 h-10 rounded-xl shadow-lg border border-slate-800/80 object-cover"
             referrerPolicy="no-referrer"
