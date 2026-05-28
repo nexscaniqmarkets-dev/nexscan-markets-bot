@@ -155,7 +155,7 @@ export function SessionCompleteModal({
 
           {/* Reset note */}
           <p className="text-center text-[9px] font-mono text-slate-500 mb-3 relative z-10">
-            Clicking OK will reset wins &amp; losses for a fresh session
+            Clicking OK resets performance stats for a fresh session. Scanner keeps running.
           </p>
 
           {/* OK Button */}
