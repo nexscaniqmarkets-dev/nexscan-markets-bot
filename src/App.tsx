@@ -415,8 +415,8 @@ export default function App() {
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 md:px-8 space-y-6">
         
         {/* Navigation Tabs bar */}
-        <div className="flex justify-between items-center bg-slate-900/50 rounded-2xl p-1.5 border border-slate-800/80">
-          <div className="flex gap-1.5 w-full sm:w-auto">
+        <div className="bg-slate-900/50 rounded-2xl p-1.5 border border-slate-800/80 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-1.5 w-max min-w-full sm:w-auto sm:min-w-0 sm:justify-between">
             <button
               id="tabScannerBtn"
               onClick={() => setActiveTab('scanner')}
