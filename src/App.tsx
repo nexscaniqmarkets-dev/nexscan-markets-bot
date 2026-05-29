@@ -143,8 +143,17 @@ export default function App() {
   const [isTelegram, setIsTelegram] = useState(false);
   const [tgUser, setTgUser] = useState<any>(null);
 
-  // Resolved session user ID — Telegram ID for mini app users, browser-generated ID for web users
-  const [sessionUserId, setSessionUserId] = useState<string>('default');
+  // Resolved session user ID — initialized synchronously so it's ready before any button click
+  const [sessionUserId] = useState<string>(() => {
+    // Try Telegram first (synchronous access)
+    try {
+      if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+        return window.Telegram.WebApp.initDataUnsafe.user.id.toString();
+      }
+    } catch(e) {}
+    // Fall back to persistent browser ID
+    return getOrCreateWebSessionId();
+  });
 
   useEffect(() => {
     if (window.Telegram?.WebApp) {
@@ -155,18 +164,10 @@ export default function App() {
         setIsTelegram(true);
         if (webapp.initDataUnsafe?.user) {
           setTgUser(webapp.initDataUnsafe.user);
-          setSessionUserId(webapp.initDataUnsafe.user.id.toString());
-          console.log('Telegram App User linked:', webapp.initDataUnsafe.user);
-        } else {
-          setSessionUserId(getOrCreateWebSessionId());
         }
       } catch (err) {
         console.error('Failed to trigger Telegram WebApp initialization:', err);
-        setSessionUserId(getOrCreateWebSessionId());
       }
-    } else {
-      // Regular browser — use persistent localStorage ID
-      setSessionUserId(getOrCreateWebSessionId());
     }
   }, []);
 
@@ -186,8 +187,6 @@ export default function App() {
 
   // Local storage restore credentials flow on mount — keyed by sessionUserId so each user's data is isolated
   useEffect(() => {
-    if (!sessionUserId || sessionUserId === 'default') return; // Wait until we have a real user ID
-
     const userId = sessionUserId;
     const TOKEN_KEY = `mamba_deriv_token_${userId}`;
     const CONFIG_KEY = `mamba_bot_config_${userId}`;
