@@ -1301,6 +1301,24 @@ async function run() {
     res.json({ success: true });
   });
 
+  // API Route: Reset session after target/loss limit reached (clears won_limit / lost_limit status)
+  app.post('/api/new-session', (req, res) => {
+    processedContracts.clear();
+    botState = {
+      ...botState,
+      isRunning: true,
+      currentStake: botConfig.stake,
+      consecutiveLosses: 0,
+      wins: 0,
+      losses: 0,
+      profit: 0,
+      tradesCount: 0,
+      status: 'waiting',
+    };
+    addLog('success', '🔄 New session started. Stats reset — bot is live and waiting for the next signal.');
+    res.json({ success: true, botState });
+  });
+
   // API Route: Restart scanning and reset all statistics
   app.post('/api/restart-scanning', (req, res) => {
     sessionStartTime = Date.now();
