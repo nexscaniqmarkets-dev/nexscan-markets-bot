@@ -552,10 +552,93 @@ export function BotTrader({
           )}
         </div>
 
+        {/* Advanced Mode — Live Win Rate Monitor Panel */}
+        {isAdvancedMode && (
+          <div className="rounded-2xl bg-violet-950/20 border border-violet-800/50 p-5 shadow-sm space-y-4">
+            <h3 className="font-sans font-bold text-violet-200 text-sm tracking-tight flex items-center gap-2 border-b border-violet-800/40 pb-3">
+              <Zap className="w-4 h-4 text-violet-400" /> Auto Pair-Swap Monitor
+            </h3>
+
+            {(() => {
+              const activeState = symbolsState[activeSymbol.id];
+              const totalSim = activeState ? activeState.wins + activeState.losses : 0;
+              const liveWinRate = totalSim >= 3 ? (activeState.wins / totalSim) * 100 : null;
+              const THRESHOLD = 55;
+              const isCritical = liveWinRate !== null && liveWinRate < THRESHOLD;
+              const isHealthy = liveWinRate !== null && liveWinRate >= THRESHOLD;
+
+              return (
+                <div className="space-y-4">
+                  {/* Win rate gauge */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold">
+                        Live Win Rate — {activeSymbol.short}
+                      </span>
+                      <span className={`text-[11px] font-mono font-black ${isCritical ? 'text-rose-400' : isHealthy ? 'text-emerald-400' : 'text-slate-500'}`}>
+                        {liveWinRate !== null ? `${liveWinRate.toFixed(1)}%` : totalSim < 3 ? `Warming up (${totalSim}/3 trades)` : 'N/A'}
+                      </span>
+                    </div>
+                    <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden relative">
+                      {/* Threshold line */}
+                      <div className="absolute top-0 bottom-0 w-px bg-violet-500/70 z-10" style={{ left: `${THRESHOLD}%` }} />
+                      {/* Fill */}
+                      <div
+                        className={`h-full rounded-full transition-all duration-700 ${isCritical ? 'bg-rose-500' : isHealthy ? 'bg-emerald-500' : 'bg-slate-600'}`}
+                        style={{ width: liveWinRate !== null ? `${Math.min(liveWinRate, 100)}%` : '0%' }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-[9px] font-mono text-slate-600">0%</span>
+                      <span className="text-[9px] font-mono text-violet-400">55% threshold</span>
+                      <span className="text-[9px] font-mono text-slate-600">100%</span>
+                    </div>
+                  </div>
+
+                  {/* Status chips */}
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                      <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">Wins</div>
+                      <div className="text-sm font-mono font-black text-emerald-400 mt-0.5">{activeState?.wins ?? 0}</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                      <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">Losses</div>
+                      <div className="text-sm font-mono font-black text-rose-400 mt-0.5">{activeState?.losses ?? 0}</div>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800">
+                      <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">Trades</div>
+                      <div className="text-sm font-mono font-black text-slate-300 mt-0.5">{totalSim}</div>
+                    </div>
+                  </div>
+
+                  {/* Status message */}
+                  <div className={`flex items-start gap-2.5 p-3 rounded-xl text-[10px] font-sans leading-relaxed border ${
+                    isCritical
+                      ? 'bg-rose-950/20 border-rose-800/40 text-rose-300'
+                      : isHealthy
+                        ? 'bg-emerald-950/20 border-emerald-800/40 text-emerald-300'
+                        : 'bg-slate-950/40 border-slate-800 text-slate-400'
+                  }`}>
+                    <span className="shrink-0 mt-0.5">{isCritical ? '⚠️' : isHealthy ? '✅' : '⏳'}</span>
+                    <span>
+                      {isCritical
+                        ? `Win rate is below 55%. If bot is running, it will pause and auto-scan for a better performing pair.`
+                        : isHealthy
+                          ? `Pair credibility is healthy. Bot will continue trading on ${activeSymbol.short}.`
+                          : `Collecting baseline data. Auto-swap monitoring activates after 3 or more trades.`}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+
         {/* Risk Param Customizers */}
-        <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 shadow-sm space-y-4">
-          <h3 className="font-sans font-bold text-slate-200 text-sm tracking-tight flex items-center gap-2 border-b border-slate-800/80 pb-3">
-            <Layers className="w-4 h-4 text-amber-500" /> Active Trade Parameters
+        <div className={`rounded-2xl p-5 shadow-sm space-y-4 ${isAdvancedMode ? 'bg-violet-950/10 border border-violet-800/40' : 'bg-slate-900 border border-slate-800'}`}>
+          <h3 className={`font-sans font-bold text-slate-200 text-sm tracking-tight flex items-center gap-2 border-b pb-3 ${isAdvancedMode ? 'border-violet-800/40' : 'border-slate-800/80'}`}>
+            <Layers className={`w-4 h-4 ${isAdvancedMode ? 'text-violet-400' : 'text-amber-500'}`} /> Active Trade Parameters
+            {isAdvancedMode && <span className="ml-auto text-[9px] font-mono text-violet-500 tracking-widest uppercase font-bold">⚡ Advanced</span>}
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
