@@ -89,10 +89,15 @@ export function BotTrader({
     }
   }, [autoTriggerResume]);
 
-  // Monitor trade state to trigger the 10s countdown ONLY on completed trade cycle (won_limit or lost_limit)
+  // Auto-countdown on session end is a Premium Autopilot feature only.
+  // For normal (non-premium) users, the session complete/lost popup handles next steps manually.
   const lastBotStatusRef = useRef(botState.status);
   useEffect(() => {
+    const premStatus = localStorage.getItem('mamba_premium_status');
+    const isPremiumActive = premStatus && premStatus !== 'idle';
+
     if (
+      isPremiumActive &&
       (botState.status === 'won_limit' || botState.status === 'lost_limit') &&
       lastBotStatusRef.current !== botState.status
     ) {
