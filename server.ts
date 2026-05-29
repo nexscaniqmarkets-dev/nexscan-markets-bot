@@ -65,7 +65,7 @@ interface BotState {
   losses: number;
   profit: number;
   tradesCount: number;
-  status: 'idle' | 'waiting' | 'trading' | 'won_limit' | 'lost_limit' | 'error';
+  status: 'idle' | 'waiting' | 'trading' | 'won_limit' | 'lost_limit' | 'error' | 'paused_low_winrate';
   lastTradeResult: 'win' | 'loss' | null;
 }
 
