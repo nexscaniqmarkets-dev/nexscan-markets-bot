@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ShieldAlert, TrendingDown, AlertTriangle, RefreshCw, X } from 'lucide-react';
 
 interface SessionLostModalProps {
@@ -21,6 +21,8 @@ export function SessionLostModal({
   onClose,
 }: SessionLostModalProps) {
   const [animate, setAnimate] = useState(false);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (isOpen) {
@@ -49,7 +51,7 @@ export function SessionLostModal({
 
           {/* Close X */}
           <button
-            onClick={onClose}
+            onClick={() => onCloseRef.current()}
             className="absolute top-4 right-4 w-7 h-7 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-colors cursor-pointer z-10"
           >
             <X className="w-4 h-4" />
@@ -135,7 +137,7 @@ export function SessionLostModal({
 
           {/* OK Button */}
           <button
-            onClick={onClose}
+            onClick={() => onCloseRef.current()}
             className="relative z-10 w-full py-4 bg-gradient-to-r from-rose-700 to-slate-700 hover:from-rose-600 hover:to-slate-600 text-white font-mono font-black text-base rounded-2xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2.5 shadow-xl shadow-rose-950/50 tracking-wider"
           >
             <RefreshCw className="w-5 h-5" />
