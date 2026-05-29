@@ -188,46 +188,90 @@ export function ScannerTab({
                   )}
                 </div>
               </div>
-            </div>
-
-            {/* Backtester Win Rate Indicator */}
+            </div>            {/* Backtester Win Rate & Performance Score Indicators */}
             <div className="border-t border-slate-800/80 pt-3 mt-3">
-              <div className="flex justify-between items-center mb-1.5">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest leading-none">
-                  Scanner Win Rate (Over prediction: 4)
-                </span>
-                <span
-                  className="font-mono text-xs font-black"
-                  style={{
-                    color:
-                      winRate === null
-                        ? '#64748b'
-                        : winRate >= 55
-                        ? '#22c55e'
-                        : winRate >= 45
-                        ? '#eab308'
-                        : '#ef4444',
-                  }}
-                >
-                  {winRate !== null ? `${winRate.toFixed(1)}%` : 'Calculating...'}
-                </span>
-              </div>
-              
-              <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${winRate !== null ? winRate : 0}%`,
-                    background:
-                      winRate === null
-                        ? '#334155'
-                        : winRate >= 55
-                        ? 'linear-gradient(90deg, #15803d, #22c55e)'
-                        : winRate >= 45
-                        ? 'linear-gradient(90deg, #b45309, #eab308)'
-                        : 'linear-gradient(90deg, #991b1b, #ef4444)',
-                  }}
-                />
+              <div className="grid grid-cols-2 gap-4 mb-3">
+                {/* Win Rate */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">
+                      Win Rate
+                    </span>
+                    <span
+                      className="font-mono text-[11px] font-black"
+                      style={{
+                        color:
+                          winRate === null
+                            ? '#64748b'
+                            : winRate >= 60.0
+                            ? '#10b981'
+                            : winRate >= 50.0
+                            ? '#f59e0b'
+                            : '#ef4444',
+                      }}
+                    >
+                      {winRate !== null ? `${winRate.toFixed(1)}%` : 'Scanning...'}
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${winRate !== null ? winRate : 0}%`,
+                        backgroundColor:
+                          winRate === null
+                            ? '#334155'
+                            : winRate >= 60.0
+                            ? '#10b981'
+                            : winRate >= 50.0
+                            ? '#f59e0b'
+                            : '#ef4444',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Performance Score */}
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">
+                      Perf. Score
+                    </span>
+                    <span
+                      className="font-mono text-[11px] font-black"
+                      style={{
+                        color:
+                          winRate === null
+                            ? '#64748b'
+                            : (winRate * 0.65 + Math.min((state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0) * 5.0, 100) * 0.35) >= 55.0
+                            ? '#6366f1'
+                            : (winRate * 0.65 + Math.min((state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0) * 5.0, 100) * 0.35) >= 45.0
+                            ? '#f59e0b'
+                            : '#ef4444',
+                      }}
+                    >
+                      {winRate !== null 
+                        ? (winRate * 0.65 + Math.min((state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0) * 5.0, 100) * 0.35).toFixed(1)
+                        : 'Calibrating...'}
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${winRate !== null ? Math.min(100, winRate * 0.65 + Math.min((state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0) * 5.0, 100) * 0.35) : 0}%`,
+                        backgroundColor:
+                          winRate === null
+                            ? '#334155'
+                            : (winRate * 0.65 + Math.min((state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0) * 5.0, 100) * 0.35) >= 55.0
+                            ? '#6366f1'
+                            : (winRate * 0.65 + Math.min((state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0) * 5.0, 100) * 0.35) >= 45.0
+                            ? '#f59e0b'
+                            : '#ef4444',
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-4 gap-1 mt-3">
