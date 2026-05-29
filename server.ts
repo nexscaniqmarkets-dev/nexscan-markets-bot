@@ -363,6 +363,7 @@ interface UserSession {
   authorizedPingInterval: NodeJS.Timeout | null;
   processedContracts: Set<string>;
   sessionStartTime: number;
+  pendingSimulatedTrade: { symbol: string; stake: number } | null;
 }
 
 const userSessions = new Map<string, UserSession>();
@@ -400,6 +401,7 @@ function getSession(userId: string): UserSession {
       authorizedPingInterval: null,
       processedContracts: new Set(),
       sessionStartTime: Date.now(),
+      pendingSimulatedTrade: null,
     });
   }
   return userSessions.get(userId)!;
@@ -800,20 +802,23 @@ function initPublicSocket() {
       const newPrice = tick.quote;
       const newDigit = getLastDigit(newPrice, pip);
 
-      // Settle simulated contract on actual next live tick update
-      if (pendingSimulatedTrade && pendingSimulatedTrade.symbol === symId) {
-        const trade = pendingSimulatedTrade;
-        pendingSimulatedTrade = null; // Clear to prevent double processing
+      // Settle simulated contract on actual next live tick update — per session
+      for (const session of userSessions.values()) {
+        if (session.pendingSimulatedTrade && session.pendingSimulatedTrade.symbol === symId) {
+          const trade = session.pendingSimulatedTrade;
+          session.pendingSimulatedTrade = null; // Clear to prevent double processing
 
-        const didWin = newDigit > 4;
-        const profitValue = didWin ? parseFloat((trade.stake * 0.95).toFixed(2)) : -trade.stake;
+          const didWin = newDigit > 4;
+          const profitValue = didWin ? parseFloat((trade.stake * 0.95).toFixed(2)) : -trade.stake;
 
-        settleContract(
-          didWin ? 'won' : 'lost',
-          profitValue,
-          trade.stake,
-          didWin ? `V-Win (Exit Digit: ${newDigit} > 4)` : `V-Loss (Exit Digit: ${newDigit} <= 4)`
-        );
+          settleContract(
+            session,
+            didWin ? 'won' : 'lost',
+            profitValue,
+            trade.stake,
+            didWin ? `V-Win (Exit Digit: ${newDigit} > 4)` : `V-Loss (Exit Digit: ${newDigit} <= 4)`
+          );
+        }
       }
 
       const oldPrice = s.price;
@@ -840,9 +845,11 @@ function initPublicSocket() {
         lastSignalTick = currentTickId;
         globalSignals++;
 
-        // Trigger action IF this index is the bot's current selection and bot is active
-        if (symId === botState.symbol && botState.isRunning) {
-          triggerBotEntry(symId, newDigit);
+        // Trigger action for every active session watching this symbol
+        for (const session of userSessions.values()) {
+          if (symId === session.botState.symbol && session.botState.isRunning) {
+            triggerBotEntry(session, symId, newDigit);
+          }
         }
       }
 
@@ -863,21 +870,21 @@ function initPublicSocket() {
         pendingSignal,
       };
 
-      // Advanced mode only — Pair credibility check: monitor live win rate of the active
-      // trading symbol. If it drops below 55% (with >= 5 sim trades), pause the session
-      // so the scanner can auto-find and swap to the next best qualifying pair.
-      if (botConfig.tradingMode === 'advanced' && botState.isRunning && symId === botState.symbol) {
-        const activeState = symbolsState[symId];
-        const totalSim = activeState.wins + activeState.losses;
-        if (totalSim >= 5) {
-          const liveWinRate = (activeState.wins / totalSim) * 100;
-          if (liveWinRate < 55.0) {
-            botState = {
-              ...botState,
-              isRunning: false,
-              status: 'paused_low_winrate',
-            };
-            addLog('warning', `⚠️ PAIR CREDIBILITY LOST: ${symId} win rate dropped to ${liveWinRate.toFixed(1)}% (below 55%). Session paused. Scanning for next best qualifying pair...`);
+      // Advanced mode only — Pair credibility check per session
+      for (const session of userSessions.values()) {
+        if (session.botConfig.tradingMode === 'advanced' && session.botState.isRunning && symId === session.botState.symbol) {
+          const activeState = symbolsState[symId];
+          const totalSim = activeState.wins + activeState.losses;
+          if (totalSim >= 5) {
+            const liveWinRate = (activeState.wins / totalSim) * 100;
+            if (liveWinRate < 55.0) {
+              session.botState = {
+                ...session.botState,
+                isRunning: false,
+                status: 'paused_low_winrate',
+              };
+              addSessionLog(session, 'warning', `⚠️ PAIR CREDIBILITY LOST: ${symId} win rate dropped to ${liveWinRate.toFixed(1)}% (below 55%). Session paused. Scanning for next best qualifying pair...`);
+            }
           }
         }
       }
@@ -902,37 +909,39 @@ function initPublicSocket() {
   });
 }
 
-// Trigger buy orders for the autotrader
-function triggerBotEntry(symId: string, entryDigit: number) {
-  if (botState.status === 'trading') return; // block simultaneous overlapping trades
+// Trigger buy orders for the autotrader — operates on a per-user session
+function triggerBotEntry(session: UserSession, symId: string, entryDigit: number) {
+  if (session.botState.status === 'trading') return; // block simultaneous overlapping trades
 
-  const activeStake = parseFloat(botState.currentStake.toFixed(2));
-  addLog('trade', `🎯 Background Trigger Locked: Last decimal was ${entryDigit} on ${symId}. Evaluating trade params...`);
+  const activeStake = parseFloat(session.botState.currentStake.toFixed(2));
+  addSessionLog(session, 'trade', `🎯 Background Trigger Locked: Last decimal was ${entryDigit} on ${symId}. Evaluating trade params...`);
+
+  const acct = session.account;
+  const isDemo = !acct || acct.fullname.toLowerCase().includes('sandbox') || acct.fullname.toLowerCase().includes('demo');
 
   // Simple sandbox simulator mode matching live market outcome rules exactly
-  if (!account || account.fullname.toLowerCase().includes('sandbox') || account.fullname.toLowerCase().includes('demo')) {
-    botState.status = 'trading';
-    addLog('info', `🗳️ [SANDBOX ENGINE] Dispatching trade ticket. Stake: $${activeStake.toFixed(2)}. Contract bought at Entry Spot. Waiting for next tick quote to settle contract...`);
-    
-    pendingSimulatedTrade = {
+  if (isDemo) {
+    session.botState.status = 'trading';
+    addSessionLog(session, 'info', `🗳️ [SANDBOX ENGINE] Dispatching trade ticket. Stake: $${activeStake.toFixed(2)}. Contract bought at Entry Spot. Waiting for next tick quote to settle contract...`);
+    session.pendingSimulatedTrade = {
       symbol: symId,
       stake: activeStake
     };
   } else {
     // Live authorized broker execution
     try {
-      if (authorizedWs && authorizedWs.readyState === WebSocket.OPEN) {
-        botState.status = 'trading';
-        addLog('info', `🗳️ [LIVE PRODUCTION] Submitting Deriv Order Ticket: stake $${activeStake.toFixed(2)} USD.`);
-        
-        authorizedWs.send(JSON.stringify({
+      if (session.authorizedWs && session.authorizedWs.readyState === WebSocket.OPEN) {
+        session.botState.status = 'trading';
+        addSessionLog(session, 'info', `🗳️ [LIVE PRODUCTION] Submitting Deriv Order Ticket: stake $${activeStake.toFixed(2)} USD.`);
+
+        session.authorizedWs.send(JSON.stringify({
           buy: 1,
           price: activeStake,
           parameters: {
             amount: activeStake,
             basis: 'stake',
             contract_type: 'DIGITOVER',
-            currency: account.currency || 'USD',
+            currency: acct.currency || 'USD',
             duration: 1,
             duration_unit: 't',
             barrier: '4',
@@ -942,17 +951,19 @@ function triggerBotEntry(symId: string, entryDigit: number) {
         }));
       } else {
         // Handle offline, connecting, or disconnected states dynamically by establishing automatic reconnection
-        if (botConfig.apiToken && (!authorizedWs || authorizedWs.readyState !== WebSocket.CONNECTING)) {
-          addLog('warning', '🔄 Secure API connection is currently offline. Triggering immediate auto-reconnection...');
-          initAuthorizedSocket(botConfig.apiToken);
+        if (session.botConfig.apiToken && (!session.authorizedWs || session.authorizedWs.readyState !== WebSocket.CONNECTING)) {
+          addSessionLog(session, 'warning', '🔄 Secure API connection is currently offline. Triggering immediate auto-reconnection...');
+          // find userId for this session
+          for (const [uid, s] of userSessions.entries()) {
+            if (s === session) { initAuthorizedSocketForUser(uid, session.botConfig.apiToken); break; }
+          }
         }
-        
-        authorizedWsStatus = 'connecting';
-        addLog('warning', '⏳ Live trade deferred: Secure API channel is reconnecting. Retrying entry on next incoming feedback tick...');
+        session.authorizedWsStatus = 'connecting';
+        addSessionLog(session, 'warning', '⏳ Live trade deferred: Secure API channel is reconnecting. Retrying entry on next incoming feedback tick...');
       }
     } catch (err: any) {
-      addLog('error', `❌ Live order submission failed: ${err.message}`);
-      botState.status = 'error';
+      addSessionLog(session, 'error', `❌ Live order submission failed: ${err.message}`);
+      session.botState.status = 'error';
     }
   }
 }
@@ -1172,12 +1183,16 @@ function initAuthorizedSocket(token: string) {
         const status = contract.status;
         if (status !== 'won' && status !== 'lost') return;
 
-        settleContract(
-          status,
-          parseFloat(contract.profit),
-          parseFloat(contract.buy_price),
-          contract.longcode || 'Real Asset Settlement'
-        );
+        const defaultSession = getSession('default');
+        if (defaultSession.botState.isRunning) {
+          settleContract(
+            defaultSession,
+            status,
+            parseFloat(contract.profit),
+            parseFloat(contract.buy_price),
+            contract.longcode || 'Real Asset Settlement'
+          );
+        }
       }
     }
   });
