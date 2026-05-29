@@ -1,6 +1,6 @@
 import { Shield, Sparkles, Activity, Clock, Wifi, User, HelpCircle, Send } from 'lucide-react';
 import { AccountInfo } from '../types';
-import nexscanLogo from '../assets/images/nexscan_iq_logo_1779881138833.png';
+import nexscanLogo from '../assets/images/nexscan_iq_logo_user_provided_1780022319954.png';
 
 interface HeaderProps {
   ticksCount: number;
@@ -127,14 +127,14 @@ export function Header({
         )}
 
         <div className="flex items-center gap-2">
-          {/* Creator Hub Settings Button */}
+          {/* Administrator Settings Button */}
           <button
             onClick={onOpenAdminHub}
             className="flex items-center gap-1.5 px-3 py-2 bg-slate-900/65 hover:bg-slate-850 hover:text-emerald-400 border border-slate-800 hover:border-slate-705 text-slate-300 rounded-xl font-mono text-[11px] font-bold tracking-wider cursor-pointer transition-colors active:scale-97"
             title="Configure Custom App ID, Affiliate Token, and Broker Fees"
           >
             <Shield className="w-4 h-4 text-emerald-400" />
-            <span>CREATOR HUB</span>
+            <span>ADMINISTRATOR</span>
           </button>
 
           {/* Onboarding Guide Button */}
