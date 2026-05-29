@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trophy, TrendingUp, Target, Star, Zap, X } from 'lucide-react';
 
 interface SessionCompleteModalProps {
@@ -23,6 +23,8 @@ export function SessionCompleteModal({
   const [animate, setAnimate] = useState(false);
   const [particles, setParticles] = useState<{ x: number; y: number; delay: number; size: number }[]>([]);
   const [countdown, setCountdown] = useState(10);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (isOpen) {
@@ -41,7 +43,7 @@ export function SessionCompleteModal({
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            onClose();
+            onCloseRef.current();
             return 0;
           }
           return prev - 1;
@@ -51,8 +53,9 @@ export function SessionCompleteModal({
       return () => clearInterval(timer);
     } else {
       setAnimate(false);
+      setCountdown(10);
     }
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
