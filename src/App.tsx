@@ -184,10 +184,15 @@ export default function App() {
     }
   }, [sessionCompleteOpen]);
 
-  // Local storage restore credentials flow on mount
+  // Local storage restore credentials flow on mount — keyed by sessionUserId so each user's data is isolated
   useEffect(() => {
+    if (!sessionUserId || sessionUserId === 'default') return; // Wait until we have a real user ID
+
     const userId = sessionUserId;
-    const savedToken = localStorage.getItem(STORAGE_KEY_TOKEN);
+    const TOKEN_KEY = `mamba_deriv_token_${userId}`;
+    const CONFIG_KEY = `mamba_bot_config_${userId}`;
+
+    const savedToken = localStorage.getItem(TOKEN_KEY);
     if (savedToken) {
       fetch('/api/authorize', {
         method: 'POST',
@@ -196,13 +201,13 @@ export default function App() {
       }).catch(err => console.error('Failed token auto-sync:', err));
     }
 
-    const savedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
+    const savedConfig = localStorage.getItem(CONFIG_KEY);
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
         if (parsed && (parsed.maxLosses === 2 || !parsed.maxLosses)) {
           parsed.maxLosses = 5;
-          localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(parsed));
+          localStorage.setItem(CONFIG_KEY, JSON.stringify(parsed));
         }
         fetch('/api/config', {
           method: 'POST',
@@ -323,9 +328,9 @@ export default function App() {
   // Handle Updates
   const handleUpdateConfig = async (updates: Partial<BotConfig>) => {
     setBotConfig((prev) => ({ ...prev, ...updates }));
-    const saved = { ...botConfig, ...updates };
-    localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(saved));
     const userId = sessionUserId;
+    const saved = { ...botConfig, ...updates };
+    localStorage.setItem(`mamba_bot_config_${userId}`, JSON.stringify(saved));
     try {
       await fetch('/api/config', {
         method: 'POST',
@@ -402,8 +407,8 @@ export default function App() {
   }, []);
 
   const handleAuthorize = async (token: string) => {
-    localStorage.setItem(STORAGE_KEY_TOKEN, token.trim());
     const userId = sessionUserId;
+    localStorage.setItem(`mamba_deriv_token_${userId}`, token.trim());
     try {
       await fetch('/api/authorize', {
         method: 'POST',
@@ -416,9 +421,9 @@ export default function App() {
   };
 
   const handleDeauthorize = async () => {
-    localStorage.removeItem(STORAGE_KEY_TOKEN);
-    setAccount(null);
     const userId = sessionUserId;
+    localStorage.removeItem(`mamba_deriv_token_${userId}`);
+    setAccount(null);
     try {
       await fetch('/api/deauthorize', {
         method: 'POST',
