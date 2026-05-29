@@ -20,7 +20,7 @@ import {
   playWinChime, playLossChime, playTargetReachedChime 
 } from './utils/audio';
 import { 
-  Compass, Trophy, Cpu, ShieldAlert, Sparkles, AlertCircle, RefreshCw, Crown, Coins, X, History, Wallet
+  Compass, Trophy, Cpu, ShieldAlert, Sparkles, AlertCircle, RefreshCw, Crown, Coins, X, History, Wallet, Zap
 } from 'lucide-react';
 
 const STORAGE_KEY_TOKEN = 'mamba_deriv_token';
@@ -30,7 +30,7 @@ const STORAGE_KEY_MEMBERSHIP = 'mamba_membership';
 const STORAGE_KEY_TERMS_ACCEPTED = 'mamba_terms_accepted';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'scanner' | 'leaderboard' | 'trader' | 'history' | 'cashier'>('leaderboard');
+  const [activeTab, setActiveTab] = useState<'scanner' | 'leaderboard' | 'trader' | 'advanced' | 'history' | 'cashier'>('leaderboard');
   const [pastTrades, setPastTrades] = useState<PastTrade[]>([]);
   const [termsAccepted, setTermsAccepted] = useState<boolean>(() => {
     return localStorage.getItem(STORAGE_KEY_TERMS_ACCEPTED) === 'true';
@@ -90,6 +90,7 @@ export default function App() {
     maxWins: 2,
     maxLosses: 5,
     targetProfit: 0,
+    tradingMode: 'normal',
   });
 
   // Active bot execution state
@@ -108,6 +109,8 @@ export default function App() {
 
   const [sessionUptime, setSessionUptime] = useState<number>(0);
   const [autoTriggerScan, setAutoTriggerScan] = useState<boolean>(false);
+  const [autoTriggerResume, setAutoTriggerResume] = useState<boolean>(false);
+  const pausedForResumeRef = useRef<boolean>(false);
 
   // Bot activity logs
   const [logs, setLogs] = useState<LogMessage[]>([]);
@@ -236,6 +239,18 @@ export default function App() {
           playLossChime();
           triggerPushNotification('🛡️ Session Stopped', '5 consecutive losses. Bot stopped to protect your capital.');
           setTimeout(() => setSessionLostOpen(true), 100);
+        }
+
+        // 5. Pair credibility lost — auto-trigger resume scan to find a better pair
+        if (data.botState.status === 'paused_low_winrate' && !pausedForResumeRef.current) {
+          pausedForResumeRef.current = true;
+          triggerPushNotification('🔄 Pair Swap Triggered', 'Active pair dropped below 55% win rate. Scanning for best replacement...');
+          setTimeout(() => setAutoTriggerResume(true), 500);
+        }
+
+        // Reset the resume ref once the bot is running again on the new pair
+        if (data.botState.isRunning && pausedForResumeRef.current) {
+          pausedForResumeRef.current = false;
         }
       } catch (err) {
         // Handle network connection drops gracefully without spamming error consoles with raw TypeError: "Failed to fetch"
@@ -372,6 +387,18 @@ export default function App() {
     }
   };
 
+  const handleResumeWithSymbol = async (symbolId: string) => {
+    try {
+      await fetch('/api/resume-with-symbol', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbolId }),
+      });
+    } catch(e) {
+      addLog('error', 'Resume command failed to reach local server.');
+    }
+  };
+
   const handleSelectSymbolForTrading = async (symbolId: string, autoStartAfterLoad = false) => {
     if (botState.isRunning) {
       addLog('error', '⚠️ SWITCH BLOCKED: Cannot switch active asset pairs while the trading session is running. Stop the bot first.');
@@ -462,7 +489,7 @@ export default function App() {
             
             <button
               id="tabTraderBtn"
-              onClick={() => setActiveTab('trader')}
+              onClick={() => { setActiveTab('trader'); handleUpdateConfig({ tradingMode: 'normal' }); }}
               className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
                 activeTab === 'trader'
                   ? 'bg-slate-950 text-indigo-400 border border-slate-800'
@@ -470,8 +497,23 @@ export default function App() {
               }`}
             >
               <Cpu className="w-4 h-4" /> Automated Trader
-              {botState.isRunning && (
+              {botState.isRunning && activeTab === 'trader' && (
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping" />
+              )}
+            </button>
+
+            <button
+              id="tabAdvancedBtn"
+              onClick={() => { setActiveTab('advanced'); handleUpdateConfig({ tradingMode: 'advanced' }); }}
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
+                activeTab === 'advanced'
+                  ? 'bg-slate-950 text-violet-400 border border-violet-800/60'
+                  : 'text-slate-500 hover:text-violet-300 border border-transparent'
+              }`}
+            >
+              <Zap className="w-4 h-4" /> Advanced
+              {botState.isRunning && activeTab === 'advanced' && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-violet-500 rounded-full animate-ping" />
               )}
             </button>
 
@@ -554,6 +596,39 @@ export default function App() {
                 sessionUptime={sessionUptime}
                 autoTriggerScan={autoTriggerScan}
                 onScanReset={() => setAutoTriggerScan(false)}
+                isAdvancedMode={false}
+              />
+              <TermsAgreementModal
+                isOpen={!termsAccepted}
+                onAccept={handleAcceptTerms}
+              />
+            </>
+          )}
+
+          {activeTab === 'advanced' && (
+            <>
+              <BotTrader
+                activeSymbol={activeTradingSymbol}
+                symbolsState={symbolsState}
+                onSelectSymbolForTrading={handleSelectSymbolForTrading}
+                account={account}
+                botConfig={botConfig}
+                onUpdateConfig={handleUpdateConfig}
+                onAuthorize={handleAuthorize}
+                onDeauthorize={handleDeauthorize}
+                onStartBot={handleStartBot}
+                onStopBot={handleStopBot}
+                botState={botState}
+                logs={logs}
+                onClearLogs={handleClearLogs}
+                authorizedWsStatus={authorizedWsStatus}
+                sessionUptime={sessionUptime}
+                autoTriggerScan={autoTriggerScan}
+                onScanReset={() => setAutoTriggerScan(false)}
+                autoTriggerResume={autoTriggerResume}
+                onResumeReset={() => setAutoTriggerResume(false)}
+                onResumeWithSymbol={handleResumeWithSymbol}
+                isAdvancedMode={true}
               />
               <TermsAgreementModal
                 isOpen={!termsAccepted}
