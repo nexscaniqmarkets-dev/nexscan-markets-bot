@@ -768,9 +768,11 @@ export default function App() {
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
         onClose={async () => {
-          sessionCompleteShownRef.current = false;
+          // Keep sessionCompleteShownRef true while we close and reset the server,
+          // so the 1-second poller can't re-open the modal before won_limit clears.
           setSessionCompleteOpen(false);
           try { await fetch('/api/new-session', { method: 'POST' }); } catch(e) {}
+          sessionCompleteShownRef.current = false;
         }}
       />
 
@@ -783,9 +785,9 @@ export default function App() {
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
         onClose={async () => {
-          sessionLostShownRef.current = false;
           setSessionLostOpen(false);
           try { await fetch('/api/new-session', { method: 'POST' }); } catch(e) {}
+          sessionLostShownRef.current = false;
         }}
       />
     </div>
