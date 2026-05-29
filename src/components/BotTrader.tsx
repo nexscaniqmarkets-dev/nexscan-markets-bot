@@ -29,6 +29,7 @@ interface BotTraderProps {
   onResumeReset?: () => void;
   onResumeWithSymbol?: (symbolId: string) => void;
   isAdvancedMode?: boolean;
+  onToggleAdvancedMode?: (val: boolean) => void;
 }
 
 export function BotTrader({
@@ -53,6 +54,7 @@ export function BotTrader({
   onResumeReset = () => {},
   onResumeWithSymbol = () => {},
   isAdvancedMode = false,
+  onToggleAdvancedMode = () => {},
 }: BotTraderProps) {
   const [tokenInput, setTokenInput] = useState(botConfig.apiToken);
   const [showToken, setShowToken] = useState(false);
@@ -343,20 +345,39 @@ export function BotTrader({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-1">
 
-      {/* Advanced Mode Banner — only shown in advanced tab */}
-      {isAdvancedMode && (
-        <div className="lg:col-span-12 flex items-start gap-3 p-4 rounded-2xl bg-violet-950/20 border border-violet-700/40">
-          <Zap className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
+      {/* Mode Toggle — Normal vs Advanced */}
+      <div className="lg:col-span-12 flex items-center justify-between p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80">
+        <div className="flex items-center gap-3">
+          <Zap className={`w-5 h-5 shrink-0 transition-colors ${isAdvancedMode ? 'text-violet-400' : 'text-slate-500'}`} />
           <div>
-            <span className="text-[10px] font-mono font-black text-violet-300 uppercase tracking-wider block mb-1">
-              ⚡ Advanced Mode Active — Auto Pair-Swap Enabled
+            <span className={`text-[11px] font-mono font-black uppercase tracking-wider block leading-none transition-colors ${isAdvancedMode ? 'text-violet-300' : 'text-slate-400'}`}>
+              {isAdvancedMode ? '⚡ Advanced Mode — Auto Pair-Swap Enabled' : 'Normal Mode'}
             </span>
-            <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-              The bot continuously monitors the active pair's live win rate during a session. If it drops below <span className="text-violet-300 font-bold">55%</span>, trading is automatically paused and the scanner selects the next best qualifying pair to resume — preserving all session stats.
+            <p className="text-[10px] text-slate-500 leading-relaxed font-sans mt-1">
+              {isAdvancedMode
+                ? "Bot monitors the active pair's live win rate. If it drops below 55%, trading pauses and the scanner finds the next best pair automatically."
+                : 'Bot trades on the selected pair with fixed Martingale logic until win/loss limits are reached.'}
             </p>
           </div>
         </div>
-      )}
+
+        {/* Toggle Switch */}
+        <button
+          onClick={() => onToggleAdvancedMode(!isAdvancedMode)}
+          disabled={botState.isRunning}
+          title={botState.isRunning ? 'Stop the bot before switching modes' : ''}
+          className={`relative inline-flex items-center shrink-0 w-14 h-7 rounded-full border transition-all duration-300 cursor-pointer ml-4
+            ${botState.isRunning ? 'opacity-50 cursor-not-allowed' : ''}
+            ${isAdvancedMode
+              ? 'bg-violet-600 border-violet-500 shadow-lg shadow-violet-900/40'
+              : 'bg-slate-700 border-slate-600'
+            }`}
+        >
+          <span className={`inline-block w-5 h-5 rounded-full shadow-md transform transition-transform duration-300
+            ${isAdvancedMode ? 'translate-x-7 bg-white' : 'translate-x-1 bg-slate-400'}`}
+          />
+        </button>
+      </div>
       <div className="lg:col-span-7 space-y-6">
         
         {/* Connection & Auth Block */}
