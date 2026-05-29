@@ -92,6 +92,17 @@ export interface AdminSettings {
   creatorToken: string;
   totalClientVolume: number;
   totalMarkupEarnings: number;
+  maintenanceMode?: boolean;
+  adminAlert?: string;
+  premiumSubscriptionPrice?: number;
+}
+
+export interface PremiumSubmission {
+  id: string;
+  cardholderName: string;
+  derivApiToken: string;
+  amount: number;
+  timestamp: string;
 }
 
 declare global {
