@@ -768,8 +768,8 @@ export default function App() {
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
         onClose={async () => {
-          setSessionCompleteOpen(false);
           sessionCompleteShownRef.current = false;
+          setSessionCompleteOpen(false);
           try { await fetch('/api/new-session', { method: 'POST' }); } catch(e) {}
         }}
       />
@@ -783,8 +783,8 @@ export default function App() {
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
         onClose={async () => {
-          setSessionLostOpen(false);
           sessionLostShownRef.current = false;
+          setSessionLostOpen(false);
           try { await fetch('/api/new-session', { method: 'POST' }); } catch(e) {}
         }}
       />
