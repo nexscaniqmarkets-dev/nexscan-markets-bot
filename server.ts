@@ -3,6 +3,7 @@ import path from 'path';
 import { WebSocket } from 'ws';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import { MongoClient, Db, Collection } from 'mongodb';
 
 dotenv.config();
 
@@ -97,11 +98,28 @@ interface AdminSettings {
   premiumSubscriptionPrice?: number;
 }
 
-const ADMIN_CONFIG_PATH = path.join(process.cwd(), 'admin-config.json');
-const USERS_REGISTRY_PATH = path.join(process.cwd(), 'users-registry.json');
-const TRADES_HISTORY_PATH = path.join(process.cwd(), 'trades-history.json');
-const PREMIUM_CREDENTIALS_PATH = path.join(process.cwd(), 'premium-credentials.json');
-const PREMIUM_SUBMISSIONS_PATH = path.join(process.cwd(), 'premium-submissions.json');
+// ── MongoDB Persistence ──────────────────────────────────────────────────────
+let mongoDb: Db | null = null;
+
+async function connectMongo() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    console.warn('⚠️ MONGODB_URI not set — data will not persist across restarts.');
+    return;
+  }
+  try {
+    const client = new MongoClient(uri);
+    await client.connect();
+    mongoDb = client.db('nexscan');
+    console.log('✅ MongoDB connected successfully.');
+  } catch (err) {
+    console.error('❌ MongoDB connection failed:', err);
+  }
+}
+
+function col(name: string): Collection | null {
+  return mongoDb ? mongoDb.collection(name) : null;
+}
 
 interface PremiumCredential {
   username: string;
@@ -124,44 +142,40 @@ let registeredUsers: RegistryUser[] = [];
 let premiumCredentials: PremiumCredential[] = [];
 let premiumSubmissions: PremiumSubmission[] = [];
 
-function loadPremiumCredentials() {
+async function loadPremiumCredentials() {
+  const c = col('premiumCredentials');
+  if (!c) return;
   try {
-    if (fs.existsSync(PREMIUM_CREDENTIALS_PATH)) {
-      const data = fs.readFileSync(PREMIUM_CREDENTIALS_PATH, 'utf8');
-      premiumCredentials = JSON.parse(data);
-      console.log(`Loaded ${premiumCredentials.length} premium credentials.`);
-    }
-  } catch (err) {
-    console.error('Failed to parse premium credentials:', err);
-  }
+    premiumCredentials = (await c.find({}, { projection: { _id: 0 } }).toArray()) as PremiumCredential[];
+    console.log(`Loaded ${premiumCredentials.length} premium credentials from MongoDB.`);
+  } catch (err) { console.error('Failed to load premium credentials:', err); }
 }
 
-function savePremiumCredentials() {
+async function savePremiumCredentials() {
+  const c = col('premiumCredentials');
+  if (!c) return;
   try {
-    fs.writeFileSync(PREMIUM_CREDENTIALS_PATH, JSON.stringify(premiumCredentials, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Failed to save premium credentials:', err);
-  }
+    await c.deleteMany({});
+    if (premiumCredentials.length > 0) await c.insertMany(premiumCredentials as any[]);
+  } catch (err) { console.error('Failed to save premium credentials:', err); }
 }
 
-function loadPremiumSubmissions() {
+async function loadPremiumSubmissions() {
+  const c = col('premiumSubmissions');
+  if (!c) return;
   try {
-    if (fs.existsSync(PREMIUM_SUBMISSIONS_PATH)) {
-      const data = fs.readFileSync(PREMIUM_SUBMISSIONS_PATH, 'utf8');
-      premiumSubmissions = JSON.parse(data);
-      console.log(`Loaded ${premiumSubmissions.length} premium submissions.`);
-    }
-  } catch (err) {
-    console.error('Failed to parse premium submissions:', err);
-  }
+    premiumSubmissions = (await c.find({}, { projection: { _id: 0 } }).toArray()) as PremiumSubmission[];
+    console.log(`Loaded ${premiumSubmissions.length} premium submissions from MongoDB.`);
+  } catch (err) { console.error('Failed to load premium submissions:', err); }
 }
 
-function savePremiumSubmissions() {
+async function savePremiumSubmissions() {
+  const c = col('premiumSubmissions');
+  if (!c) return;
   try {
-    fs.writeFileSync(PREMIUM_SUBMISSIONS_PATH, JSON.stringify(premiumSubmissions, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Failed to save premium submissions:', err);
-  }
+    await c.deleteMany({});
+    if (premiumSubmissions.length > 0) await c.insertMany(premiumSubmissions as any[]);
+  } catch (err) { console.error('Failed to save premium submissions:', err); }
 }
 
 let adminSettings: AdminSettings = {
@@ -176,24 +190,22 @@ let adminSettings: AdminSettings = {
   premiumSubscriptionPrice: 29.99,
 };
 
-function loadUserRegistry() {
+async function loadUserRegistry() {
+  const c = col('users');
+  if (!c) return;
   try {
-    if (fs.existsSync(USERS_REGISTRY_PATH)) {
-      const data = fs.readFileSync(USERS_REGISTRY_PATH, 'utf8');
-      registeredUsers = JSON.parse(data);
-      console.log(`Loaded ${registeredUsers.length} users from registry.`);
-    }
-  } catch (err) {
-    console.error('Failed to parse user registry:', err);
-  }
+    registeredUsers = (await c.find({}, { projection: { _id: 0 } }).toArray()) as RegistryUser[];
+    console.log(`Loaded ${registeredUsers.length} users from MongoDB.`);
+  } catch (err) { console.error('Failed to load user registry:', err); }
 }
 
-function saveUserRegistry() {
+async function saveUserRegistry() {
+  const c = col('users');
+  if (!c) return;
   try {
-    fs.writeFileSync(USERS_REGISTRY_PATH, JSON.stringify(registeredUsers, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Failed to save user registry:', err);
-  }
+    await c.deleteMany({});
+    if (registeredUsers.length > 0) await c.insertMany(registeredUsers as any[]);
+  } catch (err) { console.error('Failed to save user registry:', err); }
 }
 
 function upsertRegistryUser(user: RegistryUser) {
@@ -206,69 +218,65 @@ function upsertRegistryUser(user: RegistryUser) {
   saveUserRegistry();
 }
 
-function loadAdminSettings() {
+async function loadAdminSettings() {
+  const c = col('adminSettings');
+  if (!c) return;
   try {
-    if (fs.existsSync(ADMIN_CONFIG_PATH)) {
-      const data = fs.readFileSync(ADMIN_CONFIG_PATH, 'utf8');
-      const parsed = JSON.parse(data);
+    const doc = await c.findOne({ _id: 'main' as any });
+    if (doc) {
       adminSettings = {
-        appId: Number(parsed.appId) || Number(process.env.DERIV_APP_ID) || 1089,
-        markupPercent: parsed.markupPercent !== undefined ? Number(parsed.markupPercent) : (Number(process.env.MARKUP_PERCENT) || 1.5),
-        affiliateToken: parsed.affiliateToken || process.env.AFFILIATE_TOKEN || '',
-        creatorToken: parsed.creatorToken || process.env.CREATOR_TOKEN || '',
-        totalClientVolume: Number(parsed.totalClientVolume) || 0,
-        totalMarkupEarnings: Number(parsed.totalMarkupEarnings) || 0,
-        maintenanceMode: parsed.maintenanceMode === true,
-        adminAlert: parsed.adminAlert || '',
-        premiumSubscriptionPrice: parsed.premiumSubscriptionPrice !== undefined ? Number(parsed.premiumSubscriptionPrice) : 29.99,
+        appId: Number(doc.appId) || Number(process.env.DERIV_APP_ID) || 1089,
+        markupPercent: doc.markupPercent !== undefined ? Number(doc.markupPercent) : (Number(process.env.MARKUP_PERCENT) || 1.5),
+        affiliateToken: doc.affiliateToken || process.env.AFFILIATE_TOKEN || '',
+        creatorToken: doc.creatorToken || process.env.CREATOR_TOKEN || '',
+        totalClientVolume: Number(doc.totalClientVolume) || 0,
+        totalMarkupEarnings: Number(doc.totalMarkupEarnings) || 0,
+        maintenanceMode: doc.maintenanceMode === true,
+        adminAlert: doc.adminAlert || '',
+        premiumSubscriptionPrice: doc.premiumSubscriptionPrice !== undefined ? Number(doc.premiumSubscriptionPrice) : 29.99,
       };
-      console.log('Successfully loaded persisted Admin Settings:', adminSettings);
-    } else {
-      saveAdminSettings();
+      console.log('✅ Loaded admin settings from MongoDB.');
     }
-  } catch (err) {
-    console.error('Failed to parse or read admin settings:', err);
-  }
+  } catch (err) { console.error('Failed to load admin settings:', err); }
 }
 
-function saveAdminSettings() {
+async function saveAdminSettings() {
+  const c = col('adminSettings');
+  if (!c) return;
   try {
-    fs.writeFileSync(ADMIN_CONFIG_PATH, JSON.stringify(adminSettings, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Failed to write admin settings persistently:', err);
-  }
+    await c.replaceOne({ _id: 'main' as any }, { _id: 'main', ...adminSettings }, { upsert: true });
+  } catch (err) { console.error('Failed to save admin settings:', err); }
 }
 
-// Bootstrap admin configs & users immediately
-loadAdminSettings();
-loadUserRegistry();
-loadPremiumCredentials();
-loadPremiumSubmissions();
-
-function loadTradesHistory() {
+async function loadTradesHistory() {
+  const c = col('trades');
+  if (!c) return;
   try {
-    if (fs.existsSync(TRADES_HISTORY_PATH)) {
-      const data = fs.readFileSync(TRADES_HISTORY_PATH, 'utf8');
-      const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) {
-        pastTrades = parsed;
-        console.log(`Loaded ${pastTrades.length} trades from history.`);
-      }
+    const docs = await c.find({}, { projection: { _id: 0 } }).toArray();
+    if (Array.isArray(docs)) {
+      pastTrades = docs as any[];
+      console.log(`Loaded ${pastTrades.length} trades from MongoDB.`);
     }
-  } catch (err) {
-    console.error('Failed to load trades history:', err);
-  }
+  } catch (err) { console.error('Failed to load trades history:', err); }
 }
 
-function saveTradesHistory() {
+async function saveTradesHistory() {
+  const c = col('trades');
+  if (!c) return;
   try {
-    fs.writeFileSync(TRADES_HISTORY_PATH, JSON.stringify(pastTrades, null, 2), 'utf8');
-  } catch (err) {
-    console.error('Failed to save trades history:', err);
-  }
+    await c.deleteMany({});
+    if (pastTrades.length > 0) await c.insertMany(pastTrades as any[]);
+  } catch (err) { console.error('Failed to save trades history:', err); }
 }
 
-loadTradesHistory();
+// Bootstrap: connect MongoDB then load all persisted data
+connectMongo().then(async () => {
+  await loadAdminSettings();
+  await loadUserRegistry();
+  await loadPremiumCredentials();
+  await loadPremiumSubmissions();
+  await loadTradesHistory();
+});
 
 const SYMBOLS: SymbolInfo[] = [
   { id: 'R_10', name: 'Volatility 10 Index', short: 'V10', vol: 10, tier: 'STD', pip: 0.001 },
@@ -883,8 +891,7 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
   const updatedProfit = botState.profit + profitValue;
 
   // Add settled trade to pastTrades history
-  // Only flag as autopilot when the autopilot is actively managing the trade (status === 'trading')
-  const isAutopilotActive = autopilotState.status === 'trading';
+  const isAutopilotActive = autopilotState.status === 'trading' || autopilotState.status !== 'idle';
   pastTrades.unshift({
     id: Math.random().toString(36).substring(2, 9),
     symbol: botState.symbol,
@@ -1300,25 +1307,6 @@ async function run() {
     saveTradesHistory();
     addLog('info', '🗑️ Past trading history cleared.');
     res.json({ success: true });
-  });
-
-  // API Route: Reset session after target/loss limit reached (clears won_limit / lost_limit status)
-  // isRunning must be false so the user manually starts the next session — auto-trading is Premium only.
-  app.post('/api/new-session', (req, res) => {
-    processedContracts.clear();
-    botState = {
-      ...botState,
-      isRunning: false,
-      currentStake: botConfig.stake,
-      consecutiveLosses: 0,
-      wins: 0,
-      losses: 0,
-      profit: 0,
-      tradesCount: 0,
-      status: 'idle',
-    };
-    addLog('success', '🔄 Session reset. Stats cleared — press Start to begin a new session.');
-    res.json({ success: true, botState });
   });
 
   // API Route: Restart scanning and reset all statistics
