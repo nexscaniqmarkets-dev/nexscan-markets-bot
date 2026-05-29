@@ -350,6 +350,66 @@ let connectionStatus: 'connected' | 'connecting' | 'disconnected' | 'error' = 'd
 const processedContracts = new Set<string>();
 let sessionStartTime = Date.now();
 
+// ── Per-User Session Map ─────────────────────────────────────────────────────
+// Each Telegram user gets their own isolated session so tokens/state never bleed across users
+interface UserSession {
+  botConfig: BotConfig;
+  botState: BotState;
+  account: AccountInfo | null;
+  logs: LogMessage[];
+  pastTrades: any[];
+  authorizedWsStatus: 'idle' | 'connecting' | 'connected' | 'error';
+  authorizedWs: WebSocket | null;
+  authorizedPingInterval: NodeJS.Timeout | null;
+  processedContracts: Set<string>;
+  sessionStartTime: number;
+}
+
+const userSessions = new Map<string, UserSession>();
+
+function getSession(userId: string): UserSession {
+  if (!userSessions.has(userId)) {
+    userSessions.set(userId, {
+      botConfig: {
+        apiToken: '',
+        isDemo: true,
+        stake: 0.35,
+        martingaleMultiplier: 2.0,
+        maxWins: 2,
+        maxLosses: 5,
+        targetProfit: 0,
+        tradingMode: 'normal',
+      },
+      botState: {
+        isRunning: false,
+        symbol: 'R_100',
+        currentStake: 0.35,
+        consecutiveLosses: 0,
+        wins: 0,
+        losses: 0,
+        profit: 0,
+        tradesCount: 0,
+        status: 'idle',
+        lastTradeResult: null,
+      },
+      account: null,
+      logs: [],
+      pastTrades: [],
+      authorizedWsStatus: 'idle',
+      authorizedWs: null,
+      authorizedPingInterval: null,
+      processedContracts: new Set(),
+      sessionStartTime: Date.now(),
+    });
+  }
+  return userSessions.get(userId)!;
+}
+
+// Helper to get userId from request — falls back to 'default' for non-Telegram web access
+function getUserId(req: express.Request): string {
+  return (req.body?.tgUserId || req.query?.tgUserId || 'default') as string;
+}
+
 // -----------------------------------------------------------------------------
 // PREMIUM AUTOPILOT MODULE STATE & ORCHESTRATOR
 // -----------------------------------------------------------------------------
@@ -632,16 +692,32 @@ function addLog(type: LogMessage['type'], message: string) {
   console.log(`[${type.toUpperCase()}] ${message}`);
 }
 
+// Per-session log helper
+function addSessionLog(session: UserSession, type: LogMessage['type'], message: string) {
+  const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+  const log: LogMessage = {
+    id: Math.random().toString(36).substring(2, 11),
+    timestamp,
+    type,
+    message,
+  };
+  session.logs.push(log);
+  if (session.logs.length > 300) session.logs.shift();
+  console.log(`[${type.toUpperCase()}] ${message}`);
+}
+
 addLog('info', '🧠 Background persistence trading module booting up...');
 
 // -----------------------------------------------------------------------------
 // WEBSOCKET CHANNELS MANAGEMENT
 // -----------------------------------------------------------------------------
 let publicWs: WebSocket | null = null;
+let publicPingInterval: NodeJS.Timeout | null = null;
+
+// Legacy globals kept for public scanner (shared across all users)
 let authorizedWs: WebSocket | null = null;
 let lastAuthorizedToken = '';
 let authorizedWsStatus: 'idle' | 'connecting' | 'connected' | 'error' = 'idle';
-let publicPingInterval: NodeJS.Timeout | null = null;
 let authorizedPingInterval: NodeJS.Timeout | null = null;
 
 // Function to start real Deriv Public Ticks listener
@@ -881,20 +957,20 @@ function triggerBotEntry(symId: string, entryDigit: number) {
   }
 }
 
-// Settle contract outcomes
-function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: number, description: string) {
+// Settle contract outcomes — accepts a user session for per-user state isolation
+function settleContract(session: UserSession, status: 'won' | 'lost', profitValue: number, buyPrice: number, description: string) {
   const isWin = status === 'won';
 
-  const updatedWins = isWin ? botState.wins + 1 : botState.wins;
-  const updatedLosses = !isWin ? botState.losses + 1 : botState.losses;
-  const updatedConsecutiveLosses = isWin ? 0 : botState.consecutiveLosses + 1;
-  const updatedProfit = botState.profit + profitValue;
+  const updatedWins = isWin ? session.botState.wins + 1 : session.botState.wins;
+  const updatedLosses = !isWin ? session.botState.losses + 1 : session.botState.losses;
+  const updatedConsecutiveLosses = isWin ? 0 : session.botState.consecutiveLosses + 1;
+  const updatedProfit = session.botState.profit + profitValue;
 
-  // Add settled trade to pastTrades history
+  // Add settled trade to session pastTrades history
   const isAutopilotActive = autopilotState.status === 'trading' || autopilotState.status !== 'idle';
-  pastTrades.unshift({
+  session.pastTrades.unshift({
     id: Math.random().toString(36).substring(2, 9),
-    symbol: botState.symbol,
+    symbol: session.botState.symbol,
     timestamp: new Date().toISOString(),
     outcome: isWin ? 'win' : 'loss',
     stake: buyPrice,
@@ -904,56 +980,54 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
   });
   saveTradesHistory();
 
-  addLog(
+  addSessionLog(
+    session,
     isWin ? 'success' : 'trade',
     isWin
       ? `🎉 Trade WON! Profit: +$${profitValue.toFixed(2)} USD. DetailRef: ${description}`
       : `💀 Trade LOST! Stake lost: -$${Math.abs(profitValue).toFixed(2)} USD. DetailRef: ${description}`
   );
 
-  let runStatus = botState.isRunning;
+  let runStatus = session.botState.isRunning;
   let botStateStatus: BotState['status'] = 'waiting';
-  let nextStake = botConfig.stake;
+  let nextStake = session.botConfig.stake;
 
-  const targetReached = botConfig.targetProfit > 0 && updatedProfit >= botConfig.targetProfit;
-  const winsLimitReached = updatedWins >= botConfig.maxWins;
-  const lossesLimitReached = updatedConsecutiveLosses >= botConfig.maxLosses;
+  const targetReached = session.botConfig.targetProfit > 0 && updatedProfit >= session.botConfig.targetProfit;
+  const winsLimitReached = updatedWins >= session.botConfig.maxWins;
+  const lossesLimitReached = updatedConsecutiveLosses >= session.botConfig.maxLosses;
 
   if (targetReached || winsLimitReached) {
     runStatus = false;
     botStateStatus = 'won_limit';
-    addLog('success', `🏆 AUTO-TRADER GOAL ACHIEVED! Profit Target / Max Wins completed. Saved Net: $${updatedProfit.toFixed(2)} USD.`);
+    addSessionLog(session, 'success', `🏆 AUTO-TRADER GOAL ACHIEVED! Profit Target / Max Wins completed. Saved Net: $${updatedProfit.toFixed(2)} USD.`);
   } else if (lossesLimitReached) {
     runStatus = false;
     botStateStatus = 'lost_limit';
-    addLog('warning', `🚨 CAPITAL PROTECTION BREACH: Consecutive loss ceiling reached (${updatedConsecutiveLosses}). Martingale terminated.`);
+    addSessionLog(session, 'warning', `🚨 CAPITAL PROTECTION BREACH: Consecutive loss ceiling reached (${updatedConsecutiveLosses}). Martingale terminated.`);
   } else {
     if (isWin) {
-      nextStake = botConfig.stake;
+      nextStake = session.botConfig.stake;
     } else {
-      nextStake = parseFloat((botState.currentStake * botConfig.martingaleMultiplier).toFixed(2));
-      addLog('warning', `⚡ Martingale escalation: Stake raised $${botState.currentStake.toFixed(2)} → $${nextStake.toFixed(2)} USD.`);
+      nextStake = parseFloat((session.botState.currentStake * session.botConfig.martingaleMultiplier).toFixed(2));
+      addSessionLog(session, 'warning', `⚡ Martingale escalation: Stake raised $${session.botState.currentStake.toFixed(2)} → $${nextStake.toFixed(2)} USD.`);
     }
   }
 
-  botState = {
-    ...botState,
+  session.botState = {
+    ...session.botState,
     isRunning: runStatus,
     currentStake: nextStake,
     consecutiveLosses: updatedConsecutiveLosses,
     wins: updatedWins,
     losses: updatedLosses,
     profit: updatedProfit,
-    tradesCount: botState.tradesCount + 1,
+    tradesCount: session.botState.tradesCount + 1,
     status: botStateStatus,
     lastTradeResult: isWin ? 'win' : 'loss',
   };
 
-  // Update balance:
-  // - Simulator/sandbox accounts: update manually (no Deriv real-time feed)
-  // - Live/Demo Deriv accounts: updated automatically via Deriv balance subscription
-  if (account && (!botConfig.apiToken || account.fullname.toLowerCase().includes('sandbox'))) {
-    account.balance = parseFloat((account.balance + profitValue).toFixed(2));
+  if (session.account && (!session.botConfig.apiToken || session.account.fullname.toLowerCase().includes('sandbox'))) {
+    session.account.balance = parseFloat((session.account.balance + profitValue).toFixed(2));
   }
 
   // Update creator/owner markup metrics dynamically
@@ -1127,6 +1201,157 @@ function initAuthorizedSocket(token: string) {
   });
 }
 
+// Per-user authorized WebSocket — each user's token connects independently
+function initAuthorizedSocketForUser(userId: string, token: string) {
+  const session = getSession(userId);
+
+  if (session.authorizedPingInterval) {
+    clearInterval(session.authorizedPingInterval);
+    session.authorizedPingInterval = null;
+  }
+
+  if (session.authorizedWs) {
+    try {
+      session.authorizedWs.removeAllListeners();
+      session.authorizedWs.on('error', () => {});
+      session.authorizedWs.close();
+    } catch(e) {}
+    session.authorizedWs = null;
+  }
+
+  session.authorizedWsStatus = 'connecting';
+  addSessionLog(session, 'info', `🔐 Establishing isolated secure API socket for token: ${token.substring(0, 4)}***`);
+
+  const ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?app_id=${adminSettings.appId}`);
+
+  ws.on('error', (err) => {
+    if (session.authorizedWs !== ws) return;
+    addSessionLog(session, 'error', `🔐 Secure API Socket Error: ${err.message}`);
+    session.authorizedWsStatus = 'error';
+  });
+
+  session.authorizedWs = ws;
+
+  ws.on('open', () => {
+    if (session.authorizedWs !== ws) return;
+    try {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ authorize: token }));
+      }
+    } catch (err: any) {
+      addSessionLog(session, 'error', `🔐 Authorization request send failure: ${err.message}`);
+    }
+
+    session.authorizedPingInterval = setInterval(() => {
+      try {
+        if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ ping: 1 }));
+      } catch(e) {}
+    }, 15000);
+  });
+
+  ws.on('message', (msgData: string) => {
+    if (session.authorizedWs !== ws) return;
+    let data;
+    try { data = JSON.parse(msgData.toString()); } catch(e) { return; }
+
+    if (data.error) {
+      let friendlyError = data.error.message;
+      if (friendlyError.includes('Input validation failed') || friendlyError.includes('authorize')) {
+        friendlyError = 'API Token is invalid, expired, or has incorrect permissions.';
+      }
+      addSessionLog(session, 'error', `🔐 Token Rejected: ${friendlyError}`);
+      session.authorizedWsStatus = 'error';
+      session.account = null;
+      session.botConfig.apiToken = '';
+      return;
+    }
+
+    const msgType = data.msg_type;
+
+    if (msgType === 'authorize') {
+      const auth = data.authorize;
+      session.account = {
+        balance: parseFloat(auth.balance),
+        currency: auth.currency,
+        email: auth.email,
+        fullname: auth.fullname,
+        is_virtual: auth.is_virtual === 1,
+        loginid: auth.loginid,
+        scopes: auth.scopes,
+      };
+
+      upsertRegistryUser({
+        loginid: auth.loginid,
+        fullname: auth.fullname,
+        email: auth.email || '',
+        currency: auth.currency,
+        is_virtual: auth.is_virtual === 1,
+        lastActive: new Date().toISOString()
+      });
+
+      session.botConfig.apiToken = token;
+      session.authorizedWsStatus = 'connected';
+      addSessionLog(session, 'success', `🔐 ID ${auth.loginid} Authorize Verified (${auth.is_virtual ? 'Demo' : 'Live Real'}).`);
+
+      try {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ proposal_open_contract: 1, subscribe: 1 }));
+          ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+        }
+      } catch (err: any) {
+        addSessionLog(session, 'error', `🔐 Authorization subscriptions setup failure: ${err.message}`);
+      }
+    }
+
+    else if (msgType === 'balance') {
+      if (session.account) {
+        session.account.balance = parseFloat(data.balance.balance);
+      }
+    }
+
+    else if (msgType === 'proposal_open_contract') {
+      const contract = data.proposal_open_contract;
+      if (!contract || contract.is_sold !== 1) return;
+
+      const contractId = contract.contract_id || contract.id;
+      if (contractId) {
+        if (session.processedContracts.has(contractId)) return;
+        session.processedContracts.add(contractId);
+      }
+
+      const status = contract.status;
+      if (status !== 'won' && status !== 'lost') return;
+
+      if (session.botState.isRunning) {
+        settleContract(
+          session,
+          status,
+          parseFloat(contract.profit),
+          parseFloat(contract.buy_price),
+          contract.longcode || 'Real Asset Settlement'
+        );
+      }
+    }
+  });
+
+  ws.on('close', () => {
+    if (session.authorizedPingInterval) {
+      clearInterval(session.authorizedPingInterval);
+      session.authorizedPingInterval = null;
+    }
+    if (session.authorizedWs !== ws) return;
+    addSessionLog(session, 'info', '🔓 Secure API Socket channel released.');
+    if (session.authorizedWsStatus !== 'idle' && token === session.botConfig.apiToken && session.botConfig.apiToken) {
+      session.authorizedWsStatus = 'connecting';
+      setTimeout(() => {
+        if (session.authorizedWs === ws) {
+          initAuthorizedSocketForUser(userId, token);
+        }
+      }, 2000);
+    }
+  });
+}
+
 // -----------------------------------------------------------------------------
 // SERVER INIT PROCESS & EXPRESS HTTP SERVICE API
 // -----------------------------------------------------------------------------
@@ -1138,23 +1363,26 @@ async function run() {
 
   // API Route: Get state
   app.get('/api/state', (req, res) => {
-    const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const userId = getUserId(req);
+    const session = getSession(userId);
+
+    const elapsed = Math.floor((Date.now() - session.sessionStartTime) / 1000);
     const hrs = Math.floor(elapsed / 3600);
     const mins = Math.floor((elapsed % 3600) / 60);
     const secs = elapsed % 60;
     const sessionTimeFormatted = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
     res.json({
-      botConfig,
-      botState,
+      botConfig: session.botConfig,
+      botState: session.botState,
       symbolsState,
-      logs,
-      account,
+      logs: session.logs,
+      account: session.account,
       connectionStatus,
-      authorizedWsStatus,
+      authorizedWsStatus: session.authorizedWsStatus,
       globalTicks,
       globalSignals,
-      pastTrades,
+      pastTrades: session.pastTrades,
       sessionTime: sessionTimeFormatted,
       sessionUptime: elapsed,
       maintenanceMode: adminSettings.maintenanceMode,
@@ -1166,24 +1394,22 @@ async function run() {
 
   // API Route: Update configuration parameters
   app.post('/api/config', (req, res) => {
-    botConfig = {
-      ...botConfig,
-      ...req.body,
-    };
-    // Sync active state stake if bot is standby
-    if (!botState.isRunning) {
-      botState.currentStake = botConfig.stake;
+    const session = getSession(getUserId(req));
+    session.botConfig = { ...session.botConfig, ...req.body };
+    if (!session.botState.isRunning) {
+      session.botState.currentStake = session.botConfig.stake;
     }
-    res.json({ success: true, botConfig });
+    res.json({ success: true, botConfig: session.botConfig });
   });
 
   // API Route: Run the auto trader
   app.post('/api/start', (req, res) => {
-    processedContracts.clear();
-    botState = {
-      ...botState,
+    const session = getSession(getUserId(req));
+    session.processedContracts.clear();
+    session.botState = {
+      ...session.botState,
       isRunning: true,
-      currentStake: botConfig.stake,
+      currentStake: session.botConfig.stake,
       consecutiveLosses: 0,
       wins: 0,
       losses: 0,
@@ -1191,61 +1417,56 @@ async function run() {
       tradesCount: 0,
       status: 'waiting',
     };
-    
-    const activeInfo = SYMBOLS.find((s) => s.id === botState.symbol);
-    addLog('success', `▶️ AUTOMATED ACTION STARTED inside server stack for ${activeInfo?.short}! Cap protection consecutive ceiling: ${botConfig.maxLosses}.`);
-    res.json({ success: true, botState });
+    const activeInfo = SYMBOLS.find((s) => s.id === session.botState.symbol);
+    addSessionLog(session, 'success', `▶️ AUTOMATED ACTION STARTED inside server stack for ${activeInfo?.short}! Cap protection consecutive ceiling: ${session.botConfig.maxLosses}.`);
+    res.json({ success: true, botState: session.botState });
   });
 
   // API Route: Pause the automated trader
   app.post('/api/stop', (req, res) => {
-    botState = {
-      ...botState,
-      isRunning: false,
-      status: 'idle',
-    };
-    addLog('warning', '⏹️ AUTOMATED ACTION DE-ACTIVATED. System in standby mode.');
-    res.json({ success: true, botState });
+    const session = getSession(getUserId(req));
+    session.botState = { ...session.botState, isRunning: false, status: 'idle' };
+    addSessionLog(session, 'warning', '⏹️ AUTOMATED ACTION DE-ACTIVATED. System in standby mode.');
+    res.json({ success: true, botState: session.botState });
   });
 
   // API Route: Select active symbol
   app.post('/api/select-symbol', (req, res) => {
+    const session = getSession(getUserId(req));
     const { symbolId } = req.body;
     if (symbolId) {
-      botState.symbol = symbolId;
+      session.botState.symbol = symbolId;
       const act = SYMBOLS.find((s) => s.id === symbolId);
-      addLog('info', `🏷️ Loaded active asset target: ${act?.name || symbolId}`);
+      addSessionLog(session, 'info', `🏷️ Loaded active asset target: ${act?.name || symbolId}`);
     }
-    res.json({ success: true, botState });
+    res.json({ success: true, botState: session.botState });
   });
 
   // API Route: Resume with a new symbol after pair credibility loss (advanced mode)
   app.post('/api/resume-with-symbol', (req, res) => {
+    const session = getSession(getUserId(req));
     const { symbolId } = req.body;
     if (!symbolId || !symbolsState[symbolId]) {
       return res.status(400).json({ error: 'Invalid symbol ID' });
     }
     const info = SYMBOLS.find((s) => s.id === symbolId);
-    botState = {
-      ...botState,
-      symbol: symbolId,
-      isRunning: true,
-      status: 'waiting',
-    };
-    addLog('success', `▶️ SESSION RESUMED on ${info?.short || symbolId}. Pair swapped due to low win-rate. All performance stats preserved — session continues!`);
-    res.json({ success: true, botState });
+    session.botState = { ...session.botState, symbol: symbolId, isRunning: true, status: 'waiting' };
+    addSessionLog(session, 'success', `▶️ SESSION RESUMED on ${info?.short || symbolId}. Pair swapped due to low win-rate.`);
+    res.json({ success: true, botState: session.botState });
   });
 
   // API Route: Authorize Token API
   app.post('/api/authorize', (req, res) => {
-    const { token } = req.body;
+    const { token, tgUserId } = req.body;
     if (!token) {
       return res.status(400).json({ error: 'No authorization token supplied.' });
     }
+    const userId = tgUserId || 'default';
+    const session = getSession(userId);
 
     const isMock = token.trim() === 'DEMO_MOCK_TOKEN' || token.trim().toUpperCase().startsWith('MOCK_DEMO_');
     if (isMock) {
-      account = {
+      session.account = {
         balance: 10000.00,
         currency: 'USD',
         email: 'demo-sandbox@nexscaniq.example',
@@ -1264,54 +1485,56 @@ async function run() {
         lastActive: new Date().toISOString()
       });
 
-      botConfig.apiToken = token;
-      authorizedWsStatus = 'connected';
-      addLog('success', '🔐 Restored Local Sandbox Simulated credentials. Standby mode.');
-      return res.json({ success: true, account });
+      session.botConfig.apiToken = token;
+      session.authorizedWsStatus = 'connected';
+      addSessionLog(session, 'success', '🔐 Restored Local Sandbox Simulated credentials. Standby mode.');
+      return res.json({ success: true, account: session.account });
     }
 
     // Real Deriv Broker authentication
-    initAuthorizedSocket(token);
+    initAuthorizedSocketForUser(userId, token);
     res.json({ success: true, message: 'Authorization process initialized on background server context.' });
   });
 
   // API Route: Deauthorize
   app.post('/api/deauthorize', (req, res) => {
-    account = null;
-    botConfig.apiToken = '';
-    authorizedWsStatus = 'idle';
-    if (authorizedPingInterval) {
-      clearInterval(authorizedPingInterval);
-      authorizedPingInterval = null;
+    const session = getSession(getUserId(req));
+    session.account = null;
+    session.botConfig.apiToken = '';
+    session.authorizedWsStatus = 'idle';
+    if (session.authorizedPingInterval) {
+      clearInterval(session.authorizedPingInterval);
+      session.authorizedPingInterval = null;
     }
-    if (authorizedWs) {
-      try {
-        authorizedWs.close();
-      } catch(e){}
-      authorizedWs = null;
+    if (session.authorizedWs) {
+      try { session.authorizedWs.close(); } catch(e){}
+      session.authorizedWs = null;
     }
-    addLog('warning', '🔓 Profile credentials cleared. Returned to anonymous simulator.');
+    addSessionLog(session, 'warning', '🔓 Profile credentials cleared. Returned to anonymous simulator.');
     res.json({ success: true });
   });
 
   // API Route: Clear logging dashboard
   app.post('/api/clear-logs', (req, res) => {
-    logs = [];
-    addLog('info', '🗑️ Server logs dashboard cleared.');
+    const session = getSession(getUserId(req));
+    session.logs = [];
+    addSessionLog(session, 'info', '🗑️ Server logs dashboard cleared.');
     res.json({ success: true });
   });
 
   // API Route: Clear past trades history
   app.post('/api/clear-trades', (req, res) => {
-    pastTrades = [];
+    const session = getSession(getUserId(req));
+    session.pastTrades = [];
     saveTradesHistory();
-    addLog('info', '🗑️ Past trading history cleared.');
+    addSessionLog(session, 'info', '🗑️ Past trading history cleared.');
     res.json({ success: true });
   });
 
   // API Route: Restart scanning and reset all statistics
   app.post('/api/restart-scanning', (req, res) => {
-    sessionStartTime = Date.now();
+    const session = getSession(getUserId(req));
+    session.sessionStartTime = Date.now();
     globalTicks = 0;
     globalSignals = 0;
     Object.keys(symbolsState).forEach((key) => {
@@ -1323,8 +1546,28 @@ async function run() {
       symbolsState[key].lastSignalTick = -99;
       symbolsState[key].pendingSignal = null;
     });
-    addLog('success', '♻️ Scanner successfully restarted. Global stats, session runtime, and indicator metrics reset.');
+    addSessionLog(session, 'success', '♻️ Scanner successfully restarted. Global stats, session runtime, and indicator metrics reset.');
     res.json({ success: true });
+  });
+
+  // API Route: Start a new trading session (reset bot state after session complete/lost)
+  app.post('/api/new-session', (req, res) => {
+    const session = getSession(getUserId(req));
+    session.botState = {
+      ...session.botState,
+      isRunning: false,
+      consecutiveLosses: 0,
+      wins: 0,
+      losses: 0,
+      profit: 0,
+      tradesCount: 0,
+      status: 'idle',
+      currentStake: session.botConfig.stake,
+      lastTradeResult: null,
+    };
+    session.processedContracts.clear();
+    addSessionLog(session, 'info', '🔄 New trading session initialized. Bot ready for next run.');
+    res.json({ success: true, botState: session.botState });
   });
 
   // API Route: Verify Admin PIN code
