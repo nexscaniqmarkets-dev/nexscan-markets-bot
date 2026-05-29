@@ -53,6 +53,7 @@ interface BotConfig {
   maxWins: number;
   maxLosses: number;
   targetProfit: number;
+  tradingMode: 'normal' | 'advanced';
 }
 
 interface BotState {
@@ -190,6 +191,7 @@ let botConfig: BotConfig = {
   maxWins: 2,
   maxLosses: 5,
   targetProfit: 0,
+  tradingMode: 'normal',
 };
 
 let botState: BotState = {
@@ -382,6 +384,25 @@ function initPublicSocket() {
         connected: true,
         pendingSignal,
       };
+
+      // Advanced mode only — Pair credibility check: monitor live win rate of the active
+      // trading symbol. If it drops below 55% (with >= 5 sim trades), pause the session
+      // so the scanner can auto-find and swap to the next best qualifying pair.
+      if (botConfig.tradingMode === 'advanced' && botState.isRunning && symId === botState.symbol) {
+        const activeState = symbolsState[symId];
+        const totalSim = activeState.wins + activeState.losses;
+        if (totalSim >= 5) {
+          const liveWinRate = (activeState.wins / totalSim) * 100;
+          if (liveWinRate < 55.0) {
+            botState = {
+              ...botState,
+              isRunning: false,
+              status: 'paused_low_winrate',
+            };
+            addLog('warning', `⚠️ PAIR CREDIBILITY LOST: ${symId} win rate dropped to ${liveWinRate.toFixed(1)}% (below 55%). Session paused. Scanning for next best qualifying pair...`);
+          }
+        }
+      }
 
       globalTicks++;
     }
@@ -839,6 +860,25 @@ async function run() {
     saveTradesHistory();
     addLog('info', '🗑️ Past trading history cleared.');
     res.json({ success: true });
+  });
+
+  // API Route: Resume trading on a new pair after a low win-rate pause.
+  // Switches the symbol and restarts the bot WITHOUT resetting any session stats
+  // (wins, losses, profit, stake, consecutiveLosses all preserved).
+  app.post('/api/resume-with-symbol', (req, res) => {
+    const { symbolId } = req.body;
+    if (!symbolId || !symbolsState[symbolId]) {
+      return res.status(400).json({ error: 'Invalid symbol ID' });
+    }
+    const info = SYMBOLS.find((s) => s.id === symbolId);
+    botState = {
+      ...botState,
+      symbol: symbolId,
+      isRunning: true,
+      status: 'waiting',
+    };
+    addLog('success', `▶️ SESSION RESUMED on ${info?.short || symbolId}. Pair swapped due to low win-rate. All performance stats preserved — session continues!`);
+    res.json({ success: true, botState });
   });
 
   // API Route: Start a new session — resets ONLY bot performance stats (wins, losses, profit, stake)
