@@ -4,7 +4,7 @@ import { getVolColor, formatPrice } from '../constants';
 import { 
   Lock, Key, Play, Square, CircleCheck, Info, RefreshCw, AlertTriangle, 
   HelpCircle, Trash2, Wallet, Layers, ShieldCheck, CheckSquare, Terminal, ExternalLink,
-  ShieldAlert
+  ShieldAlert, Zap
 } from 'lucide-react';
 
 interface BotTraderProps {
@@ -25,6 +25,10 @@ interface BotTraderProps {
   sessionUptime?: number;
   autoTriggerScan?: boolean;
   onScanReset?: () => void;
+  autoTriggerResume?: boolean;
+  onResumeReset?: () => void;
+  onResumeWithSymbol?: (symbolId: string) => void;
+  isAdvancedMode?: boolean;
 }
 
 export function BotTrader({
@@ -45,6 +49,10 @@ export function BotTrader({
   sessionUptime = 300,
   autoTriggerScan = false,
   onScanReset = () => {},
+  autoTriggerResume = false,
+  onResumeReset = () => {},
+  onResumeWithSymbol = () => {},
+  isAdvancedMode = false,
 }: BotTraderProps) {
   const [tokenInput, setTokenInput] = useState(botConfig.apiToken);
   const [showToken, setShowToken] = useState(false);
@@ -52,6 +60,7 @@ export function BotTrader({
   const terminalEndRef = useRef<HTMLDivElement>(null);
 
   const isAutoTransitionRef = useRef(false);
+  const isResumeModeRef = useRef(false);
 
   // Search and Load countdown states
   const [searchLoadCountdown, setSearchLoadCountdown] = useState<number | null>(null);
@@ -62,10 +71,21 @@ export function BotTrader({
   useEffect(() => {
     if (autoTriggerScan) {
       isAutoTransitionRef.current = false;
+      isResumeModeRef.current = false;
       onScanReset();
       handleSearchAndLoad();
     }
   }, [autoTriggerScan]);
+
+  // Monitor resume trigger — fires when pair credibility drops below 55%
+  useEffect(() => {
+    if (autoTriggerResume) {
+      isResumeModeRef.current = true;
+      isAutoTransitionRef.current = false;
+      onResumeReset();
+      handleSearchAndLoad();
+    }
+  }, [autoTriggerResume]);
 
   // Monitor trade state to trigger the 10s countdown ONLY on completed trade cycle (won_limit or lost_limit)
   const lastBotStatusRef = useRef(botState.status);
@@ -106,18 +126,34 @@ export function BotTrader({
   }, [searchLoadCountdown]);
 
   // Compute best symbol based on the leaderboard logic
+  // In resume mode: excludes the current failing symbol and prefers pairs with >= 55% win rate
   const getBestSymbolId = () => {
+    const currentSymbol = botState.symbol;
+    const inResumeMode = isResumeModeRef.current;
+
     const ranked = Object.values(symbolsState)
+      .filter((state) => {
+        // In resume mode, skip the symbol that just lost credibility
+        if (inResumeMode && state.info.id === currentSymbol) return false;
+        return true;
+      })
       .map((state) => {
         const totalSim = state.wins + state.losses;
         const winRate = totalSim >= 3 ? (state.wins / totalSim) * 100 : null;
         const signalFreq = state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0;
-        const score = winRate !== null 
-          ? winRate * 0.65 + Math.min(signalFreq * 5.0, 100) * 0.35 
+        const score = winRate !== null
+          ? winRate * 0.65 + Math.min(signalFreq * 5.0, 100) * 0.35
           : -1;
-        return { id: state.info.id, score };
+        return { id: state.info.id, score, winRate };
       })
       .sort((a, b) => b.score - a.score);
+
+    // In resume mode, prefer a pair that already meets the 55% threshold
+    if (inResumeMode) {
+      const qualifying = ranked.find((s) => s.winRate !== null && s.winRate >= 55.0);
+      if (qualifying) return qualifying.id;
+    }
+
     return ranked[0]?.id || 'R_100';
   };
 
@@ -141,9 +177,17 @@ export function BotTrader({
         clearInterval(intervalId);
         setIsScanning(false);
         const bestSymbolId = getBestSymbolId();
-        const shouldAutoStart = isAutoTransitionRef.current;
-        isAutoTransitionRef.current = false;
-        onSelectSymbolForTrading(bestSymbolId, shouldAutoStart);
+
+        if (isResumeModeRef.current) {
+          // Resume mode: switch pair and continue session without resetting stats
+          isResumeModeRef.current = false;
+          onResumeWithSymbol(bestSymbolId);
+        } else {
+          // Normal mode: load the pair and optionally auto-start
+          const shouldAutoStart = isAutoTransitionRef.current;
+          isAutoTransitionRef.current = false;
+          onSelectSymbolForTrading(bestSymbolId, shouldAutoStart);
+        }
       }
     }, 100);
   };
@@ -298,7 +342,21 @@ export function BotTrader({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-1">
-      {/* Parameters Panel Left Column */}
+
+      {/* Advanced Mode Banner — only shown in advanced tab */}
+      {isAdvancedMode && (
+        <div className="lg:col-span-12 flex items-start gap-3 p-4 rounded-2xl bg-violet-950/20 border border-violet-700/40">
+          <Zap className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
+          <div>
+            <span className="text-[10px] font-mono font-black text-violet-300 uppercase tracking-wider block mb-1">
+              ⚡ Advanced Mode Active — Auto Pair-Swap Enabled
+            </span>
+            <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+              The bot continuously monitors the active pair's live win rate during a session. If it drops below <span className="text-violet-300 font-bold">55%</span>, trading is automatically paused and the scanner selects the next best qualifying pair to resume — preserving all session stats.
+            </p>
+          </div>
+        </div>
+      )}
       <div className="lg:col-span-7 space-y-6">
         
         {/* Connection & Auth Block */}
@@ -555,6 +613,18 @@ export function BotTrader({
           {account ? (
             !botState.isRunning ? (
               <div className="space-y-4">
+                {/* Paused due to low win rate — advanced mode only */}
+                {isAdvancedMode && botState.status === 'paused_low_winrate' && (
+                  <div className="flex gap-2.5 p-3.5 rounded-xl bg-amber-950/25 border border-amber-500/40 text-[11px] text-amber-200">
+                    <RefreshCw className="w-5 h-5 text-amber-400 shrink-0 mt-0.5 animate-spin" />
+                    <div className="space-y-1">
+                      <div className="font-bold font-sans text-amber-300">⚠️ Pair Credibility Lost — Session Paused</div>
+                      <p className="text-slate-300 font-sans leading-relaxed">
+                        The active pair <span className="font-bold text-amber-300">"{activeSymbol.name}"</span> dropped below the <span className="font-bold text-emerald-400">55% win rate</span> threshold. The scanner is searching for the next best qualifying pair to resume your session. All session stats are preserved.
+                      </p>
+                    </div>
+                  </div>
+                )}
                 {isCalibrationActive ? (
                   <div className="flex gap-2.5 p-3.5 rounded-xl bg-indigo-950/25 border border-indigo-500/30 text-[11px] text-indigo-200">
                     <ShieldAlert className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5 animate-spin" style={{ animationDuration: '3.0s' }} />
@@ -602,14 +672,20 @@ export function BotTrader({
                 <button
                   id="mainStartBotBtn"
                   onClick={onStartBot}
-                  disabled={isCalibrationActive || !activeMeetsConditions}
+                  disabled={isCalibrationActive || !activeMeetsConditions || (isAdvancedMode && botState.status === 'paused_low_winrate')}
                   className={`w-full py-4 font-mono text-sm font-black tracking-widest uppercase transition-all duration-150 flex items-center justify-center gap-2 border rounded-2xl ${
-                    activeMeetsConditions
+                    isAdvancedMode && botState.status === 'paused_low_winrate'
+                      ? 'bg-amber-950/30 text-amber-400 border-amber-700/50 cursor-not-allowed animate-pulse'
+                      : activeMeetsConditions
                       ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 cursor-pointer shadow-xl shadow-amber-950/20 active:scale-[0.99] border-transparent'
                       : 'bg-slate-800 text-slate-500 border-slate-700/60 cursor-not-allowed opacity-60'
                   }`}
                 >
-                  {isCalibrationActive ? (
+                  {isAdvancedMode && botState.status === 'paused_low_winrate' ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 animate-spin" /> SCANNING FOR REPLACEMENT PAIR...
+                    </>
+                  ) : isCalibrationActive ? (
                     <>
                       <Lock className="w-5 h-5 animate-pulse text-indigo-400" /> STAGES LOCKED DURING CALIBRATION
                     </>
@@ -653,10 +729,20 @@ export function BotTrader({
               <h3 className="font-sans font-bold text-slate-200 text-sm tracking-tight">LIVE PERFORMANCE HUD</h3>
             </div>
             
-            <span className="font-mono text-[8px] text-slate-500 flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-850">
-              <span className={`w-1.5 h-1.5 rounded-full ${botState.isRunning ? 'bg-amber-400 animate-pulse' : 'bg-slate-700'}`} />
-              {botState.isRunning ? 'BOT ACTIVE' : 'STANDBY'}
-            </span>
+            <div className="flex items-center gap-2">
+              {/* Mode badge */}
+              <span className={`font-mono text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${
+                isAdvancedMode
+                  ? 'bg-violet-950/40 text-violet-300 border-violet-700/50'
+                  : 'bg-slate-900 text-slate-400 border-slate-800'
+              }`}>
+                {isAdvancedMode ? '⚡ ADVANCED' : 'NORMAL'}
+              </span>
+              <span className="font-mono text-[8px] text-slate-500 flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-850">
+                <span className={`w-1.5 h-1.5 rounded-full ${botState.isRunning ? 'bg-amber-400 animate-pulse' : 'bg-slate-700'}`} />
+                {botState.isRunning ? 'BOT ACTIVE' : 'STANDBY'}
+              </span>
+            </div>
           </div>
 
           {/* NET PROFIT CARD - Massive Display */}
