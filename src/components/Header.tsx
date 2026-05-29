@@ -1,6 +1,6 @@
 import { Shield, Sparkles, Activity, Clock, Wifi, User, HelpCircle, Send } from 'lucide-react';
 import { AccountInfo } from '../types';
-import nexscanLogo from '../assets/images/nexscan_iq_logo_user_provided_1780022319954.png';
+import nexscanLogo from '../assets/images/nexscan_iq_logo_1779881138833.png';
 
 interface HeaderProps {
   ticksCount: number;
