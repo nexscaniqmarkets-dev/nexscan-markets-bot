@@ -20,7 +20,7 @@ import {
   playWinChime, playLossChime, playTargetReachedChime 
 } from './utils/audio';
 import { 
-  Compass, Trophy, Cpu, ShieldAlert, Sparkles, AlertCircle, RefreshCw, Crown, Coins, X, History, Wallet, Zap
+  Compass, Trophy, Cpu, ShieldAlert, Sparkles, AlertCircle, RefreshCw, Crown, Coins, X, History, Wallet
 } from 'lucide-react';
 
 const STORAGE_KEY_TOKEN = 'mamba_deriv_token';
@@ -30,7 +30,8 @@ const STORAGE_KEY_MEMBERSHIP = 'mamba_membership';
 const STORAGE_KEY_TERMS_ACCEPTED = 'mamba_terms_accepted';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'scanner' | 'leaderboard' | 'trader' | 'advanced' | 'history' | 'cashier'>('leaderboard');
+  const [activeTab, setActiveTab] = useState<'scanner' | 'leaderboard' | 'trader' | 'history' | 'cashier'>('leaderboard');
+  const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [pastTrades, setPastTrades] = useState<PastTrade[]>([]);
   const [termsAccepted, setTermsAccepted] = useState<boolean>(() => {
     return localStorage.getItem(STORAGE_KEY_TERMS_ACCEPTED) === 'true';
@@ -489,7 +490,7 @@ export default function App() {
             
             <button
               id="tabTraderBtn"
-              onClick={() => { setActiveTab('trader'); handleUpdateConfig({ tradingMode: 'normal' }); }}
+              onClick={() => setActiveTab('trader')}
               className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
                 activeTab === 'trader'
                   ? 'bg-slate-950 text-indigo-400 border border-slate-800'
@@ -499,21 +500,6 @@ export default function App() {
               <Cpu className="w-4 h-4" /> Automated Trader
               {botState.isRunning && activeTab === 'trader' && (
                 <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping" />
-              )}
-            </button>
-
-            <button
-              id="tabAdvancedBtn"
-              onClick={() => { setActiveTab('advanced'); handleUpdateConfig({ tradingMode: 'advanced' }); }}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
-                activeTab === 'advanced'
-                  ? 'bg-slate-950 text-violet-400 border border-violet-800/60'
-                  : 'text-slate-500 hover:text-violet-300 border border-transparent'
-              }`}
-            >
-              <Zap className="w-4 h-4" /> Advanced
-              {botState.isRunning && activeTab === 'advanced' && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-violet-500 rounded-full animate-ping" />
               )}
             </button>
 
@@ -596,39 +582,14 @@ export default function App() {
                 sessionUptime={sessionUptime}
                 autoTriggerScan={autoTriggerScan}
                 onScanReset={() => setAutoTriggerScan(false)}
-                isAdvancedMode={false}
-              />
-              <TermsAgreementModal
-                isOpen={!termsAccepted}
-                onAccept={handleAcceptTerms}
-              />
-            </>
-          )}
-
-          {activeTab === 'advanced' && (
-            <>
-              <BotTrader
-                activeSymbol={activeTradingSymbol}
-                symbolsState={symbolsState}
-                onSelectSymbolForTrading={handleSelectSymbolForTrading}
-                account={account}
-                botConfig={botConfig}
-                onUpdateConfig={handleUpdateConfig}
-                onAuthorize={handleAuthorize}
-                onDeauthorize={handleDeauthorize}
-                onStartBot={handleStartBot}
-                onStopBot={handleStopBot}
-                botState={botState}
-                logs={logs}
-                onClearLogs={handleClearLogs}
-                authorizedWsStatus={authorizedWsStatus}
-                sessionUptime={sessionUptime}
-                autoTriggerScan={autoTriggerScan}
-                onScanReset={() => setAutoTriggerScan(false)}
                 autoTriggerResume={autoTriggerResume}
                 onResumeReset={() => setAutoTriggerResume(false)}
                 onResumeWithSymbol={handleResumeWithSymbol}
-                isAdvancedMode={true}
+                isAdvancedMode={isAdvancedMode}
+                onToggleAdvancedMode={(val) => {
+                  setIsAdvancedMode(val);
+                  handleUpdateConfig({ tradingMode: val ? 'advanced' : 'normal' });
+                }}
               />
               <TermsAgreementModal
                 isOpen={!termsAccepted}
