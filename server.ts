@@ -883,7 +883,8 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
   const updatedProfit = botState.profit + profitValue;
 
   // Add settled trade to pastTrades history
-  const isAutopilotActive = autopilotState.status === 'trading' || autopilotState.status !== 'idle';
+  // Only flag as autopilot when the autopilot is actively managing the trade (status === 'trading')
+  const isAutopilotActive = autopilotState.status === 'trading';
   pastTrades.unshift({
     id: Math.random().toString(36).substring(2, 9),
     symbol: botState.symbol,
@@ -1302,20 +1303,21 @@ async function run() {
   });
 
   // API Route: Reset session after target/loss limit reached (clears won_limit / lost_limit status)
+  // isRunning must be false so the user manually starts the next session — auto-trading is Premium only.
   app.post('/api/new-session', (req, res) => {
     processedContracts.clear();
     botState = {
       ...botState,
-      isRunning: true,
+      isRunning: false,
       currentStake: botConfig.stake,
       consecutiveLosses: 0,
       wins: 0,
       losses: 0,
       profit: 0,
       tradesCount: 0,
-      status: 'waiting',
+      status: 'idle',
     };
-    addLog('success', '🔄 New session started. Stats reset — bot is live and waiting for the next signal.');
+    addLog('success', '🔄 Session reset. Stats cleared — press Start to begin a new session.');
     res.json({ success: true, botState });
   });
 
