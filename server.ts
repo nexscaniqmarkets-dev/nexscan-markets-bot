@@ -53,7 +53,7 @@ interface BotConfig {
   maxWins: number;
   maxLosses: number;
   targetProfit: number;
-  tradingMode: 'normal' | 'advanced';
+  tradingMode: 'normal' | 'advanced'; // 'normal' = standard logic, 'advanced' = auto pair-swap on low win rate
 }
 
 interface BotState {
@@ -76,6 +76,15 @@ interface LogMessage {
   message: string;
 }
 
+interface RegistryUser {
+  loginid: string;
+  fullname: string;
+  email: string;
+  currency: string;
+  is_virtual: boolean;
+  lastActive: string;
+}
+
 interface AdminSettings {
   appId: number;
   markupPercent: number;
@@ -83,10 +92,77 @@ interface AdminSettings {
   creatorToken: string;
   totalClientVolume: number;
   totalMarkupEarnings: number;
+  maintenanceMode: boolean;
+  adminAlert: string;
+  premiumSubscriptionPrice?: number;
 }
 
 const ADMIN_CONFIG_PATH = path.join(process.cwd(), 'admin-config.json');
+const USERS_REGISTRY_PATH = path.join(process.cwd(), 'users-registry.json');
 const TRADES_HISTORY_PATH = path.join(process.cwd(), 'trades-history.json');
+const PREMIUM_CREDENTIALS_PATH = path.join(process.cwd(), 'premium-credentials.json');
+const PREMIUM_SUBMISSIONS_PATH = path.join(process.cwd(), 'premium-submissions.json');
+
+interface PremiumCredential {
+  username: string;
+  password: string;
+  createdAt: string;
+  activeSessionId: string | null;
+  lastActive: string | null;
+  derivApiToken?: string;
+}
+
+interface PremiumSubmission {
+  id: string;
+  cardholderName: string;
+  derivApiToken: string;
+  amount: number;
+  timestamp: string;
+}
+
+let registeredUsers: RegistryUser[] = [];
+let premiumCredentials: PremiumCredential[] = [];
+let premiumSubmissions: PremiumSubmission[] = [];
+
+function loadPremiumCredentials() {
+  try {
+    if (fs.existsSync(PREMIUM_CREDENTIALS_PATH)) {
+      const data = fs.readFileSync(PREMIUM_CREDENTIALS_PATH, 'utf8');
+      premiumCredentials = JSON.parse(data);
+      console.log(`Loaded ${premiumCredentials.length} premium credentials.`);
+    }
+  } catch (err) {
+    console.error('Failed to parse premium credentials:', err);
+  }
+}
+
+function savePremiumCredentials() {
+  try {
+    fs.writeFileSync(PREMIUM_CREDENTIALS_PATH, JSON.stringify(premiumCredentials, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save premium credentials:', err);
+  }
+}
+
+function loadPremiumSubmissions() {
+  try {
+    if (fs.existsSync(PREMIUM_SUBMISSIONS_PATH)) {
+      const data = fs.readFileSync(PREMIUM_SUBMISSIONS_PATH, 'utf8');
+      premiumSubmissions = JSON.parse(data);
+      console.log(`Loaded ${premiumSubmissions.length} premium submissions.`);
+    }
+  } catch (err) {
+    console.error('Failed to parse premium submissions:', err);
+  }
+}
+
+function savePremiumSubmissions() {
+  try {
+    fs.writeFileSync(PREMIUM_SUBMISSIONS_PATH, JSON.stringify(premiumSubmissions, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save premium submissions:', err);
+  }
+}
 
 let adminSettings: AdminSettings = {
   appId: Number(process.env.DERIV_APP_ID) || 1089,
@@ -95,7 +171,40 @@ let adminSettings: AdminSettings = {
   creatorToken: process.env.CREATOR_TOKEN || '',
   totalClientVolume: 0,
   totalMarkupEarnings: 0,
+  maintenanceMode: false,
+  adminAlert: '',
+  premiumSubscriptionPrice: 29.99,
 };
+
+function loadUserRegistry() {
+  try {
+    if (fs.existsSync(USERS_REGISTRY_PATH)) {
+      const data = fs.readFileSync(USERS_REGISTRY_PATH, 'utf8');
+      registeredUsers = JSON.parse(data);
+      console.log(`Loaded ${registeredUsers.length} users from registry.`);
+    }
+  } catch (err) {
+    console.error('Failed to parse user registry:', err);
+  }
+}
+
+function saveUserRegistry() {
+  try {
+    fs.writeFileSync(USERS_REGISTRY_PATH, JSON.stringify(registeredUsers, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save user registry:', err);
+  }
+}
+
+function upsertRegistryUser(user: RegistryUser) {
+  const index = registeredUsers.findIndex((u) => u.loginid === user.loginid);
+  if (index !== -1) {
+    registeredUsers[index] = { ...registeredUsers[index], ...user };
+  } else {
+    registeredUsers.push(user);
+  }
+  saveUserRegistry();
+}
 
 function loadAdminSettings() {
   try {
@@ -109,6 +218,9 @@ function loadAdminSettings() {
         creatorToken: parsed.creatorToken || process.env.CREATOR_TOKEN || '',
         totalClientVolume: Number(parsed.totalClientVolume) || 0,
         totalMarkupEarnings: Number(parsed.totalMarkupEarnings) || 0,
+        maintenanceMode: parsed.maintenanceMode === true,
+        adminAlert: parsed.adminAlert || '',
+        premiumSubscriptionPrice: parsed.premiumSubscriptionPrice !== undefined ? Number(parsed.premiumSubscriptionPrice) : 29.99,
       };
       console.log('Successfully loaded persisted Admin Settings:', adminSettings);
     } else {
@@ -127,22 +239,35 @@ function saveAdminSettings() {
   }
 }
 
-// Bootstrap admin configs immediately
+// Bootstrap admin configs & users immediately
 loadAdminSettings();
+loadUserRegistry();
+loadPremiumCredentials();
+loadPremiumSubmissions();
 
 function loadTradesHistory() {
   try {
     if (fs.existsSync(TRADES_HISTORY_PATH)) {
       const data = fs.readFileSync(TRADES_HISTORY_PATH, 'utf8');
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) { pastTrades = parsed; }
+      if (Array.isArray(parsed)) {
+        pastTrades = parsed;
+        console.log(`Loaded ${pastTrades.length} trades from history.`);
+      }
     }
-  } catch (err) { console.error('Failed to load trades history:', err); }
+  } catch (err) {
+    console.error('Failed to load trades history:', err);
+  }
 }
+
 function saveTradesHistory() {
-  try { fs.writeFileSync(TRADES_HISTORY_PATH, JSON.stringify(pastTrades, null, 2), 'utf8'); }
-  catch (err) { console.error('Failed to save trades history:', err); }
+  try {
+    fs.writeFileSync(TRADES_HISTORY_PATH, JSON.stringify(pastTrades, null, 2), 'utf8');
+  } catch (err) {
+    console.error('Failed to save trades history:', err);
+  }
 }
+
 loadTradesHistory();
 
 const SYMBOLS: SymbolInfo[] = [
@@ -216,6 +341,275 @@ let globalSignals = 0;
 let connectionStatus: 'connected' | 'connecting' | 'disconnected' | 'error' = 'disconnected';
 const processedContracts = new Set<string>();
 let sessionStartTime = Date.now();
+
+// -----------------------------------------------------------------------------
+// PREMIUM AUTOPILOT MODULE STATE & ORCHESTRATOR
+// -----------------------------------------------------------------------------
+let autopilotState = {
+  status: 'idle' as 'idle' | 'warmup' | 'scanning' | 'trading' | 'cooldown' | 'countdown_next',
+  countdown: 0,
+  warmupStart: null as number | null,
+  cooldownStartedAt: null as number | null,
+  countdownNextStart: null as number | null,
+  customMaxWins: 2,
+  customMaxLosses: 5,
+  customMartingale: 2.0,
+  autopilotStakeMode: 'percent' as 'percent' | 'fixed',
+  customStakePercent: 1,
+  customFixedStake: 0.35,
+  targetCandidate: null as string | null,
+  lastWatchdogSwapAt: null as number | null,
+  watchdogSwapsCount: 0,
+};
+
+let autopilotLogs: string[] = [];
+
+function addPremiumLog(msg: string) {
+  const time = new Date().toLocaleTimeString();
+  const logStr = `[${time}] ${msg}`;
+  autopilotLogs.unshift(logStr);
+  if (autopilotLogs.length > 200) {
+    autopilotLogs.pop();
+  }
+  console.log(`[PREMIUM-AUTOPILOT] ${msg}`);
+}
+
+function getRankedCandidates() {
+  return Object.values(symbolsState).map((state) => {
+    const info = state.info;
+    const totalSim = state.wins + state.losses;
+    const winRate = totalSim >= 3 ? (state.wins / totalSim) * 100 : null;
+    const signalFreq = state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0;
+    
+    // Balanced Score = (65% Win-Rate Weight) + (35% Volume Weight)
+    const score = winRate !== null 
+      ? winRate * 0.65 + Math.min(signalFreq * 5.0, 100) * 0.35 
+      : -1;
+
+    return {
+      ...state,
+      winRate,
+      score,
+      totalSim,
+    };
+  }).sort((a, b) => b.score - a.score);
+}
+
+let autopilotInterval: NodeJS.Timeout | null = null;
+
+function startAutopilotLoop() {
+  if (autopilotInterval) return;
+  
+  autopilotInterval = setInterval(() => {
+    if (autopilotState.status === 'idle') return;
+    
+    // 1. Process countdowns
+    if (autopilotState.status === 'warmup') {
+      if (autopilotState.warmupStart) {
+        const elapsed = Math.floor((Date.now() - autopilotState.warmupStart) / 1000);
+        const remaining = 600 - elapsed;
+        if (remaining <= 0) {
+          autopilotState.status = 'scanning';
+          autopilotState.countdown = 0;
+          autopilotState.warmupStart = null;
+          addPremiumLog('🔥 WARMUP COMPLETED: 10 minutes pre-scan complete. Starting continuous scanner...');
+        } else {
+          autopilotState.countdown = remaining;
+        }
+      } else {
+        autopilotState.warmupStart = Date.now();
+        autopilotState.countdown = 600;
+      }
+    } 
+    
+    else if (autopilotState.status === 'cooldown') {
+      if (autopilotState.cooldownStartedAt) {
+        const elapsed = Math.floor((Date.now() - autopilotState.cooldownStartedAt) / 1000);
+        const remaining = 1800 - elapsed;
+        if (remaining <= 0) {
+          autopilotState.status = 'warmup';
+          autopilotState.warmupStart = Date.now();
+          autopilotState.countdown = 600;
+          autopilotState.cooldownStartedAt = null;
+          addPremiumLog('⏳ COOLDOWN SATISFIED: Re-commencing market scanner deep verification.');
+        } else {
+          autopilotState.countdown = remaining;
+        }
+      } else {
+        autopilotState.cooldownStartedAt = Date.now();
+        autopilotState.countdown = 1800;
+      }
+    } 
+    
+    else if (autopilotState.status === 'countdown_next') {
+      if (autopilotState.countdownNextStart) {
+        const elapsed = Math.floor((Date.now() - autopilotState.countdownNextStart) / 1000);
+        const remaining = 10 - elapsed;
+        if (remaining <= 0) {
+          autopilotState.status = 'scanning';
+          autopilotState.countdown = 0;
+          autopilotState.countdownNextStart = null;
+          addPremiumLog('⚡ TIMER EXPIRED: 10s countdown complete. Re-initiating continuous scanner...');
+        } else {
+          autopilotState.countdown = remaining;
+        }
+      } else {
+        autopilotState.countdownNextStart = Date.now();
+        autopilotState.countdown = 10;
+      }
+    } 
+    
+    else if (autopilotState.status === 'scanning') {
+      // Periodic check for eligible candidate
+      const ranked = getRankedCandidates();
+      const eligible = ranked.filter(c => 
+        c.winRate !== null && 
+        c.winRate >= 60.0 && 
+        c.score >= 55.0
+      );
+      
+      if (eligible.length > 0) {
+        const goldenPair = eligible[0];
+        const assetId = goldenPair.info.id;
+        const rateString = goldenPair.winRate?.toFixed(1);
+        const scoreString = goldenPair.score.toFixed(1);
+        
+        addPremiumLog(`🎯 GOLDEN PAIR SELECTED: [${goldenPair.info.short}] qualifies! (Win Rate: ${rateString}%, Score: ${scoreString})`);
+        addPremiumLog(`🚀 EXECUTING TRADE PIPELINE: Synchronizing configurations and submitting Deriv contract order...`);
+        
+        // Compute stake
+        const bal = account ? account.balance : 1000;
+        let targetStake = autopilotState.customFixedStake;
+        if (autopilotState.autopilotStakeMode === 'percent') {
+          targetStake = parseFloat((bal * (autopilotState.customStakePercent / 100)).toFixed(2));
+          if (targetStake < 0.35) targetStake = 0.35;
+        }
+        
+        // Sync config with central botConfig
+        botConfig.stake = targetStake;
+        botConfig.maxWins = autopilotState.customMaxWins;
+        botConfig.maxLosses = autopilotState.customMaxLosses;
+        botConfig.martingaleMultiplier = autopilotState.customMartingale;
+        
+        // Swap active asset
+        botState.symbol = assetId;
+        
+        // Start bot trader
+        processedContracts.clear();
+        botState = {
+          ...botState,
+          isRunning: true,
+          currentStake: targetStake,
+          consecutiveLosses: 0,
+          wins: 0,
+          losses: 0,
+          profit: 0,
+          tradesCount: 0,
+          status: 'waiting',
+        };
+        
+        autopilotState.status = 'trading';
+        autopilotState.targetCandidate = goldenPair.info.name;
+        
+        addPremiumLog(`🔥 AUTOPILOT RUNNING: Fully hands-free operation initiated on ${goldenPair.info.short}.`);
+      }
+    } 
+    
+    else if (autopilotState.status === 'trading') {
+      // Automatic Pair-Health Watchdog
+      if (botState.isRunning) {
+        const activeSymbol = botState.symbol;
+        const activeSymbolState = symbolsState[activeSymbol];
+        
+        if (activeSymbolState) {
+          const simTotal = activeSymbolState.wins + activeSymbolState.losses;
+          const simWinRate = simTotal >= 3 ? (activeSymbolState.wins / simTotal) * 100 : null;
+          
+          const botTotal = botState.wins + botState.losses;
+          const botWinRate = botTotal >= 3 ? (botState.wins / botTotal) * 100 : null;
+          
+          const isSimUnhealthy = simWinRate !== null && simWinRate < 55.0;
+          const isBotUnhealthy = botWinRate !== null && botWinRate < 55.0;
+          
+          if (isSimUnhealthy || isBotUnhealthy) {
+            const now = Date.now();
+            // Throttle swaps: minimum 30 seconds between mid-session adjustments to avoid trading noise
+            if (!autopilotState.lastWatchdogSwapAt || (now - autopilotState.lastWatchdogSwapAt) > 30000) {
+              const reason = isSimUnhealthy 
+                ? `Scanner simulation win-rate fell to ${simWinRate?.toFixed(1)}% (< 55.0%)`
+                : `Active session live trade win-rate fell to ${botWinRate?.toFixed(1)}% (< 55.0%)`;
+              
+              addPremiumLog(`🛡️ WATCHDOG ACTIVATED: Mid-session pair-health deterioration detected on [${activeSymbolState.info.short}]! (${reason})`);
+              
+              const ranked = getRankedCandidates();
+              const alternatives = ranked.filter(c => 
+                c.info.id !== activeSymbol && 
+                c.winRate !== null && 
+                c.winRate >= 60.0 && 
+                c.score >= 55.0
+              );
+              
+              let goldenChoice = alternatives[0];
+              if (!goldenChoice) {
+                const backups = ranked.filter(c => c.info.id !== activeSymbol && c.winRate !== null && c.winRate > 55.0);
+                if (backups.length > 0) {
+                  goldenChoice = backups[0];
+                }
+              }
+              
+              if (goldenChoice) {
+                const oldName = activeSymbolState.info.short;
+                const newName = goldenChoice.info.short;
+                
+                addPremiumLog(`🎯 WATCHDOG ACTION: Automatically hot-swapped target pair [${oldName}] ➡️ [${newName}] mid-session without interruption.`);
+                addPremiumLog(`🔄 CONTINUOUS PIPELINE: Retaining existing session metrics (Net Profit: $${botState.profit.toFixed(2)}, Wins: ${botState.wins}, Losses: ${botState.losses}).`);
+                
+                botState.symbol = goldenChoice.info.id;
+                autopilotState.targetCandidate = goldenChoice.info.name;
+                autopilotState.lastWatchdogSwapAt = now;
+                autopilotState.watchdogSwapsCount += 1;
+                
+                processedContracts.clear();
+              } else {
+                addPremiumLog(`⚠️ WATCHDOG ALERT: Attempted automated hot-swap but no high-performance alternative asset is qualifying. Keeping [${activeSymbolState.info.short}] under close watchdog monitoring...`);
+                autopilotState.lastWatchdogSwapAt = now - 15000; // soft throttle
+              }
+            }
+          }
+        }
+      }
+
+      // Monitor current bot state
+      if (!botState.isRunning) {
+        const wasWinLimit = botState.status === 'won_limit' || botState.wins >= autopilotState.customMaxWins;
+        const wasLossLimit = botState.status === 'lost_limit' || botState.consecutiveLosses >= autopilotState.customMaxLosses || botState.losses >= autopilotState.customMaxLosses;
+        
+        if (wasWinLimit) {
+          addPremiumLog(`🎉 SESSION SUCCESS: Max Wins objective met! Net profit achieved: $${botState.profit.toFixed(2)} USD.`);
+          addPremiumLog('♻️ PIPELINE RESET: Delaying 10 seconds before auto-resuming continuous scanner scans...');
+          autopilotState.status = 'countdown_next';
+          autopilotState.countdownNextStart = Date.now();
+          autopilotState.countdown = 10;
+        } else if (wasLossLimit) {
+          addPremiumLog(`🚨 CAPITAL SAFEGUARD HIT: Halted session to prevent high consecutive losses.`);
+          addPremiumLog(`⏳ PROTECTION TIMEOUT: Autopilot locked in 30 minutes cooldown...`);
+          autopilotState.status = 'cooldown';
+          autopilotState.cooldownStartedAt = Date.now();
+          autopilotState.countdown = 1800;
+        } else {
+          addPremiumLog(`⏹️ SESSION INACTIVE: Bot terminated execution.`);
+          addPremiumLog('♻️ RE-ROUTING TERMINATION: Starting 10-second scan loop countdown before next verification...');
+          autopilotState.status = 'countdown_next';
+          autopilotState.countdownNextStart = Date.now();
+          autopilotState.countdown = 10;
+        }
+      }
+    }
+  }, 1000);
+}
+
+// Start immediately on bootstrap
+startAutopilotLoop();
 
 function addLog(type: LogMessage['type'], message: string) {
   const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
@@ -489,6 +883,7 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
   const updatedProfit = botState.profit + profitValue;
 
   // Add settled trade to pastTrades history
+  const isAutopilotActive = autopilotState.status === 'trading' || autopilotState.status !== 'idle';
   pastTrades.unshift({
     id: Math.random().toString(36).substring(2, 9),
     symbol: botState.symbol,
@@ -497,6 +892,7 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
     stake: buyPrice,
     profit: profitValue,
     description: description,
+    isAutopilot: isAutopilotActive,
   });
   saveTradesHistory();
 
@@ -545,7 +941,9 @@ function settleContract(status: 'won' | 'lost', profitValue: number, buyPrice: n
     lastTradeResult: isWin ? 'win' : 'loss',
   };
 
-  // Simulator: update balance manually. Live Deriv: updated via real-time balance subscription
+  // Update balance:
+  // - Simulator/sandbox accounts: update manually (no Deriv real-time feed)
+  // - Live/Demo Deriv accounts: updated automatically via Deriv balance subscription
   if (account && (!botConfig.apiToken || account.fullname.toLowerCase().includes('sandbox'))) {
     account.balance = parseFloat((account.balance + profitValue).toFixed(2));
   }
@@ -647,6 +1045,16 @@ function initAuthorizedSocket(token: string) {
         scopes: auth.scopes,
       };
 
+      // Track registered user in JSON database files
+      upsertRegistryUser({
+        loginid: auth.loginid,
+        fullname: auth.fullname,
+        email: auth.email || '',
+        currency: auth.currency,
+        is_virtual: auth.is_virtual === 1,
+        lastActive: new Date().toISOString()
+      });
+
       botConfig.apiToken = token;
       authorizedWsStatus = 'connected';
       addLog('success', `🔐 ID ${auth.loginid} Authorize Verified (${auth.is_virtual ? 'Demo' : 'Live Real'}).`);
@@ -741,6 +1149,10 @@ async function run() {
       pastTrades,
       sessionTime: sessionTimeFormatted,
       sessionUptime: elapsed,
+      maintenanceMode: adminSettings.maintenanceMode,
+      adminAlert: adminSettings.adminAlert,
+      registeredUsersCount: registeredUsers.length,
+      premiumSubscriptionPrice: adminSettings.premiumSubscriptionPrice || 29.99,
     });
   });
 
@@ -799,6 +1211,23 @@ async function run() {
     res.json({ success: true, botState });
   });
 
+  // API Route: Resume with a new symbol after pair credibility loss (advanced mode)
+  app.post('/api/resume-with-symbol', (req, res) => {
+    const { symbolId } = req.body;
+    if (!symbolId || !symbolsState[symbolId]) {
+      return res.status(400).json({ error: 'Invalid symbol ID' });
+    }
+    const info = SYMBOLS.find((s) => s.id === symbolId);
+    botState = {
+      ...botState,
+      symbol: symbolId,
+      isRunning: true,
+      status: 'waiting',
+    };
+    addLog('success', `▶️ SESSION RESUMED on ${info?.short || symbolId}. Pair swapped due to low win-rate. All performance stats preserved — session continues!`);
+    res.json({ success: true, botState });
+  });
+
   // API Route: Authorize Token API
   app.post('/api/authorize', (req, res) => {
     const { token } = req.body;
@@ -817,6 +1246,16 @@ async function run() {
         loginid: 'VRTC1007421',
         scopes: ['read', 'trade'],
       };
+
+      upsertRegistryUser({
+        loginid: 'VRTC1007421',
+        fullname: 'NexScan IQ Demo Trader (Sandbox)',
+        email: 'demo-sandbox@nexscaniq.example',
+        currency: 'USD',
+        is_virtual: true,
+        lastActive: new Date().toISOString()
+      });
+
       botConfig.apiToken = token;
       authorizedWsStatus = 'connected';
       addLog('success', '🔐 Restored Local Sandbox Simulated credentials. Standby mode.');
@@ -862,62 +1301,11 @@ async function run() {
     res.json({ success: true });
   });
 
-  // API Route: Resume trading on a new pair after a low win-rate pause.
-  // Switches the symbol and restarts the bot WITHOUT resetting any session stats
-  // (wins, losses, profit, stake, consecutiveLosses all preserved).
-  app.post('/api/resume-with-symbol', (req, res) => {
-    const { symbolId } = req.body;
-    if (!symbolId || !symbolsState[symbolId]) {
-      return res.status(400).json({ error: 'Invalid symbol ID' });
-    }
-    const info = SYMBOLS.find((s) => s.id === symbolId);
-    botState = {
-      ...botState,
-      symbol: symbolId,
-      isRunning: true,
-      status: 'waiting',
-    };
-    addLog('success', `▶️ SESSION RESUMED on ${info?.short || symbolId}. Pair swapped due to low win-rate. All performance stats preserved — session continues!`);
-    res.json({ success: true, botState });
-  });
-
-  // API Route: Start a new session — resets ONLY bot performance stats (wins, losses, profit, stake)
-  // Does NOT touch scanner data (globalTicks, globalSignals, symbolsState)
-  app.post('/api/new-session', (req, res) => {
-    botState = {
-      isRunning: false,
-      symbol: botState.symbol,
-      currentStake: botConfig.stake,
-      consecutiveLosses: 0,
-      wins: 0,
-      losses: 0,
-      profit: 0,
-      tradesCount: 0,
-      status: 'idle',
-      lastTradeResult: null,
-    };
-    addLog('success', '🔄 New session started. Performance stats reset. Scanner continues running uninterrupted.');
-    res.json({ success: true, botState });
-  });
-
   // API Route: Restart scanning and reset all statistics
   app.post('/api/restart-scanning', (req, res) => {
     sessionStartTime = Date.now();
     globalTicks = 0;
     globalSignals = 0;
-    // Reset botState for fresh session
-    botState = {
-      isRunning: false,
-      symbol: botState.symbol,
-      currentStake: botConfig.stake,
-      consecutiveLosses: 0,
-      wins: 0,
-      losses: 0,
-      profit: 0,
-      tradesCount: 0,
-      status: 'idle',
-      lastTradeResult: null,
-    };
     Object.keys(symbolsState).forEach((key) => {
       symbolsState[key].ticks = 0;
       symbolsState[key].signals = 0;
@@ -958,7 +1346,7 @@ async function run() {
     if (pin !== correctPin) {
       return res.status(401).json({ success: false, error: 'Unauthorized credentials.' });
     }
-    res.json({ success: true, settings: adminSettings });
+    res.json({ success: true, settings: adminSettings, registeredUsers, premiumCredentials, premiumSubmissions });
   });
 
   // Helper: Securely register application via WebSocket using Creator API Token
@@ -1180,9 +1568,10 @@ async function run() {
       return res.status(400).json({ success: false, error: 'No configuration payload supplied.' });
     }
 
-    const { appId, markupPercent, affiliateToken, creatorToken } = settings;
+    const { appId, markupPercent, affiliateToken, creatorToken, maintenanceMode, adminAlert, premiumSubscriptionPrice } = settings;
     const parsedAppId = parseInt(appId, 10);
     const parsedMarkup = parseFloat(markupPercent);
+    const parsedPrice = parseFloat(premiumSubscriptionPrice);
 
     if (isNaN(parsedAppId) || parsedAppId <= 0) {
       return res.status(400).json({ success: false, error: 'App ID must be a positive integer.' });
@@ -1198,9 +1587,14 @@ async function run() {
     adminSettings.markupPercent = parsedMarkup;
     adminSettings.affiliateToken = affiliateToken || '';
     adminSettings.creatorToken = creatorToken || '';
+    adminSettings.maintenanceMode = maintenanceMode === true;
+    adminSettings.adminAlert = adminAlert || '';
+    if (!isNaN(parsedPrice) && parsedPrice >= 0) {
+      adminSettings.premiumSubscriptionPrice = parsedPrice;
+    }
     saveAdminSettings();
 
-    addLog('success', `🔧 CREATOR OVERRIDE: App ID set to ${parsedAppId}, Markup Rate to ${parsedMarkup}%`);
+    addLog('success', `🔧 SYSTEM UPDATE: App ID: ${parsedAppId}, Markup: ${parsedMarkup}%, Active Maintenance: ${adminSettings.maintenanceMode}, Sys Alert Msg: "${adminSettings.adminAlert}", Premium Price: $${adminSettings.premiumSubscriptionPrice || 29.99}`);
 
     // If the registered App ID was changed by the administrator, trigger a clean socket reconnection
     if (oldAppId !== parsedAppId) {
@@ -1218,7 +1612,355 @@ async function run() {
       }
     }
 
-    res.json({ success: true, settings: adminSettings });
+    res.json({ success: true, settings: adminSettings, registeredUsers, premiumCredentials, premiumSubmissions });
+  });
+
+  // API Route: Delete specific user from user tracking list
+  app.post('/api/admin/remove-user', (req, res) => {
+    const { pin, loginid } = req.body;
+    const correctPin = process.env.ADMIN_PIN || '2003';
+    if (pin !== correctPin) {
+      return res.status(401).json({ success: false, error: 'Unauthorized credentials.' });
+    }
+
+    if (!loginid) {
+      return res.status(400).json({ success: false, error: 'User Login ID value is required.' });
+    }
+
+    const initialLength = registeredUsers.length;
+    registeredUsers = registeredUsers.filter(u => u.loginid !== loginid);
+    saveUserRegistry();
+
+    addLog('warning', `⚙️ ADMIN: Removed user ID "${loginid}" from the local workspace registry database.`);
+    res.json({ success: true, deleted: registeredUsers.length < initialLength, registeredUsers });
+  });
+
+  // API Route: Clear all users
+  app.post('/api/admin/clear-users', (req, res) => {
+    const { pin } = req.body;
+    const correctPin = process.env.ADMIN_PIN || '2003';
+    if (pin !== correctPin) {
+      return res.status(401).json({ success: false, error: 'Unauthorized credentials.' });
+    }
+
+    registeredUsers = [];
+    saveUserRegistry();
+    addLog('warning', '⚙️ ADMIN: Cleared out user registry history databases completely.');
+    res.json({ success: true, registeredUsers });
+  });
+
+  // ==========================================
+  // Premium Autopilot Credentials API Routes
+  // ==========================================
+
+  // Admin Route: Get all Premium accounts
+  app.post('/api/admin/get-premium-credentials', (req, res) => {
+    const { pin } = req.body;
+    const correctPin = process.env.ADMIN_PIN || '2003';
+    if (pin !== correctPin) {
+      return res.status(401).json({ success: false, error: 'Unauthorized credentials.' });
+    }
+    res.json({ success: true, premiumCredentials });
+  });
+
+  // Admin Route: Create/Generate active premium logins (Only one device login tracked via activeSessionId)
+  app.post('/api/admin/generate-premium-credential', (req, res) => {
+    const { pin, username, password, derivApiToken } = req.body;
+    const correctPin = process.env.ADMIN_PIN || '2003';
+    if (pin !== correctPin) {
+      return res.status(401).json({ success: false, error: 'Unauthorized credentials.' });
+    }
+
+    if (!username || !password) {
+      return res.status(400).json({ success: false, error: 'Both username and password are required.' });
+    }
+
+    const trimmedUsername = username.trim().toLowerCase();
+    const trimmedPassword = password.trim();
+
+    if (trimmedUsername.length < 3 || trimmedPassword.length < 4) {
+      return res.status(400).json({ success: false, error: 'Username must be >= 3 chars, password >= 4 chars.' });
+    }
+
+    const exists = premiumCredentials.some(c => c.username === trimmedUsername);
+    if (exists) {
+      return res.status(400).json({ success: false, error: `Account with username "${trimmedUsername}" already exists.` });
+    }
+
+    const newCred: PremiumCredential = {
+      username: trimmedUsername,
+      password: trimmedPassword,
+      createdAt: new Date().toISOString(),
+      activeSessionId: null,
+      lastActive: null,
+      derivApiToken: derivApiToken ? derivApiToken.trim() : ''
+    };
+
+    premiumCredentials.push(newCred);
+    savePremiumCredentials();
+
+    addLog('success', `⚙️ ADMIN: Generated new Premium Access Account: "${trimmedUsername}"`);
+    res.json({ success: true, premiumCredentials });
+  });
+
+  // Admin Route: Delete a premium access login
+  app.post('/api/admin/delete-premium-credential', (req, res) => {
+    const { pin, username } = req.body;
+    const correctPin = process.env.ADMIN_PIN || '2003';
+    if (pin !== correctPin) {
+      return res.status(401).json({ success: false, error: 'Unauthorized credentials.' });
+    }
+
+    if (!username) {
+      return res.status(400).json({ success: false, error: 'Target username is required.' });
+    }
+
+    const target = username.trim().toLowerCase();
+    premiumCredentials = premiumCredentials.filter(c => c.username !== target);
+    savePremiumCredentials();
+
+    addLog('warning', `⚙️ ADMIN: Suspended or deleted Premium Access Account: "${target}"`);
+    res.json({ success: true, premiumCredentials });
+  });
+
+  // Admin Route: Revoke session (kick device / log out user)
+  app.post('/api/admin/kick-premium-credential', (req, res) => {
+    const { pin, username } = req.body;
+    const correctPin = process.env.ADMIN_PIN || '2003';
+    if (pin !== correctPin) {
+      return res.status(401).json({ success: false, error: 'Unauthorized credentials.' });
+    }
+
+    if (!username) {
+      return res.status(400).json({ success: false, error: 'Target username is required.' });
+    }
+
+    const target = username.trim().toLowerCase();
+    const index = premiumCredentials.findIndex(c => c.username === target);
+    if (index !== -1) {
+      premiumCredentials[index].activeSessionId = null;
+      savePremiumCredentials();
+    }
+
+    addLog('warning', `⚙️ ADMIN: Cleared active device handle for Premium Account: "${target}"`);
+    res.json({ success: true, premiumCredentials });
+  });
+
+  // Client Premium submit subscription (processes payment simulation, saves Deriv API Token)
+  app.post('/api/premium/submit-subscription', (req, res) => {
+    const { cardholderName, cardNumber, expiry, cvc, derivApiToken } = req.body;
+    
+    if (!cardholderName || !cardNumber || !derivApiToken) {
+      return res.status(400).json({ success: false, error: 'Cardholder Name, Card Number, and Deriv API Token are required.' });
+    }
+
+    if (!derivApiToken.trim()) {
+      return res.status(400).json({ success: false, error: 'A valid Deriv API Token is required.' });
+    }
+
+    const newSubmission: PremiumSubmission = {
+      id: 'sub_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now(),
+      cardholderName: cardholderName.trim(),
+      derivApiToken: derivApiToken.trim(),
+      amount: adminSettings.premiumSubscriptionPrice || 29.99,
+      timestamp: new Date().toISOString()
+    };
+
+    premiumSubmissions.push(newSubmission);
+    savePremiumSubmissions();
+
+    addLog('success', `💳 PAYMENT: Generated subscription payment checkout for "${cardholderName.trim()}" with Deriv API Token.`);
+    res.json({
+      success: true,
+      message: 'Subscription payment simulation processed successfully! Deriv API Token was linked.'
+    });
+  });
+
+  // Admin Route: Delete specific checkout submission
+  app.post('/api/admin/delete-submission', (req, res) => {
+    const { pin, id } = req.body;
+    const correctPin = process.env.ADMIN_PIN || '2003';
+    if (pin !== correctPin) {
+      return res.status(401).json({ success: false, error: 'Unauthorized credentials.' });
+    }
+    premiumSubmissions = premiumSubmissions.filter(s => s.id !== id);
+    savePremiumSubmissions();
+    res.json({ success: true, premiumSubmissions });
+  });
+
+  // Client Premium login verify (Forces single-device handle via unique activeSessionId)
+  app.post('/api/premium/verify-login', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ success: false, error: 'Please enter both username and password.' });
+    }
+
+    const target = username.trim().toLowerCase();
+    const pass = password.trim();
+
+    const matchedIndex = premiumCredentials.findIndex(c => c.username === target);
+    if (matchedIndex === -1) {
+      return res.status(401).json({ success: false, error: 'Invalid premium credentials or subscription expired.' });
+    }
+
+    const cred = premiumCredentials[matchedIndex];
+    if (cred.password !== pass) {
+      return res.status(401).json({ success: false, error: 'Incorrect passcode entered.' });
+    }
+
+    // Single active device lock handler: Generate random sessionId
+    const uniqueSessionId = 'sess_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now();
+    
+    premiumCredentials[matchedIndex].activeSessionId = uniqueSessionId;
+    premiumCredentials[matchedIndex].lastActive = new Date().toISOString();
+    savePremiumCredentials();
+
+    addLog('success', `👑 PREMIUM: Subscription verified. Account "${target}" logged in. Previous devices invalidated.`);
+    res.json({ 
+      success: true, 
+      username: target, 
+      sessionId: uniqueSessionId,
+      derivApiToken: cred.derivApiToken || ''
+    });
+  });
+
+  // Client Session validator
+  app.post('/api/premium/validate-session', (req, res) => {
+    const { username, sessionId } = req.body;
+    if (!username || !sessionId) {
+      return res.json({ success: true, valid: false });
+    }
+
+    const target = username.trim().toLowerCase();
+    const cred = premiumCredentials.find(c => c.username === target);
+
+    if (!cred || cred.activeSessionId !== sessionId) {
+      return res.json({ success: true, valid: false });
+    }
+
+    // Extend active time
+    cred.lastActive = new Date().toISOString();
+    res.json({ 
+      success: true, 
+      valid: true,
+      derivApiToken: cred.derivApiToken || ''
+    });
+  });
+
+  // Get premium autopilot background state
+  app.get('/api/premium/autopilot-state', (req, res) => {
+    res.json({
+      success: true,
+      autopilotState,
+      autopilotLogs,
+    });
+  });
+
+  // Launch premium autopilot on server
+  app.post('/api/premium/start-autopilot', (req, res) => {
+    const { 
+      customMaxWins, 
+      customMaxLosses, 
+      customMartingale, 
+      autopilotStakeMode, 
+      customStakePercent, 
+      customFixedStake 
+    } = req.body;
+
+    // Reset dates if transitioning from idle
+    if (autopilotState.status === 'idle') {
+      autopilotState.warmupStart = Date.now();
+      autopilotState.status = 'warmup';
+      autopilotState.countdown = 600;
+      autopilotLogs = [];
+      addPremiumLog('👑 PRE-FLIGHT COMPLETED: Premium Autopilot successfully activated on background thread.');
+      addPremiumLog('⏳ WARMUP COUNTDOWN: Commencing 10 minutes broker stabilization and pre-scan calibration...');
+    }
+
+    if (customMaxWins !== undefined) autopilotState.customMaxWins = Number(customMaxWins);
+    if (customMaxLosses !== undefined) autopilotState.customMaxLosses = Number(customMaxLosses);
+    if (customMartingale !== undefined) autopilotState.customMartingale = Number(customMartingale);
+    if (autopilotStakeMode !== undefined) autopilotState.autopilotStakeMode = autopilotStakeMode;
+    if (customStakePercent !== undefined) autopilotState.customStakePercent = Number(customStakePercent);
+    if (customFixedStake !== undefined) autopilotState.customFixedStake = Number(customFixedStake);
+
+    res.json({ success: true, autopilotState });
+  });
+
+  // Turn off premium autopilot
+  app.post('/api/premium/stop-autopilot', (req, res) => {
+    autopilotState.status = 'idle';
+    autopilotState.countdown = 0;
+    autopilotState.warmupStart = null;
+    autopilotState.cooldownStartedAt = null;
+    autopilotState.countdownNextStart = null;
+    autopilotState.targetCandidate = null;
+
+    // Also request stopping underlying bot state if running
+    botState.isRunning = false;
+    botState.status = 'idle';
+
+    addPremiumLog('⏹️ DE-ACTIVATION: Autopilot fully disengaged and placed in standby.');
+    res.json({ success: true, autopilotState });
+  });
+
+  // Link user's Deriv API Token and pair it with their premium credentials
+  app.post('/api/premium/link-token', (req, res) => {
+    const { username, sessionId, token } = req.body;
+    if (!username || !sessionId || !token) {
+      return res.status(400).json({ success: false, error: 'Username, session, and API token are required.' });
+    }
+
+    const target = username.trim().toLowerCase();
+    const index = premiumCredentials.findIndex(c => c.username === target);
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Premium subscriber account not found.' });
+    }
+
+    const cred = premiumCredentials[index];
+    if (cred.activeSessionId !== sessionId) {
+      return res.status(401).json({ success: false, error: 'Invalid or expired active session.' });
+    }
+
+    // Save/update the token in premium credentials list
+    premiumCredentials[index].derivApiToken = token.trim();
+    savePremiumCredentials();
+
+    addLog('success', `👑 PREMIUM: Linked/Updated Deriv API Token for premium account "${target}"`);
+    res.json({ 
+      success: true, 
+      message: 'Deriv API Token linked successfully to your subscription profile.',
+      derivApiToken: token.trim() 
+    });
+  });
+
+  // Unlink user's Deriv API Token from their premium credentials
+  app.post('/api/premium/unlink-token', (req, res) => {
+    const { username, sessionId } = req.body;
+    if (!username || !sessionId) {
+      return res.status(400).json({ success: false, error: 'Username and session are required.' });
+    }
+
+    const target = username.trim().toLowerCase();
+    const index = premiumCredentials.findIndex(c => c.username === target);
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: 'Premium subscriber account not found.' });
+    }
+
+    const cred = premiumCredentials[index];
+    if (cred.activeSessionId !== sessionId) {
+      return res.status(401).json({ success: false, error: 'Invalid or expired active session.' });
+    }
+
+    // Unlink/clear the token
+    premiumCredentials[index].derivApiToken = '';
+    savePremiumCredentials();
+
+    addLog('warning', `👑 PREMIUM: Unlinked Deriv API Token for premium account "${target}"`);
+    res.json({ 
+      success: true, 
+      message: 'Deriv API Token successfully unlinked.'
+    });
   });
 
   // Start Background Public feeds
