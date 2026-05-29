@@ -44,6 +44,7 @@ export interface BotConfig {
   maxWins: number;      // Stop after X wins (configured by user, default 2)
   maxLosses: number;    // Stop after Y consecutive losses (configured by user, default 5)
   targetProfit: number; // Target net profit (optional)
+  tradingMode: 'normal' | 'advanced'; // 'normal' = standard logic, 'advanced' = auto pair-swap on low win rate
 }
 
 export interface BotState {
@@ -55,7 +56,7 @@ export interface BotState {
   losses: number;
   profit: number;
   tradesCount: number;
-  status: 'idle' | 'waiting' | 'trading' | 'won_limit' | 'lost_limit' | 'error';
+  status: 'idle' | 'waiting' | 'trading' | 'won_limit' | 'lost_limit' | 'error' | 'paused_low_winrate';
   lastTradeResult: 'win' | 'loss' | null;
 }
 
@@ -143,5 +144,3 @@ declare global {
     };
   }
 }
-
-
