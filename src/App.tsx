@@ -136,6 +136,8 @@ export default function App() {
   const lastGlobalSignalsRef = useRef<number>(0);
   const sessionCompleteShownRef = useRef<boolean>(false);
   const sessionLostShownRef = useRef<boolean>(false);
+  const closingSessionCompleteRef = useRef<boolean>(false);
+  const closingSessionLostRef = useRef<boolean>(false);
 
   // Telegram WebApp detection state
   const [isTelegram, setIsTelegram] = useState(false);
@@ -266,8 +268,8 @@ export default function App() {
           lastTradesCountRef.current = data.botState.tradesCount;
         }
 
-        // 3. Session complete popup — checked every poll, independent of trade count
-        if (data.botState.status === 'won_limit' && !sessionCompleteShownRef.current) {
+        // 3. Session complete popup
+        if (data.botState.status === 'won_limit' && !sessionCompleteShownRef.current && !closingSessionCompleteRef.current) {
           console.log('🏆 WON LIMIT DETECTED — showing popup');
           sessionCompleteShownRef.current = true;
           playTargetReachedChime();
@@ -276,7 +278,7 @@ export default function App() {
         }
 
         // 4. Session lost popup — 5 consecutive losses
-        if (data.botState.status === 'lost_limit' && !sessionLostShownRef.current) {
+        if (data.botState.status === 'lost_limit' && !sessionLostShownRef.current && !closingSessionLostRef.current) {
           console.log('🛡️ LOST LIMIT DETECTED — showing loss popup');
           sessionLostShownRef.current = true;
           playLossChime();
@@ -821,10 +823,16 @@ export default function App() {
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
         onClose={async () => {
-          sessionCompleteShownRef.current = false;
+          closingSessionCompleteRef.current = true;
+          sessionCompleteShownRef.current = true;
           setSessionCompleteOpen(false);
           const userId = sessionUserId;
           try { await fetch('/api/new-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tgUserId: userId }) }); } catch(e) {}
+          // Allow re-triggering only after server has reset status
+          setTimeout(() => {
+            sessionCompleteShownRef.current = false;
+            closingSessionCompleteRef.current = false;
+          }, 3000);
         }}
       />
 
@@ -837,10 +845,16 @@ export default function App() {
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
         onClose={async () => {
-          sessionLostShownRef.current = false;
+          closingSessionLostRef.current = true;
+          sessionLostShownRef.current = true;
           setSessionLostOpen(false);
           const userId = sessionUserId;
           try { await fetch('/api/new-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tgUserId: userId }) }); } catch(e) {}
+          // Allow re-triggering only after server has reset status
+          setTimeout(() => {
+            sessionLostShownRef.current = false;
+            closingSessionLostRef.current = false;
+          }, 3000);
         }}
       />
     </div>
