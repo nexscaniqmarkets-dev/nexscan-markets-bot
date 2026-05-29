@@ -16,6 +16,7 @@ import { TermsAgreementModal } from './components/TermsAgreementModal';
 import { CashierTab } from './components/CashierTab';
 import { SessionCompleteModal } from './components/SessionCompleteModal';
 import { SessionLostModal } from './components/SessionLostModal';
+import { PremiumTab } from './components/PremiumTab';
 import { 
   playWinChime, playLossChime, playTargetReachedChime 
 } from './utils/audio';
@@ -30,7 +31,7 @@ const STORAGE_KEY_MEMBERSHIP = 'mamba_membership';
 const STORAGE_KEY_TERMS_ACCEPTED = 'mamba_terms_accepted';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'scanner' | 'leaderboard' | 'trader' | 'history' | 'cashier'>('leaderboard');
+  const [activeTab, setActiveTab] = useState<'scanner' | 'leaderboard' | 'trader' | 'history' | 'cashier' | 'premium'>('leaderboard');
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [pastTrades, setPastTrades] = useState<PastTrade[]>([]);
   const [termsAccepted, setTermsAccepted] = useState<boolean>(() => {
@@ -48,6 +49,8 @@ export default function App() {
   });
   const [adOpen, setAdOpen] = useState(false);
   const [adminHubOpen, setAdminHubOpen] = useState(false);
+  const [clickCount, setClickCount] = useState<number>(0);
+  const [sequenceCompleted, setSequenceCompleted] = useState<boolean>(false);
   const [sessionCompleteOpen, setSessionCompleteOpen] = useState(false);
   const [sessionLostOpen, setSessionLostOpen] = useState(false);
   const [globalTicks, setGlobalTicks] = useState(0);
@@ -55,6 +58,8 @@ export default function App() {
   const [sessionTime, setSessionTime] = useState('00:00:00');
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error' | 'disconnected'>('idle');
   const [authorizedWsStatus, setAuthorizedWsStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
+  const [maintenanceMode, setMaintenanceMode] = useState<boolean>(false);
+  const [adminAlert, setAdminAlert] = useState<string>('');
   
   // Real-time symbol states
   const [symbolsState, setSymbolsState] = useState<Record<string, SymbolState>>(() => {
@@ -143,6 +148,20 @@ export default function App() {
     }
   }, []);
 
+  // Auto-close session complete popup if Premium Autopilot is active
+  useEffect(() => {
+    if (sessionCompleteOpen) {
+      const premStatus = localStorage.getItem('mamba_premium_status');
+      if (premStatus && premStatus !== 'idle') {
+        const autoCloseTimeout = setTimeout(() => {
+          setSessionCompleteOpen(false);
+          sessionCompleteShownRef.current = false;
+        }, 3000); // Wait 3 seconds to let user see success, then auto close to allow scanner to load new session
+        return () => clearTimeout(autoCloseTimeout);
+      }
+    }
+  }, [sessionCompleteOpen]);
+
   // Local storage restore credentials flow on mount
   useEffect(() => {
     const savedToken = localStorage.getItem(STORAGE_KEY_TOKEN);
@@ -197,6 +216,8 @@ export default function App() {
         setConnectionStatus(data.connectionStatus);
         setAuthorizedWsStatus(data.authorizedWsStatus || 'idle');
         setSessionUptime(data.sessionUptime || 0);
+        setMaintenanceMode(data.maintenanceMode === true);
+        setAdminAlert(data.adminAlert || '');
 
         // Clear rejected/invalid token so it doesn't trigger automated cyclic errors on reboot
         if (data.authorizedWsStatus === 'error' && !data.botConfig?.apiToken) {
@@ -432,6 +453,21 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY_ONBOARDING, 'true');
   };
 
+  // 5-tap admin sequence unlock
+  const handleAdminTriggerClick = () => {
+    const nextCount = clickCount + 1;
+    setClickCount(nextCount);
+
+    if (nextCount >= 5) {
+      setSequenceCompleted(true);
+      setAdminHubOpen(true);
+      addLog('success', '🔑 SECURITY NODE UNLOCKED: 5-tap administrator sequence completed. Access keys decrypted!');
+      setClickCount(0);
+    } else {
+      addLog('warning', `🔒 SECURE INTERCEPT: Administrator access requested. Handshake pattern mismatch. (${nextCount}/5)...`);
+    }
+  };
+
   const handleAcceptTerms = (signatureName: string) => {
     localStorage.setItem(STORAGE_KEY_TERMS_ACCEPTED, 'true');
     setTermsAccepted(true);
@@ -443,6 +479,29 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white selection:font-bold">
       
+      {/* Dynamic News Broadcast Marquee Banner */}
+      {adminAlert && (
+        <div className="bg-gradient-to-r from-amber-600/95 via-indigo-955/95 to-amber-600/95 text-[10px] text-white py-2 px-4 shadow-md font-mono font-bold tracking-wider relative overflow-hidden shrink-0 select-none border-b border-amber-500/20">
+          <div className="marquee flex gap-6 items-center whitespace-nowrap animate-marquee">
+            <span>📢 ANNOUNCEMENT: {adminAlert}</span>
+            <span className="opacity-55">•</span>
+            <span>📢 ANNOUNCEMENT: {adminAlert}</span>
+            <span className="opacity-55">•</span>
+            <span>📢 ANNOUNCEMENT: {adminAlert}</span>
+          </div>
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes marquee {
+              0% { transform: translateX(0%); }
+              100% { transform: translateX(-33.33%); }
+            }
+            .animate-marquee {
+              display: inline-flex;
+              animation: marquee 20s linear infinite;
+            }
+          `}} />
+        </div>
+      )}
+
       {/* Top Header Panel */}
       <Header
         ticksCount={globalTicks}
@@ -453,121 +512,206 @@ export default function App() {
         botRunning={botState.isRunning}
         onStopAll={handleStopBot}
         onOpenOnboarding={() => setOnboardingOpen(true)}
-        onOpenAdminHub={() => setAdminHubOpen(true)}
+        onOpenAdminHub={handleAdminTriggerClick}
         isTelegram={isTelegram}
         tgUser={tgUser}
       />
 
-      {/* Main Container Layout */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 md:px-8 space-y-6">
-        
-        {/* Navigation Tabs bar */}
-        <div className="bg-slate-900/50 rounded-2xl p-1.5 border border-slate-800/80 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-1.5 w-max min-w-full sm:w-auto sm:min-w-0 sm:justify-between">
-            <button
-              id="tabScannerBtn"
-              onClick={() => setActiveTab('scanner')}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all duration-150 active:scale-97 ${
-                activeTab === 'scanner'
-                  ? 'bg-slate-950 text-indigo-400 border border-slate-800'
-                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
-              }`}
-            >
-              <Compass className="w-4 h-4" /> Global Grid
-            </button>
-            
-            <button
-              id="tabLeaderboardBtn"
-              onClick={() => setActiveTab('leaderboard')}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all duration-150 active:scale-97 ${
-                activeTab === 'leaderboard'
-                  ? 'bg-slate-950 text-indigo-400 border border-slate-800'
-                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
-              }`}
-            >
-              <Trophy className="w-4 h-4" /> Leaderboard
-            </button>
-            
-            <button
-              id="tabTraderBtn"
-              onClick={() => setActiveTab('trader')}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
-                activeTab === 'trader'
-                  ? 'bg-slate-950 text-indigo-400 border border-slate-800'
-                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
-              }`}
-            >
-              <Cpu className="w-4 h-4" /> Automated Trader
-              {botState.isRunning && activeTab === 'trader' && (
-                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping" />
-              )}
-            </button>
-
-            <button
-              id="tabHistoryBtn"
-              onClick={() => setActiveTab('history')}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
-                activeTab === 'history'
-                  ? 'bg-slate-950 text-indigo-400 border border-slate-800'
-                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
-              }`}
-            >
-              <History className="w-4 h-4 text-indigo-400" /> History
-              {pastTrades.length > 0 && (
-                <span className="bg-indigo-500/15 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full border border-indigo-500/25 font-bold ml-1 font-mono">
-                  {pastTrades.length}
-                </span>
-              )}
-            </button>
-
-            <button
-              id="tabCashierBtn"
-              onClick={() => setActiveTab('cashier')}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
-                activeTab === 'cashier'
-                  ? 'bg-slate-950 text-indigo-400 border border-slate-800'
-                  : 'text-slate-500 hover:text-slate-300 border border-transparent'
-              }`}
-            >
-              <Wallet className="w-4 h-4 text-emerald-400" /> Cashier
-            </button>
+      {maintenanceMode ? (
+        /* High-contrast Lockout Calibration Screen layout */
+        <div className="flex-1 flex flex-col justify-center items-center px-4 py-16 text-center space-y-6 max-w-md mx-auto animate-pulse">
+          <div className="w-16 h-16 rounded-2xl bg-amber-950/40 border border-amber-900/60 flex items-center justify-center text-amber-500">
+            <Cpu className="w-8 h-8 animate-spin" />
           </div>
-
-          <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 font-mono pr-2 select-none">
-            <Sparkles className="w-4.5 h-4.5 text-indigo-400" />
-            LIVE MARKET RADAR
+          <div className="space-y-2">
+            <h1 className="text-sm font-bold text-slate-100 font-mono tracking-wider uppercase">System Calibration Active</h1>
+            <p className="text-xs text-slate-400 leading-relaxed font-mono">
+              ⚠️ NexScan IQ automated servers are offline. Active system-wide calibrations are currently being deployed by the site administrator. Please check back shortly.
+            </p>
           </div>
+          <div className="p-4 bg-slate-900/40 border border-slate-800/80 rounded-xl space-y-1.5 w-full text-left font-mono text-[10px] text-slate-500">
+            <p className="text-slate-350 font-semibold mb-1 uppercase text-amber-500">Diagnostics Pipeline State:</p>
+            <p>• Interface Router: Hot-Sealed</p>
+            <p>• Database Ledger: Synced &amp; Persistent</p>
+            <p>• Broker Websocket Connection: Active Proxy</p>
+            <p className="text-indigo-400 font-semibold mt-1 animate-pulse">• Administrator update sequence active on port 3000...</p>
+          </div>
+          <p className="text-[9px] text-slate-600 font-mono">Normal trading services will resume automatically as soon as changes are saved.</p>
         </div>
+      ) : (
+        /* Main Container Layout */
+        <div className="flex-1 max-w-7xl w-full mx-auto px-4 py-6 md:px-8 space-y-6">
+          
+          {/* Navigation Tabs bar */}
+          <div className="bg-slate-900/50 rounded-2xl p-1.5 border border-slate-800/80 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-1.5 w-max min-w-full sm:w-auto sm:min-w-0 sm:justify-between">
+              <button
+                id="tabScannerBtn"
+                onClick={() => setActiveTab('scanner')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all duration-150 active:scale-97 ${
+                  activeTab === 'scanner'
+                    ? 'bg-slate-950 text-indigo-400 border border-slate-800'
+                    : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                }`}
+              >
+                <Compass className="w-4 h-4" /> Global Grid
+              </button>
+              
+              <button
+                id="tabLeaderboardBtn"
+                onClick={() => setActiveTab('leaderboard')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer transition-all duration-150 active:scale-97 ${
+                  activeTab === 'leaderboard'
+                    ? 'bg-slate-950 text-indigo-400 border border-slate-800'
+                    : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                }`}
+              >
+                <Trophy className="w-4 h-4" /> Leaderboard
+              </button>
+              
+              <button
+                id="tabTraderBtn"
+                onClick={() => setActiveTab('trader')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
+                  activeTab === 'trader'
+                    ? 'bg-slate-950 text-indigo-400 border border-slate-800'
+                    : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                }`}
+              >
+                <Cpu className="w-4 h-4" /> Automated Trader
+                {botState.isRunning && activeTab === 'trader' && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full animate-ping" />
+                )}
+              </button>
 
-        {/* Dynamic Inner Tab Router Screen */}
-        <div className="relative">
-          {activeTab === 'scanner' && (
-            <ScannerTab
-              symbolsState={symbolsState}
-              onSelectSymbolForTrading={handleSelectSymbolForTrading}
-              activeTradingSymbolId={botState.symbol}
-              botRunning={botState.isRunning}
-              sessionUptime={sessionUptime}
-              onRestartScanning={handleRestartScanning}
-            />
-          )}
+              <button
+                id="tabHistoryBtn"
+                onClick={() => setActiveTab('history')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
+                  activeTab === 'history'
+                    ? 'bg-slate-950 text-indigo-400 border border-slate-800'
+                    : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                }`}
+              >
+                <History className="w-4 h-4 text-indigo-400" /> History
+                {pastTrades.length > 0 && (
+                  <span className="bg-indigo-500/15 text-indigo-400 px-1.5 py-0.5 text-[9px] rounded-full border border-indigo-500/25 font-bold ml-1 font-mono">
+                    {pastTrades.length}
+                  </span>
+                )}
+              </button>
 
-          {activeTab === 'leaderboard' && (
-            <LeaderboardTab
-              symbolsState={symbolsState}
-              onSelectSymbolForTrading={handleSelectSymbolForTrading}
-              activeTradingSymbolId={botState.symbol}
-              botRunning={botState.isRunning}
-              sessionUptime={sessionUptime}
-            />
-          )}
+              <button
+                id="tabCashierBtn"
+                onClick={() => setActiveTab('cashier')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
+                  activeTab === 'cashier'
+                    ? 'bg-slate-950 text-indigo-400 border border-slate-800'
+                    : 'text-slate-500 hover:text-slate-300 border border-transparent'
+                }`}
+              >
+                <Wallet className="w-4 h-4 text-emerald-400" /> Cashier
+              </button>
 
-          {activeTab === 'trader' && (
-            <>
-              <BotTrader
-                activeSymbol={activeTradingSymbol}
+              <button
+                id="tabPremiumBtn"
+                onClick={() => setActiveTab('premium')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider cursor-pointer relative transition-all duration-150 active:scale-97 ${
+                  activeTab === 'premium'
+                    ? 'bg-slate-950 text-amber-400 border border-amber-500/30'
+                    : 'text-slate-500 hover:text-amber-300 border border-transparent'
+                }`}
+              >
+                <Crown className="w-4 h-4 text-amber-450 fill-amber-500/20" /> Premium Autopilot
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 font-mono pr-2 select-none">
+              <Sparkles className="w-4.5 h-4.5 text-indigo-400" />
+              LIVE MARKET RADAR
+            </div>
+          </div>
+
+          {/* Dynamic Inner Tab Router Screen */}
+          <div className="relative">
+            {activeTab === 'scanner' && (
+              <ScannerTab
                 symbolsState={symbolsState}
                 onSelectSymbolForTrading={handleSelectSymbolForTrading}
+                activeTradingSymbolId={botState.symbol}
+                botRunning={botState.isRunning}
+                sessionUptime={sessionUptime}
+                onRestartScanning={handleRestartScanning}
+              />
+            )}
+
+            {activeTab === 'leaderboard' && (
+              <LeaderboardTab
+                symbolsState={symbolsState}
+                onSelectSymbolForTrading={handleSelectSymbolForTrading}
+                activeTradingSymbolId={botState.symbol}
+                botRunning={botState.isRunning}
+                sessionUptime={sessionUptime}
+              />
+            )}
+
+            {activeTab === 'trader' && (
+              <>
+                <BotTrader
+                  activeSymbol={activeTradingSymbol}
+                  symbolsState={symbolsState}
+                  onSelectSymbolForTrading={handleSelectSymbolForTrading}
+                  account={account}
+                  botConfig={botConfig}
+                  onUpdateConfig={handleUpdateConfig}
+                  onAuthorize={handleAuthorize}
+                  onDeauthorize={handleDeauthorize}
+                  onStartBot={handleStartBot}
+                  onStopBot={handleStopBot}
+                  botState={botState}
+                  logs={logs}
+                  onClearLogs={handleClearLogs}
+                  authorizedWsStatus={authorizedWsStatus}
+                  sessionUptime={sessionUptime}
+                  autoTriggerScan={autoTriggerScan}
+                  onScanReset={() => setAutoTriggerScan(false)}
+                  autoTriggerResume={autoTriggerResume}
+                  onResumeReset={() => setAutoTriggerResume(false)}
+                  onResumeWithSymbol={handleResumeWithSymbol}
+                  isAdvancedMode={isAdvancedMode}
+                  onToggleAdvancedMode={(val) => {
+                    setIsAdvancedMode(val);
+                    handleUpdateConfig({ tradingMode: val ? 'advanced' : 'normal' });
+                  }}
+                />
+                <TermsAgreementModal
+                  isOpen={!termsAccepted}
+                  onAccept={handleAcceptTerms}
+                />
+              </>
+            )}
+
+            {activeTab === 'history' && (
+              <HistoryTab
+                pastTrades={pastTrades}
+                onClearHistory={handleClearTrades}
+                sessionUptime={sessionUptime}
+              />
+            )}
+
+            {activeTab === 'cashier' && (
+              <CashierTab
+                account={account}
+                pastTrades={pastTrades}
+                onAuthorize={handleAuthorize}
+                authorizedWsStatus={authorizedWsStatus}
+                apiToken={botConfig.apiToken}
+              />
+            )}
+
+            {activeTab === 'premium' && (
+              <PremiumTab
+                symbolsState={symbolsState}
                 account={account}
                 botConfig={botConfig}
                 onUpdateConfig={handleUpdateConfig}
@@ -577,46 +721,13 @@ export default function App() {
                 onStopBot={handleStopBot}
                 botState={botState}
                 logs={logs}
-                onClearLogs={handleClearLogs}
-                authorizedWsStatus={authorizedWsStatus}
                 sessionUptime={sessionUptime}
-                autoTriggerScan={autoTriggerScan}
-                onScanReset={() => setAutoTriggerScan(false)}
-                autoTriggerResume={autoTriggerResume}
-                onResumeReset={() => setAutoTriggerResume(false)}
-                onResumeWithSymbol={handleResumeWithSymbol}
-                isAdvancedMode={isAdvancedMode}
-                onToggleAdvancedMode={(val) => {
-                  setIsAdvancedMode(val);
-                  handleUpdateConfig({ tradingMode: val ? 'advanced' : 'normal' });
-                }}
+                pastTrades={pastTrades}
               />
-              <TermsAgreementModal
-                isOpen={!termsAccepted}
-                onAccept={handleAcceptTerms}
-              />
-            </>
-          )}
-
-          {activeTab === 'history' && (
-            <HistoryTab
-              pastTrades={pastTrades}
-              onClearHistory={handleClearTrades}
-              sessionUptime={sessionUptime}
-            />
-          )}
-
-          {activeTab === 'cashier' && (
-            <CashierTab
-              account={account}
-              pastTrades={pastTrades}
-              onAuthorize={handleAuthorize}
-              authorizedWsStatus={authorizedWsStatus}
-              apiToken={botConfig.apiToken}
-            />
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Global Bottom footer border credits */}
       <footer className="bg-slate-950 border-t border-slate-900 py-6 text-center text-slate-600 text-[10px] font-mono select-none mt-12">
@@ -638,7 +749,14 @@ export default function App() {
       {/* Creator & Broker Markup Console Admin Hub */}
       <AdminHubModal
         isOpen={adminHubOpen}
-        onClose={() => setAdminHubOpen(false)}
+        onClose={() => {
+          setAdminHubOpen(false);
+          setSequenceCompleted(false);
+        }}
+        sequenceCompleted={sequenceCompleted}
+        onLockConsole={() => {
+          setSequenceCompleted(false);
+        }}
       />
 
       {/* Session Complete Popup */}
