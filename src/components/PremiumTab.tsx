@@ -550,6 +550,8 @@ export function PremiumTab({
     // Filter server trades that have isAutopilot flag
     const serverPremiumTrades = pastTrades.filter((t: any) => t.isAutopilot);
 
+    // Only record trades explicitly flagged as autopilot by the server.
+    // No fallback — a trade without isAutopilot: true is a manual trade and must not appear here.
     if (serverPremiumTrades.length > 0) {
       setAutopilotTrades((prev) => {
         const merged = [...serverPremiumTrades];
@@ -563,20 +565,6 @@ export function PremiumTab({
         localStorage.setItem('mamba_premium_autopilot_trades', JSON.stringify(trimmed));
         return trimmed;
       });
-    } else {
-      // Fallback matching: If autopilot is active, capture the most recent trade if it falls in the trade timeline
-      const isAutopilotOn = autopilotState !== 'idle';
-      if (isAutopilotOn) {
-        const newestTrade = pastTrades[0];
-        if (newestTrade) {
-          setAutopilotTrades((prev) => {
-            if (prev.some((t) => t.id === newestTrade.id)) return prev;
-            const updated = [newestTrade, ...prev].slice(0, 100);
-            localStorage.setItem('mamba_premium_autopilot_trades', JSON.stringify(updated));
-            return updated;
-          });
-        }
-      }
     }
   }, [pastTrades, autopilotState]);
 
