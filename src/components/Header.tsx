@@ -52,7 +52,7 @@ export function Header({
           <img
             src={nexscanLogo}
             alt="NexScan IQ Markets Logo"
-            className="w-10 h-10 rounded-xl shadow-lg border border-slate-800/80 object-cover"
+            className="w-12 h-12 rounded-xl shadow-lg border border-slate-800/80 object-contain bg-slate-900/60"
             referrerPolicy="no-referrer"
           />
           <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-indigo-500 border-2 border-slate-950 rounded-full animate-ping" />
