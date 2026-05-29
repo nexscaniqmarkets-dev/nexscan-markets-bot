@@ -30,6 +30,16 @@ const STORAGE_KEY_ONBOARDING = 'mamba_onboarding_completed';
 const STORAGE_KEY_MEMBERSHIP = 'mamba_membership';
 const STORAGE_KEY_TERMS_ACCEPTED = 'mamba_terms_accepted';
 
+// Generate or retrieve a persistent browser session ID for non-Telegram web users
+function getOrCreateWebSessionId(): string {
+  let id = localStorage.getItem('mamba_web_session_id');
+  if (!id) {
+    id = 'web_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
+    localStorage.setItem('mamba_web_session_id', id);
+  }
+  return id;
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<'scanner' | 'leaderboard' | 'trader' | 'history' | 'cashier' | 'premium'>('leaderboard');
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
@@ -131,6 +141,9 @@ export default function App() {
   const [isTelegram, setIsTelegram] = useState(false);
   const [tgUser, setTgUser] = useState<any>(null);
 
+  // Resolved session user ID — Telegram ID for mini app users, browser-generated ID for web users
+  const [sessionUserId, setSessionUserId] = useState<string>('default');
+
   useEffect(() => {
     if (window.Telegram?.WebApp) {
       try {
@@ -140,11 +153,18 @@ export default function App() {
         setIsTelegram(true);
         if (webapp.initDataUnsafe?.user) {
           setTgUser(webapp.initDataUnsafe.user);
+          setSessionUserId(webapp.initDataUnsafe.user.id.toString());
           console.log('Telegram App User linked:', webapp.initDataUnsafe.user);
+        } else {
+          setSessionUserId(getOrCreateWebSessionId());
         }
       } catch (err) {
         console.error('Failed to trigger Telegram WebApp initialization:', err);
+        setSessionUserId(getOrCreateWebSessionId());
       }
+    } else {
+      // Regular browser — use persistent localStorage ID
+      setSessionUserId(getOrCreateWebSessionId());
     }
   }, []);
 
@@ -164,12 +184,13 @@ export default function App() {
 
   // Local storage restore credentials flow on mount
   useEffect(() => {
+    const userId = sessionUserId;
     const savedToken = localStorage.getItem(STORAGE_KEY_TOKEN);
     if (savedToken) {
       fetch('/api/authorize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: savedToken }),
+        body: JSON.stringify({ token: savedToken, tgUserId: userId }),
       }).catch(err => console.error('Failed token auto-sync:', err));
     }
 
@@ -177,7 +198,6 @@ export default function App() {
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
-        // Upgrade legacy default maxLosses (2) to 5 consecutive losses
         if (parsed && (parsed.maxLosses === 2 || !parsed.maxLosses)) {
           parsed.maxLosses = 5;
           localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(parsed));
@@ -185,17 +205,18 @@ export default function App() {
         fetch('/api/config', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(parsed),
+          body: JSON.stringify({ ...parsed, tgUserId: userId }),
         }).catch(err => console.error('Failed config auto-sync:', err));
       } catch(e) {}
     }
-  }, []);
+  }, [sessionUserId]);
 
   // Poll state loop from Backend Server context to achieve persistent execution tracking
   useEffect(() => {
     const handlePoll = async () => {
       try {
-        const res = await fetch('/api/state');
+        const userId = sessionUserId;
+        const res = await fetch(`/api/state?tgUserId=${userId}`);
         if (!res.ok) return;
         const contentType = res.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
@@ -299,16 +320,15 @@ export default function App() {
 
   // Handle Updates
   const handleUpdateConfig = async (updates: Partial<BotConfig>) => {
-    // Snappy client feedback
     setBotConfig((prev) => ({ ...prev, ...updates }));
     const saved = { ...botConfig, ...updates };
     localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(saved));
-
+    const userId = sessionUserId;
     try {
       await fetch('/api/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
+        body: JSON.stringify({ ...updates, tgUserId: userId }),
       });
     } catch (e) {
       console.error('Failed config upload:', e);
@@ -341,15 +361,25 @@ export default function App() {
 
   const handleClearLogs = async () => {
     setLogs([]);
+    const userId = sessionUserId;
     try {
-      await fetch('/api/clear-logs', { method: 'POST' });
+      await fetch('/api/clear-logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tgUserId: userId }),
+      });
     } catch(e){}
   };
 
   const handleClearTrades = async () => {
     setPastTrades([]);
+    const userId = sessionUserId;
     try {
-      await fetch('/api/clear-trades', { method: 'POST' });
+      await fetch('/api/clear-trades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tgUserId: userId }),
+      });
     } catch(e){}
   };
 
@@ -371,11 +401,12 @@ export default function App() {
 
   const handleAuthorize = async (token: string) => {
     localStorage.setItem(STORAGE_KEY_TOKEN, token.trim());
+    const userId = sessionUserId;
     try {
       await fetch('/api/authorize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: token.trim() }),
+        body: JSON.stringify({ token: token.trim(), tgUserId: userId }),
       });
     } catch(e) {
       addLog('error', 'Authentication command failed to reach local network server.');
@@ -385,36 +416,52 @@ export default function App() {
   const handleDeauthorize = async () => {
     localStorage.removeItem(STORAGE_KEY_TOKEN);
     setAccount(null);
+    const userId = sessionUserId;
     try {
-      await fetch('/api/deauthorize', { method: 'POST' });
+      await fetch('/api/deauthorize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tgUserId: userId }),
+      });
     } catch(e){}
   };
 
   const handleStartBot = async () => {
     if (!account) return;
-    sessionCompleteShownRef.current = false; // Reset so popup can show again next session
+    sessionCompleteShownRef.current = false;
     sessionLostShownRef.current = false;
+    const userId = sessionUserId;
     try {
-      await fetch('/api/start', { method: 'POST' });
+      await fetch('/api/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tgUserId: userId }),
+      });
     } catch(e) {
       addLog('error', 'Start command failed to register with local server.');
     }
   };
 
   const handleStopBot = async () => {
+    const userId = sessionUserId;
     try {
-      await fetch('/api/stop', { method: 'POST' });
+      await fetch('/api/stop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tgUserId: userId }),
+      });
     } catch(e){
       addLog('error', 'Stop command failed to register with local server.');
     }
   };
 
   const handleResumeWithSymbol = async (symbolId: string) => {
+    const userId = sessionUserId;
     try {
       await fetch('/api/resume-with-symbol', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symbolId }),
+        body: JSON.stringify({ symbolId, tgUserId: userId }),
       });
     } catch(e) {
       addLog('error', 'Resume command failed to reach local server.');
@@ -426,11 +473,12 @@ export default function App() {
       addLog('error', '⚠️ SWITCH BLOCKED: Cannot switch active asset pairs while the trading session is running. Stop the bot first.');
       return;
     }
+    const userId = sessionUserId;
     try {
       await fetch('/api/select-symbol', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symbolId }),
+        body: JSON.stringify({ symbolId, tgUserId: userId }),
       });
       setActiveTab('trader');
       addLog('success', `📥 LOADED: Scanned pair "${symbolId.toUpperCase()}" loaded into trade terminal. Ready for manual execution!`);
@@ -440,8 +488,13 @@ export default function App() {
   };
 
   const handleRestartScanning = async () => {
+    const userId = sessionUserId;
     try {
-      await fetch('/api/restart-scanning', { method: 'POST' });
+      await fetch('/api/restart-scanning', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tgUserId: userId }),
+      });
       addLog('success', '♻️ Scanner statistics, global metrics, and calibration timers successfully restarted.');
     } catch(e) {
       addLog('error', 'Restart scanning command failed to reach local network server.');
@@ -768,11 +821,10 @@ export default function App() {
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
         onClose={async () => {
-          // Keep sessionCompleteShownRef true while we close and reset the server,
-          // so the 1-second poller can't re-open the modal before won_limit clears.
-          setSessionCompleteOpen(false);
-          try { await fetch('/api/new-session', { method: 'POST' }); } catch(e) {}
           sessionCompleteShownRef.current = false;
+          setSessionCompleteOpen(false);
+          const userId = sessionUserId;
+          try { await fetch('/api/new-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tgUserId: userId }) }); } catch(e) {}
         }}
       />
 
@@ -785,9 +837,10 @@ export default function App() {
         stake={botConfig.stake}
         currency={account?.currency || 'USD'}
         onClose={async () => {
-          setSessionLostOpen(false);
-          try { await fetch('/api/new-session', { method: 'POST' }); } catch(e) {}
           sessionLostShownRef.current = false;
+          setSessionLostOpen(false);
+          const userId = sessionUserId;
+          try { await fetch('/api/new-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tgUserId: userId }) }); } catch(e) {}
         }}
       />
     </div>
