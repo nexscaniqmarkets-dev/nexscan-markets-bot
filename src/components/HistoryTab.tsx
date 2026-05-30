@@ -68,98 +68,98 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
   };
 
   return (
-    <div className="space-y-6" id="historyTabSection">
+    <div className="space-y-3" id="historyTabSection">
       
       {/* Real-time Session Metrics Board */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         
         {/* Total Trades Stat */}
-        <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg backdrop-blur-sm" id="statTotalTrades">
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase font-mono tracking-wider text-slate-500">Contract Tickets</p>
-            <p className="text-2xl font-bold font-mono tracking-tight text-white">{totalTrades}</p>
-            <p className="text-[10px] text-slate-400">Total processed trades</p>
+        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between shadow backdrop-blur-sm" id="statTotalTrades">
+          <div className="space-y-0.5 text-left">
+            <p className="text-[7.5px] uppercase font-mono tracking-wider text-slate-500 leading-none font-bold">Contract Tickets</p>
+            <p className="text-lg font-bold font-mono tracking-tight text-white mt-0.5 leading-none">{totalTrades}</p>
+            <p className="text-[8px] text-slate-400 mt-1 leading-none">Processed trades</p>
           </div>
-          <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <BarChart2 className="w-5 h-5" />
+          <div className="p-1.5 rounded bg-indigo-500/10 border border-indigo-500/15 text-indigo-400">
+            <BarChart2 className="w-3.5 h-3.5" />
           </div>
         </div>
 
         {/* Win Rate Stat */}
-        <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg backdrop-blur-sm" id="statWinRate">
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase font-mono tracking-wider text-slate-500">Win Rate Ratio</p>
-            <p className="text-2xl font-bold font-mono tracking-tight text-emerald-400">
-              {winRate.toFixed(1)}<span className="text-xs text-slate-400 font-sans ml-1">%</span>
+        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between shadow backdrop-blur-sm" id="statWinRate">
+          <div className="space-y-0.5 text-left">
+            <p className="text-[7.5px] uppercase font-mono tracking-wider text-slate-500 leading-none font-bold">Win Rate Ratio</p>
+            <p className="text-lg font-bold font-mono tracking-tight text-emerald-400 mt-0.5 leading-none">
+              {winRate.toFixed(1)}<span className="text-[9px] text-slate-400 font-sans ml-0.5">%</span>
             </p>
-            <p className="text-[10px] text-slate-400">
-              {winCount} Wins / {lossTrades.length} Losses
+            <p className="text-[8px] text-slate-400 mt-1 leading-none">
+              {winCount}W / {lossTrades.length}L
             </p>
           </div>
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-            <Percent className="w-5 h-5" />
+          <div className="p-1.5 rounded bg-emerald-500/10 border border-emerald-500/15 text-emerald-400">
+            <Percent className="w-3.5 h-3.5" />
           </div>
         </div>
 
         {/* Net Realized Profit/Loss */}
-        <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg backdrop-blur-sm" id="statNetProfit">
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase font-mono tracking-wider text-slate-500">Cumulative Profit</p>
-            <p className={`text-2xl font-bold font-mono tracking-tight ${totalNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between shadow backdrop-blur-sm" id="statNetProfit text-left">
+          <div className="space-y-0.5 text-left">
+            <p className="text-[7.5px] uppercase font-mono tracking-wider text-slate-500 leading-none font-bold">Cumulative Profit</p>
+            <p className={`text-lg font-bold font-mono tracking-tight mt-0.5 leading-none ${totalNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {totalNetProfit >= 0 ? '+' : '-'}${Math.abs(totalNetProfit).toFixed(2)}
             </p>
-            <p className="text-[10px] text-slate-400">Net after commission markups</p>
+            <p className="text-[8px] text-slate-400 mt-1 leading-none">Net active margin</p>
           </div>
-          <div className={`p-3 rounded-xl border ${
+          <div className={`p-1.5 rounded border ${
             totalNetProfit >= 0 
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
-              : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+              ? 'bg-emerald-500/10 border-emerald-500/15 text-emerald-400' 
+              : 'bg-rose-500/10 border-rose-500/15 text-rose-400'
           }`}>
-            {totalNetProfit >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+            {totalNetProfit >= 0 ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
           </div>
         </div>
 
         {/* Aggregate Volume Stat */}
-        <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg backdrop-blur-sm" id="statVolume">
-          <div className="space-y-1">
-            <p className="text-[10px] uppercase font-mono tracking-wider text-slate-500">Transaction Volume</p>
-            <p className="text-2xl font-bold font-mono tracking-tight text-slate-200">
+        <div className="bg-slate-900/60 border border-slate-800 p-2.5 rounded-lg flex items-center justify-between shadow backdrop-blur-sm" id="statVolume text-left">
+          <div className="space-y-0.5 text-left">
+            <p className="text-[7.5px] uppercase font-mono tracking-wider text-slate-500 leading-none font-bold">Trading Volume</p>
+            <p className="text-lg font-bold font-mono tracking-tight text-slate-200 mt-0.5 leading-none">
               ${totalStakeValue.toFixed(2)}
             </p>
-            <p className="text-[10px] text-slate-400">Aggregate active capital</p>
+            <p className="text-[8px] text-slate-400 mt-1 leading-none">Aggregate stake</p>
           </div>
-          <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-400">
-            <CircleDollarSign className="w-5 h-5" />
+          <div className="p-1.5 rounded bg-slate-800 border border-slate-700 text-slate-400">
+            <CircleDollarSign className="w-3.5 h-3.5" />
           </div>
         </div>
 
       </div>
 
       {/* Advanced Filter, Search & Utility Rail Layout */}
-      <div className="bg-slate-900/40 border border-slate-800/80 p-4 rounded-2xl" id="historyFilters">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+      <div className="bg-slate-900/40 border border-slate-800/80 p-2.5 rounded-lg" id="historyFilters">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-2 shadow-sm rounded-md items-center">
           
           {/* Search bar inputs */}
           <div className="relative md:col-span-5" id="historySearchContainer">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3 h-3 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by index, asset or description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-xl text-xs bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono"
+              className="w-full pl-7 pr-2.5 py-1.5 rounded-md text-[10px] bg-slate-950 border border-slate-805 focus:border-indigo-505 text-slate-300 placeholder:text-slate-600 focus:outline-none transition-all font-mono h-8 text-left"
             />
           </div>
 
           {/* Outcome Badge filter */}
-          <div className="grid grid-cols-3 md:col-span-4 bg-slate-950 border border-slate-800 p-1.5 rounded-xl" id="historyOutcomeGroup">
+          <div className="grid grid-cols-3 md:col-span-4 bg-slate-950 border border-slate-805 p-0.5 rounded-md h-8 items-center" id="historyOutcomeGroup">
             {(['all', 'win', 'loss'] as const).map((filter) => (
               <button
                 key={filter}
                 onClick={() => setOutcomeFilter(filter)}
-                className={`py-1.5 px-2 rounded-lg text-[10px] font-bold uppercase transition-all tracking-wider ${
+                className={`py-0.5 rounded text-[8px] font-bold uppercase transition-all tracking-wider ${
                   outcomeFilter === filter
-                    ? 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-400'
+                    ? 'bg-indigo-505 bg-indigo-500/10 border border-indigo-500/15 text-indigo-400'
                     : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
@@ -173,7 +173,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
             <select
               value={symbolFilter}
               onChange={(e) => setSymbolFilter(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl text-xs bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-400 focus:outline-none transition-all font-mono"
+              className="w-full px-1.5 py-1 rounded-md text-[10px] bg-slate-950 border border-slate-850 focus:border-indigo-505 text-slate-400 focus:outline-none transition-all font-mono h-8"
             >
               <option value="all">ALL SYMBOLS</option>
               {uniqueSymbols.map((symId) => (
@@ -189,11 +189,11 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
             <button
               onClick={handleClearTrigger}
               disabled={pastTrades.length === 0 || isClearing}
-              className="w-full md:w-auto p-2.5 bg-slate-950 hover:bg-rose-950/20 border border-slate-800 hover:border-rose-900 text-slate-400 hover:text-rose-400 rounded-xl transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed text-center flex items-center justify-center gap-1.5"
+              className="w-full md:w-auto p-1.5 bg-slate-950 hover:bg-rose-950/20 border border-slate-805 hover:border-rose-900 text-slate-400 hover:text-rose-450 rounded-md transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed text-center flex items-center justify-center gap-1.5 h-8 font-mono text-[9px] uppercase font-bold"
               title="Purge past trades history"
             >
-              <Trash2 className="w-4 h-4" />
-              <span className="md:hidden text-xs font-mono font-bold uppercase tracking-wider">Clear History</span>
+              <Trash2 className="w-3 h-3 text-slate-500" />
+              <span className="md:hidden">Clear History</span>
             </button>
           </div>
 
@@ -201,83 +201,83 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
       </div>
 
       {/* Main Table Panel container */}
-      <div className="bg-slate-900/30 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl" id="historyCardGrid">
+      <div className="bg-slate-900/30 border border-slate-800/80 rounded-lg overflow-hidden shadow" id="historyCardGrid">
         
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse" id="historyTable">
             <thead>
-              <tr className="bg-slate-900/60 border-b border-slate-800/90 text-slate-500 text-[10px] font-mono uppercase tracking-wider">
-                <th className="py-4 px-5">Ticket ID</th>
-                <th className="py-4 px-5">Volatility Asset Pin</th>
-                <th className="py-4 px-5">Time Initiated (Local)</th>
-                <th className="py-4 px-5">Underlying Contract Details</th>
-                <th className="py-4 px-5 text-right">Active Stake</th>
-                <th className="py-4 px-5 text-right">Net Payout</th>
-                <th className="py-4 px-5 text-center">Status</th>
+              <tr className="bg-slate-900/60 border-b border-slate-800/95 text-slate-500 text-[8px] font-mono uppercase tracking-wider">
+                <th className="py-1 px-2.5 font-bold">Ticket ID</th>
+                <th className="py-1 px-2.5 font-bold">Volatility Asset Pin</th>
+                <th className="py-1 px-2.5 font-bold">Time Initiated (Local)</th>
+                <th className="py-1 px-2.5 font-bold">Underlying Contract Details</th>
+                <th className="py-1 px-2.5 text-right font-bold">Active Stake</th>
+                <th className="py-1 px-2.5 text-right font-bold">Net Payout</th>
+                <th className="py-1 px-2.5 text-center font-bold">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50 text-[11px] font-mono">
+            <tbody className="divide-y divide-slate-800/40 text-[9.5px] font-mono text-slate-350">
               {filteredTrades.length > 0 ? (
                 filteredTrades.map((trade) => {
                   const isWin = trade.outcome === 'win';
                   return (
                     <tr 
                       key={trade.id} 
-                      className="hover:bg-slate-900/20 transition-all font-mono group"
+                      className="hover:bg-slate-900/20 transition-all font-mono group animate-fade-in"
                     >
                       {/* Ticket id */}
-                      <td className="py-4 px-5 text-slate-500 select-all font-bold">
+                      <td className="py-1 px-2.5 text-slate-500 select-all font-bold">
                         #{trade.id.toUpperCase()}
                       </td>
 
                       {/* Symbol description */}
-                      <td className="py-4 px-5">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] bg-slate-950 px-2 py-1 rounded font-bold border border-slate-800 text-indigo-400 group-hover:border-slate-700 transition-all">
+                      <td className="py-1 px-2.5">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[7.5px] bg-slate-950 px-1 py-0.5 rounded font-bold border border-slate-800 text-indigo-405 text-indigo-400 group-hover:border-slate-700 transition-all">
                             {getSymbolShort(trade.symbol)}
                           </span>
-                          <span className="text-slate-400 font-sans font-medium text-[10.5px] hidden sm:inline">
+                          <span className="text-slate-400 font-sans font-medium text-[9.5px] hidden sm:inline">
                             {getSymbolName(trade.symbol)}
                           </span>
                         </div>
                       </td>
 
                       {/* Formatted Date & Time */}
-                      <td className="py-4 px-5 text-slate-400">
-                        <div className="flex items-center gap-1.5 text-slate-500 font-mono text-[10.5px]">
-                          <Calendar className="w-3.5 h-3.5 text-slate-600" />
+                      <td className="py-1 px-2.5 text-slate-400">
+                        <div className="flex items-center gap-1 text-slate-550 text-slate-500 font-mono text-[9px]">
+                          <Calendar className="w-2.5 h-2.5 text-slate-600" />
                           {new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                          <span className="text-[10px] text-slate-600 ml-1">
+                          <span className="text-[8px] text-slate-600 ml-0.5">
                             {new Date(trade.timestamp).toLocaleDateString([], { month: '2-digit', day: '2-digit' })}
                           </span>
                         </div>
                       </td>
 
                       {/* Trade Contract Long Description */}
-                      <td className="py-4 px-5 text-slate-300 font-sans max-w-sm overflow-hidden text-ellipsis whitespace-nowrap text-[10.5px]" title={trade.description}>
+                      <td className="py-1 px-2.5 text-slate-300 font-sans max-w-xs overflow-hidden text-ellipsis whitespace-nowrap text-[9px]" title={trade.description}>
                         {trade.description}
                       </td>
 
                       {/* Capital stake */}
-                      <td className="py-4 px-5 text-right text-slate-400 font-mono font-bold">
+                      <td className="py-1 px-2.5 text-right text-slate-400 font-mono font-bold">
                         ${trade.stake.toFixed(2)}
                       </td>
 
                       {/* Realized Win/Loss Profit */}
-                      <td className={`py-4 px-5 text-right font-mono font-bold text-xs ${isWin ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      <td className={`py-1 px-2.5 text-right font-mono font-bold text-[9.5px] ${isWin ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {isWin ? '+' : ''}${trade.profit.toFixed(2)}
                       </td>
 
                       {/* Status indicator pill */}
-                      <td className="py-4 px-5 text-center">
+                      <td className="py-1 px-2.5 text-center">
                         <div className="flex justify-center">
                           {isWin ? (
-                            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 tracking-wider">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> WIN
+                            <span className="flex items-center gap-0.5 px-1 rounded text-[7.5px] font-extrabold uppercase bg-emerald-500/10 text-emerald-450 text-emerald-400 border border-emerald-500/15 tracking-wider">
+                              <CheckCircle2 className="w-2 h-2 text-emerald-400 font-bold" /> WIN
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase bg-rose-500/10 text-rose-400 border border-rose-500/20 tracking-wider">
-                              <XCircle className="w-3 h-3 text-rose-400" /> LOSS
+                            <span className="flex items-center gap-0.5 px-1 rounded text-[7.5px] font-extrabold uppercase bg-rose-500/10 text-rose-450 text-rose-450 text-rose-400 border border-rose-500/15 tracking-wider">
+                              <XCircle className="w-2 h-2 text-rose-400 font-bold" /> LOSS
                             </span>
                           )}
                         </div>
@@ -288,14 +288,14 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-12 px-5 text-center text-slate-500">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <div className="p-4 bg-slate-900 rounded-full border border-slate-800 text-slate-600">
-                        <History className="w-7 h-7" />
+                  <td colSpan={7} className="py-5 px-3 text-center text-slate-500">
+                    <div className="flex flex-col items-center justify-center space-y-1.5">
+                      <div className="p-2 bg-slate-900 rounded-full border border-slate-800 text-slate-600">
+                        <History className="w-5 h-5" />
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-semibold text-slate-400">No matching trades recorded</p>
-                        <p className="text-[10px] text-slate-600 font-sans">
+                      <div className="space-y-0.5">
+                        <p className="text-[10px] font-semibold text-slate-400">No matching trades recorded</p>
+                        <p className="text-[8.5px] text-slate-500 font-sans">
                           {pastTrades.length === 0 
                             ? 'Run a simulation or active authorized trading session on the and they will populate here.' 
                             : 'Try updating your filters or search constraints above.'}
