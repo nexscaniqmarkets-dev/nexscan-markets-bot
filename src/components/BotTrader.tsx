@@ -916,6 +916,81 @@ export function BotTrader({
             </div>
           </div>
 
+          {/* ── Extended Stats Panel ── */}
+          {(() => {
+            const totalTrades = botState.wins + botState.losses;
+            const winRate = totalTrades > 0 ? ((botState.wins / totalTrades) * 100) : 0;
+            const totalStaked = parseFloat((botState.tradesCount * botConfig.stake).toFixed(2));
+            const potentialPayout = parseFloat((botState.currentStake * 1.95).toFixed(2));
+            const totalPayout = parseFloat((botState.profit + totalStaked).toFixed(2));
+            const avgProfit = totalTrades > 0 ? parseFloat((botState.profit / totalTrades).toFixed(2)) : 0;
+
+            return (
+              <div className="mt-4 rounded-xl border border-slate-800/80 overflow-hidden">
+                {/* Panel header */}
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-900/60 border-b border-slate-800/60">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                  <span className="text-[9px] font-mono font-black text-slate-400 uppercase tracking-widest">Session Analytics</span>
+                </div>
+
+                <div className="grid grid-cols-3 divide-x divide-slate-800/60">
+                  {/* Total Stake */}
+                  <div className="p-3 text-center bg-slate-950/40 select-none">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block leading-none mb-1.5">Total Staked</span>
+                    <span className="text-sm font-black font-mono text-slate-200">${totalStaked.toFixed(2)}</span>
+                    <span className="text-[8px] font-mono text-slate-600 block mt-0.5">USD</span>
+                  </div>
+
+                  {/* Potential Payout */}
+                  <div className="p-3 text-center bg-slate-950/40 select-none relative overflow-hidden">
+                    {botState.isRunning && (
+                      <div className="absolute inset-0 bg-indigo-400/[0.03] animate-pulse pointer-events-none" />
+                    )}
+                    <span className="text-[8px] font-mono text-indigo-400 uppercase tracking-wider block leading-none mb-1.5 font-bold">Next Payout</span>
+                    <span className="text-sm font-black font-mono text-indigo-300">+${potentialPayout.toFixed(2)}</span>
+                    <span className="text-[8px] font-mono text-slate-600 block mt-0.5">if win</span>
+                  </div>
+
+                  {/* Total Runs */}
+                  <div className="p-3 text-center bg-slate-950/40 select-none">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block leading-none mb-1.5">Runs</span>
+                    <span className="text-sm font-black font-mono text-slate-200">{botState.tradesCount}</span>
+                    <span className="text-[8px] font-mono text-slate-600 block mt-0.5">contracts</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 divide-x divide-slate-800/60 border-t border-slate-800/60">
+                  {/* Win Rate */}
+                  <div className="p-3 text-center bg-slate-950/30 select-none">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block leading-none mb-1.5">Win Rate</span>
+                    <span className={`text-sm font-black font-mono ${winRate >= 55 ? 'text-emerald-400' : winRate > 0 ? 'text-amber-400' : 'text-slate-500'}`}>
+                      {totalTrades > 0 ? `${winRate.toFixed(0)}%` : '—'}
+                    </span>
+                    <span className="text-[8px] font-mono text-slate-600 block mt-0.5">this session</span>
+                  </div>
+
+                  {/* Total Payout received */}
+                  <div className="p-3 text-center bg-slate-950/30 select-none">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block leading-none mb-1.5">Paid Out</span>
+                    <span className={`text-sm font-black font-mono ${totalPayout >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      ${Math.max(0, totalPayout).toFixed(2)}
+                    </span>
+                    <span className="text-[8px] font-mono text-slate-600 block mt-0.5">received</span>
+                  </div>
+
+                  {/* Avg per trade */}
+                  <div className="p-3 text-center bg-slate-950/30 select-none">
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block leading-none mb-1.5">Avg / Trade</span>
+                    <span className={`text-sm font-black font-mono ${avgProfit >= 0 ? 'text-slate-200' : 'text-rose-400'}`}>
+                      {totalTrades > 0 ? `${avgProfit >= 0 ? '+' : ''}$${avgProfit.toFixed(2)}` : '—'}
+                    </span>
+                    <span className="text-[8px] font-mono text-slate-600 block mt-0.5">per run</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Search & Load Smart Assistant block */}
           {(!botState.isRunning || searchLoadCountdown !== null || isScanning) && (
             <div className="mt-4 bg-indigo-950/20 border border-indigo-900/40 rounded-xl p-3.5 animate-fade-in relative overflow-hidden select-none">
