@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { BotConfig, BotState, AccountInfo, LogMessage, SymbolInfo, SymbolState } from '../types';
 import { getVolColor, formatPrice } from '../constants';
@@ -388,328 +387,229 @@ export function BotTrader({
       <div className="lg:col-span-7 space-y-6">
         
         {/* Connection & Auth Block */}
-        <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 shadow-sm">
+        <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 shadow-sm space-y-4">
 
-          {/* Header */}
-          <div className="flex justify-between items-center mb-4">
+          {/* Header row */}
+          <div className="flex items-center justify-between">
             <h3 className="font-sans font-bold text-slate-200 text-sm tracking-tight flex items-center gap-2">
               <Lock className="w-4 h-4 text-indigo-400" /> Deriv Secure Integration
             </h3>
-            <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase ${
-              botConfig.isDemo
-                ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
-                : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
+            {/* Live status pill */}
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border font-mono text-[9px] font-black uppercase tracking-wider ${
+              !botConfig.isDemo
+                ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-400'
+                : 'bg-amber-950/40 border-amber-800/50 text-amber-400'
             }`}>
-              {botConfig.isDemo ? '🟡 Demo' : '🔴 Real'}
-            </span>
+              <span className={`w-1.5 h-1.5 rounded-full ${!botConfig.isDemo ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
+              {!botConfig.isDemo ? 'Real' : 'Demo'}
+            </div>
           </div>
 
-          {/* ── Demo / Real Toggle — always visible ── */}
-          <div className={`flex items-center justify-between p-3 rounded-xl border mb-4 transition-colors ${
-            botConfig.isDemo
-              ? 'bg-amber-950/15 border-amber-900/40'
-              : 'bg-emerald-950/15 border-emerald-900/40'
+          {/* ── Mode Toggle Card ── */}
+          <div className={`rounded-xl border p-3.5 transition-colors ${
+            !botConfig.isDemo
+              ? 'bg-emerald-950/10 border-emerald-900/40'
+              : 'bg-slate-950/60 border-slate-800'
           }`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${
-                botConfig.isDemo ? 'bg-amber-950/40 border-amber-900/50' : 'bg-emerald-950/40 border-emerald-900/50'
-              }`}>
-                {botConfig.isDemo
-                  ? <ShieldAlert className="w-4 h-4 text-amber-400" />
-                  : <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                }
-              </div>
-              <div>
-                <span className={`text-[10px] font-mono font-black uppercase tracking-wider block leading-none ${
-                  botConfig.isDemo ? 'text-amber-300' : 'text-emerald-300'
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${
+                  !botConfig.isDemo
+                    ? 'bg-emerald-950/50 border-emerald-800/60'
+                    : 'bg-slate-900 border-slate-800'
                 }`}>
-                  {botConfig.isDemo ? 'Demo Mode' : 'Real Mode'}
-                </span>
-                <p className="text-[9px] text-slate-500 font-sans mt-0.5 leading-snug">
-                  {botConfig.isDemo
-                    ? 'Trades use simulated funds only. No real money at risk.'
-                    : 'Live trades execute on your real Deriv account.'}
-                </p>
+                  {!botConfig.isDemo
+                    ? <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
+                    : <ShieldAlert className="w-4.5 h-4.5 text-slate-500" />
+                  }
+                </div>
+                <div>
+                  <p className={`text-[11px] font-mono font-black uppercase tracking-wider ${!botConfig.isDemo ? 'text-emerald-300' : 'text-slate-400'}`}>
+                    {!botConfig.isDemo ? 'Real Mode' : 'Demo Mode'}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-sans leading-tight mt-0.5">
+                    {!botConfig.isDemo
+                      ? 'Live trades on your Deriv account.'
+                      : 'Simulated funds — no real money at risk.'}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col items-end gap-1 ml-4 shrink-0">
-              <div className="flex items-center gap-2">
-                <span className={`text-[9px] font-mono font-bold transition-colors ${botConfig.isDemo ? 'text-amber-400' : 'text-slate-600'}`}>
-                  DEMO
-                </span>
-                <button
-                  onClick={() => {
-                    if (botState.isRunning) return;
-                    // Toggle is purely a trading-mode switch — never disconnects the token.
-                    // Only the Disconnect button logs the user out.
-                    onUpdateConfig({ isDemo: !botConfig.isDemo });
-                  }}
-                  disabled={botState.isRunning}
-                  title={botState.isRunning ? 'Stop the bot before switching modes' : `Switch to ${botConfig.isDemo ? 'Real' : 'Demo'} mode`}
-                  className={`relative inline-flex items-center shrink-0 w-12 h-6 rounded-full border transition-all duration-300 cursor-pointer
-                    ${botState.isRunning ? 'opacity-50 cursor-not-allowed' : ''}
-                    ${!botConfig.isDemo
-                      ? 'bg-emerald-600 border-emerald-500 shadow-lg shadow-emerald-900/40'
-                      : 'bg-amber-600/70 border-amber-700/60'
+              {/* Toggle switch */}
+              <div className="flex flex-col items-end gap-1 shrink-0 ml-3">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[9px] font-mono font-bold ${botConfig.isDemo ? 'text-amber-400' : 'text-slate-600'}`}>DEMO</span>
+                  <button
+                    type="button"
+                    onClick={() => { if (!botState.isRunning) onUpdateConfig({ isDemo: !botConfig.isDemo }); }}
+                    disabled={botState.isRunning}
+                    title={botState.isRunning ? 'Stop bot before switching' : `Switch to ${botConfig.isDemo ? 'Real' : 'Demo'}`}
+                    className={`relative inline-flex shrink-0 w-11 h-6 rounded-full border-2 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                      !botConfig.isDemo
+                        ? 'bg-emerald-500 border-emerald-400/60 shadow-lg shadow-emerald-900/40'
+                        : 'bg-slate-700 border-slate-600/60'
                     }`}
-                >
-                  <span className={`inline-block w-4 h-4 rounded-full shadow-md transform transition-transform duration-300
-                    ${!botConfig.isDemo ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white/90'}`}
-                  />
-                </button>
-                <span className={`text-[9px] font-mono font-bold transition-colors ${!botConfig.isDemo ? 'text-emerald-400' : 'text-slate-600'}`}>
-                  REAL
-                </span>
+                  >
+                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-md transition-all duration-300 ${!botConfig.isDemo ? 'left-[calc(100%-18px)]' : 'left-0.5'}`} />
+                  </button>
+                  <span className={`text-[9px] font-mono font-bold ${!botConfig.isDemo ? 'text-emerald-400' : 'text-slate-600'}`}>REAL</span>
+                </div>
+                {!botConfig.isDemo && (
+                  <span className="text-[8px] font-mono text-rose-400 font-bold">⚠ LIVE FUNDS</span>
+                )}
               </div>
-              {!botConfig.isDemo && (
-                <span className="text-[8px] font-mono text-rose-400 font-bold animate-pulse">⚠ LIVE FUNDS</span>
-              )}
             </div>
           </div>
 
-          {/* ── DEMO SIDE ── */}
-          {botConfig.isDemo ? (
-            <div className="space-y-3">
-              {/* Demo balance card */}
-              <div className="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800">
+          {/* ── Account Cards ── */}
+          <div className="space-y-2.5">
+
+            {/* Demo Account Card */}
+            <div className={`rounded-xl border p-3.5 transition-all ${
+              botConfig.isDemo
+                ? 'bg-amber-950/15 border-amber-800/40 ring-1 ring-amber-800/20'
+                : 'bg-slate-950/40 border-slate-800/60'
+            }`}>
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-amber-950/30 border border-amber-900/40 flex items-center justify-center">
-                    <Wallet className="w-4.5 h-4.5 text-amber-400" />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-colors ${
+                    botConfig.isDemo
+                      ? 'bg-amber-950/50 border-amber-800/60'
+                      : 'bg-slate-900 border-slate-800'
+                  }`}>
+                    <Wallet className={`w-5 h-5 ${botConfig.isDemo ? 'text-amber-400' : 'text-slate-600'}`} />
                   </div>
                   <div>
-                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Demo Balance</span>
-                    <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
-                      ${((demoAccount ?? account)?.balance ?? 1000).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+                    <span className={`text-[9px] font-mono uppercase tracking-widest font-bold block ${botConfig.isDemo ? 'text-amber-500/70' : 'text-slate-600'}`}>
+                      Demo Account
                     </span>
-                    <span className="text-[9px] font-mono text-amber-600 block mt-0.5">
-                      {(demoAccount ?? account)?.loginid || 'Demo Account'}
+                    <span className={`text-xl font-mono font-black block mt-0.5 transition-colors ${botConfig.isDemo ? 'text-slate-100' : 'text-slate-500'}`}>
+                      ${((demoAccount ?? account)?.balance ?? 1000).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                      <span className="text-xs font-normal text-slate-500 ml-1">USD</span>
+                    </span>
+                    <span className={`text-[9px] font-mono block mt-0.5 ${botConfig.isDemo ? 'text-amber-600' : 'text-slate-700'}`}>
+                      Sandbox — no real money
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  {((demoAccount ?? account)?.balance ?? 0) < 1000 && (
+
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  {/* Reset button when balance low */}
+                  {botConfig.isDemo && ((demoAccount ?? account)?.balance ?? 0) < 1000 && (
                     <button
+                      type="button"
                       onClick={onResetDemoBalance}
                       disabled={botState.isRunning}
-                      className="py-1.5 px-3 bg-amber-950/40 hover:bg-amber-900/30 text-amber-400 hover:text-amber-300 border border-amber-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="py-1.5 px-2.5 bg-amber-950/40 hover:bg-amber-900/40 text-amber-400 border border-amber-900/50 rounded-lg font-mono text-[8px] font-bold cursor-pointer transition-colors disabled:opacity-40"
                     >
-                      ↺ RESET $1,000
+                      ↺ Reset
                     </button>
+                  )}
+                  {/* Switch to demo button (when on real) */}
+                  {!botConfig.isDemo && (
+                    <button
+                      type="button"
+                      onClick={() => { if (!botState.isRunning) onUpdateConfig({ isDemo: true }); }}
+                      disabled={botState.isRunning}
+                      className="py-1.5 px-3 bg-amber-700/80 hover:bg-amber-600 text-white border border-amber-600/60 rounded-lg font-mono text-[9px] font-black cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      SWITCH →
+                    </button>
+                  )}
+                  {botConfig.isDemo && (
+                    <span className="text-[8px] font-mono text-amber-700 font-bold px-2 py-0.5 bg-amber-950/30 rounded-full border border-amber-900/30">ACTIVE</span>
                   )}
                 </div>
               </div>
-
-              {/* Real account quick-switch — shown if a real account is already connected */}
-              {realAccount && (
-                <div className="flex items-center justify-between p-3 bg-emerald-950/10 rounded-xl border border-emerald-900/30">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-950/30 border border-emerald-900/40 flex items-center justify-center">
-                      <Wallet className="w-4.5 h-4.5 text-emerald-400" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">
-                        {realAccount.is_virtual ? 'Deriv Demo' : 'Real Account'}
-                      </span>
-                      <span className="text-sm font-mono font-black text-slate-100 mt-1 block">
-                        ${realAccount.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {realAccount.currency}
-                      </span>
-                      <span className="text-[9px] font-mono text-emerald-600 block mt-0.5">{realAccount.loginid}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5">
-                    <button
-                      onClick={() => onUpdateConfig({ isDemo: false })}
-                      disabled={botState.isRunning}
-                      className="py-1.5 px-3 bg-emerald-700 hover:bg-emerald-600 text-white border border-emerald-600 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      SWITCH →
-                    </button>
-                    <button
-                      onClick={onDeauthorize}
-                      disabled={botState.isRunning}
-                      className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40"
-                    >
-                      DISCONNECT
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {!realAccount && (
-                <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
-                  You are on the free demo account. Flip the toggle above to link your Deriv API token and trade with real funds.
-                </p>
-              )}
-
-              {/* Smart Presets */}
-              <div>
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest font-bold mb-2 block">
-                  🛡️ Smart Presets (Based on Current Account Balance)
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  <button onClick={() => applyPresetParams('low')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
-                    <div className="text-[9px] font-mono font-bold text-amber-400">Low Risk</div>
-                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake $0.35</div>
-                  </button>
-                  <button onClick={() => applyPresetParams('balanced')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
-                    <div className="text-[9px] font-mono font-bold text-indigo-400">Balanced</div>
-                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 1%</div>
-                  </button>
-                  <button onClick={() => applyPresetParams('pro')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
-                    <div className="text-[9px] font-mono font-bold text-purple-400">Pro Power</div>
-                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 2%</div>
-                  </button>
-                </div>
-              </div>
             </div>
 
-          ) : (
-            /* ── REAL SIDE ── */
-            <>
-              {/* If real Deriv account is connected, show it */}
+            {/* Real / Deriv Account Card */}
+            <div className={`rounded-xl border transition-all ${
+              !botConfig.isDemo
+                ? 'bg-emerald-950/15 border-emerald-800/40 ring-1 ring-emerald-800/20'
+                : 'bg-slate-950/40 border-slate-800/60'
+            }`}>
               {realAccount ? (
-                <div className="space-y-4">
-                  {/* Real account balance */}
-                  <div className="flex justify-between items-center p-3 bg-slate-950 rounded-xl border border-slate-800">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-emerald-950/30 border border-emerald-900/40 flex items-center justify-center">
-                        <Wallet className="w-4.5 h-4.5 text-emerald-400" />
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">
-                          {realAccount.is_virtual ? 'Deriv Virtual' : 'Live Balance'}
-                        </span>
-                        <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
-                          ${realAccount.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {realAccount.currency}
-                        </span>
-                        <span className="text-[9px] font-mono text-emerald-600 block mt-0.5">{realAccount.loginid}</span>
-                      </div>
+                /* Connected — show balance */
+                <div className="flex items-center justify-between p-3.5">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-colors ${
+                      !botConfig.isDemo
+                        ? 'bg-emerald-950/50 border-emerald-800/60'
+                        : 'bg-slate-900 border-slate-800'
+                    }`}>
+                      <Wallet className={`w-5 h-5 ${!botConfig.isDemo ? 'text-emerald-400' : 'text-slate-600'}`} />
                     </div>
+                    <div>
+                      <span className={`text-[9px] font-mono uppercase tracking-widest font-bold block ${!botConfig.isDemo ? 'text-emerald-500/70' : 'text-slate-600'}`}>
+                        {realAccount.is_virtual ? 'Deriv Demo Account' : 'Live Account'}
+                      </span>
+                      <span className={`text-xl font-mono font-black block mt-0.5 ${!botConfig.isDemo ? 'text-slate-100' : 'text-slate-500'}`}>
+                        ${realAccount.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        <span className="text-xs font-normal text-slate-500 ml-1">{realAccount.currency}</span>
+                      </span>
+                      <span className={`text-[9px] font-mono block mt-0.5 ${!botConfig.isDemo ? 'text-emerald-600' : 'text-slate-700'}`}>
+                        {realAccount.loginid}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    {botConfig.isDemo ? (
+                      <button
+                        type="button"
+                        onClick={() => { if (!botState.isRunning) onUpdateConfig({ isDemo: false }); }}
+                        disabled={botState.isRunning}
+                        className="py-1.5 px-3 bg-emerald-700/80 hover:bg-emerald-600 text-white border border-emerald-600/60 rounded-lg font-mono text-[9px] font-black cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        SWITCH →
+                      </button>
+                    ) : (
+                      <span className="text-[8px] font-mono text-emerald-700 font-bold px-2 py-0.5 bg-emerald-950/30 rounded-full border border-emerald-900/30">ACTIVE</span>
+                    )}
                     <button
+                      type="button"
                       onClick={onDeauthorize}
-                      className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
-                    >
-                      DISCONNECT
-                    </button>
-                  </div>
-
-                  {/* Demo account quick-switch */}
-                  <div className="flex items-center justify-between p-3 bg-amber-950/10 rounded-xl border border-amber-900/30">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-amber-950/30 border border-amber-900/40 flex items-center justify-center">
-                        <Wallet className="w-4.5 h-4.5 text-amber-400" />
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Demo Account</span>
-                        <span className="text-sm font-mono font-black text-slate-100 mt-1 block">
-                          ${((demoAccount)?.balance ?? 1000).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
-                        </span>
-                        <span className="text-[9px] font-mono text-amber-600 block mt-0.5">Sandbox — no real money</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => onUpdateConfig({ isDemo: true })}
                       disabled={botState.isRunning}
-                      className="py-1.5 px-3 bg-amber-700 hover:bg-amber-600 text-white border border-amber-600 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="py-1 px-2.5 bg-slate-900 hover:bg-rose-950/30 text-slate-500 hover:text-rose-400 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[8px] font-bold cursor-pointer transition-colors disabled:opacity-40"
                     >
-                      SWITCH →
+                      Disconnect
                     </button>
-                  </div>
-
-                  {/* Smart Presets */}
-                  <div>
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest font-bold mb-2 block">
-                      🛡️ Smart Presets (Based on Current Account Balance)
-                    </span>
-                    <div className="grid grid-cols-3 gap-2">
-                      <button
-                        onClick={() => applyPresetParams('low')}
-                        className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                      >
-                        <div className="text-[9px] font-mono font-bold text-amber-400">Low Risk</div>
-                        <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake $0.35</div>
-                      </button>
-                      <button
-                        onClick={() => applyPresetParams('balanced')}
-                        className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                      >
-                        <div className="text-[9px] font-mono font-bold text-indigo-400">Balanced</div>
-                        <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 1%</div>
-                      </button>
-                      <button
-                        onClick={() => applyPresetParams('pro')}
-                        className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                      >
-                        <div className="text-[9px] font-mono font-bold text-purple-400">Pro Power</div>
-                        <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 2%</div>
-                      </button>
-                    </div>
                   </div>
                 </div>
-
               ) : (
-                <form onSubmit={handleAuthorizeSubmit} className="space-y-4">
-                  <p className="text-xs text-slate-500 font-sans leading-relaxed">
-                    Provide your Deriv API Token to enable live automated trades. Generate a token with <span className="text-slate-300 font-semibold">"Read"</span> and <span className="text-slate-300 font-semibold">"Trade"</span> scopes.
-                  </p>
-
-                  <div className="p-3 bg-slate-950/35 border border-slate-800/60 rounded-xl space-y-1.5 text-left">
-                    <div className="text-[10px] font-mono text-amber-500 font-bold uppercase tracking-wider flex items-center gap-1">
-                      💡 HOW TO GET YOUR API TOKEN:
+                /* Not connected — show compact token form */
+                <div className="p-3.5 space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+                      <Key className="w-4.5 h-4.5 text-slate-500" />
                     </div>
-                    <ol className="list-decimal list-inside text-[11px] text-slate-400 space-y-1 font-sans">
-                      <li>Log in to your Deriv Account (Demo or Real portfolio).</li>
-                      <li>Go to <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline font-mono inline-flex items-center gap-1">Deriv Settings → API Token <ExternalLink className="w-3 h-3" /></a>.</li>
-                      <li>Tick BOTH the <span className="text-slate-300 font-semibold">"Read"</span> and <span className="text-slate-300 font-semibold">"Trade"</span> checkboxes.</li>
-                      <li>Enter a token name (e.g., <code className="bg-slate-900 px-1 py-0.5 rounded text-indigo-300">NexScan IQ Bot</code>) and click <span className="text-slate-300 font-semibold">Create</span>.</li>
-                      <li>Copy and paste it below to authorize live trading.</li>
-                    </ol>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center justify-between p-3.5 bg-emerald-950/25 rounded-xl border border-emerald-900/40">
-                    <div className="space-y-0.5 text-left">
-                      <div className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                        🚀 DON'T HAVE A DERIV ACCOUNT?
-                      </div>
-                      <p className="text-[11px] text-slate-400">Create your free Deriv account using our sponsor link, then return to authorize your token!</p>
+                    <div>
+                      <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">Deriv Account</p>
+                      <p className="text-[10px] text-slate-600 font-sans">Not connected — paste your API token to link</p>
                     </div>
-                    <a
-                      href="https://deriv.partners/rx?sidc=C6D4FA86-827B-4AAF-844B-344F9FE57A0F&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU334564"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full sm:w-auto shrink-0 text-center py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[10px] uppercase font-black tracking-wider rounded-lg shadow-md cursor-pointer transition-all active:scale-97 flex items-center justify-center gap-1.5"
-                    >
-                      Create free Account <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
                   </div>
 
                   {authorizedWsStatus === 'error' && (
-                    <div className="flex gap-2.5 p-3.5 rounded-xl bg-rose-950/20 border border-rose-900/40 text-xs text-rose-200">
-                      <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-                      <div className="space-y-1">
-                        <div className="font-bold font-sans">Token Verification Failed</div>
-                        <p className="text-slate-300 font-sans leading-relaxed">
-                          The token was rejected. Ensure it's copied correctly and has both <span className="font-bold text-rose-300">"Read"</span> and <span className="font-bold text-rose-300">"Trade"</span> scopes.
-                        </p>
-                      </div>
+                    <div className="flex items-center gap-2 p-2.5 rounded-lg bg-rose-950/20 border border-rose-900/40">
+                      <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                      <p className="text-[10px] text-rose-300 font-sans">Token rejected — check scopes (Read + Trade).</p>
                     </div>
                   )}
 
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <form onSubmit={handleAuthorizeSubmit} className="flex gap-2">
                     <div className="relative flex-1">
-                      <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
                       <input
                         type={showToken ? 'text' : 'password'}
-                        placeholder="Paste Deriv API Token here..."
+                        placeholder="Paste API token..."
                         value={tokenInput}
                         onChange={(e) => setTokenInput(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl py-2.5 pl-10 pr-12 text-xs font-mono text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                        className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/30 rounded-xl py-2.5 px-3.5 text-xs font-mono text-slate-200 placeholder-slate-700 outline-none transition-colors pr-14"
                       />
                       <button
                         type="button"
                         onClick={() => setShowToken(!showToken)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-500 hover:text-slate-300 cursor-pointer"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-mono font-bold text-slate-600 hover:text-slate-400 cursor-pointer"
                       >
                         {showToken ? 'HIDE' : 'SHOW'}
                       </button>
@@ -717,19 +617,63 @@ export function BotTrader({
                     <button
                       type="submit"
                       disabled={!tokenInput.trim()}
-                      className="sm:w-auto py-2.5 px-6 bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-xs font-bold rounded-xl border border-transparent shadow-lg shadow-indigo-900/20 active:scale-97 cursor-pointer transition-all disabled:opacity-50"
+                      className="shrink-0 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-mono text-[10px] font-black rounded-xl cursor-pointer transition-all active:scale-97"
                     >
-                      AUTHORIZE SESSION
+                      LINK
                     </button>
+                  </form>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-[9px] text-slate-600 font-mono">
+                      <ShieldCheck className="w-3 h-3 text-emerald-700" /> Encrypted • Never stored
+                    </div>
+                    <a
+                      href="https://deriv.partners/rx?sidc=C6D4FA86-827B-4AAF-844B-344F9FE57A0F&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU334564"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[9px] font-mono text-indigo-500 hover:text-indigo-400 flex items-center gap-1 transition-colors"
+                    >
+                      No account? Create free <ExternalLink className="w-3 h-3" />
+                    </a>
                   </div>
 
-                  <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Secure SSL local transport • Kept private
-                  </div>
-                </form>
+                  {/* API token how-to — collapsible hint */}
+                  <details className="group">
+                    <summary className="text-[9px] font-mono text-slate-600 hover:text-slate-400 cursor-pointer list-none flex items-center gap-1 select-none">
+                      <span className="group-open:hidden">▶</span>
+                      <span className="hidden group-open:inline">▼</span>
+                      How to get your API token
+                    </summary>
+                    <ol className="mt-2 space-y-1 list-decimal list-inside text-[10px] text-slate-500 font-sans leading-relaxed pl-1">
+                      <li>Log in to <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer" className="text-indigo-400 underline">app.deriv.com → API Token</a></li>
+                      <li>Enable <span className="text-slate-300">"Read"</span> and <span className="text-slate-300">"Trade"</span> scopes</li>
+                      <li>Name it (e.g. <code className="text-indigo-300 bg-slate-900 px-1 rounded">NexScan IQ</code>) → Create</li>
+                      <li>Copy and paste it above</li>
+                    </ol>
+                  </details>
+                </div>
               )}
-            </>
-          )}
+            </div>
+          </div>
+
+          {/* Smart Presets — always visible at bottom */}
+          <div>
+            <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest font-bold mb-2 block">🛡️ Smart Presets</span>
+            <div className="grid grid-cols-3 gap-2">
+              <button onClick={() => applyPresetParams('low')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
+                <div className="text-[9px] font-mono font-bold text-amber-400">Low Risk</div>
+                <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake $0.35</div>
+              </button>
+              <button onClick={() => applyPresetParams('balanced')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
+                <div className="text-[9px] font-mono font-bold text-indigo-400">Balanced</div>
+                <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 1%</div>
+              </button>
+              <button onClick={() => applyPresetParams('pro')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
+                <div className="text-[9px] font-mono font-bold text-purple-400">Pro Power</div>
+                <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 2%</div>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Advanced Mode — Live Win Rate Monitor Panel */}
