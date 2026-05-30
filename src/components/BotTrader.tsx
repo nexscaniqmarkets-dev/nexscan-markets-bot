@@ -390,14 +390,82 @@ export function BotTrader({
             </h3>
             {account && (
               <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase ${
-                account.is_virtual 
-                  ? 'bg-amber-950/40 text-amber-400 border-amber-900/50' 
-                  : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
+                account.loginid?.startsWith('DEMO_')
+                  ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
+                  : botConfig.isDemo
+                    ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
+                    : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
               }`}>
-                {account.loginid?.startsWith('DEMO_') ? 'Free Demo' : account.is_virtual ? 'Deriv Demo' : 'Real Account'}
+                {account.loginid?.startsWith('DEMO_')
+                  ? 'Free Demo'
+                  : botConfig.isDemo
+                    ? 'Demo Trading'
+                    : '🔴 Real Account'}
               </span>
             )}
           </div>
+
+          {/* Demo / Real account toggle — only shown when a real Deriv account is connected */}
+          {account && !account.loginid?.startsWith('DEMO_') && (
+            <div className="mb-4 flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${
+                  botConfig.isDemo
+                    ? 'bg-amber-950/30 border-amber-900/40'
+                    : 'bg-emerald-950/30 border-emerald-900/40'
+                }`}>
+                  {botConfig.isDemo
+                    ? <ShieldAlert className="w-4 h-4 text-amber-400" />
+                    : <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  }
+                </div>
+                <div>
+                  <span className={`text-[10px] font-mono font-black uppercase tracking-wider block leading-none transition-colors ${
+                    botConfig.isDemo ? 'text-amber-300' : 'text-emerald-300'
+                  }`}>
+                    {botConfig.isDemo ? 'Demo Mode' : 'Real Mode'}
+                  </span>
+                  <p className="text-[9px] text-slate-500 font-sans mt-0.5 leading-snug">
+                    {botConfig.isDemo
+                      ? 'Trades simulated on your Deriv virtual/demo account.'
+                      : 'Live trades execute on your real Deriv account.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Toggle switch — Deriv-style */}
+              <div className="flex flex-col items-end gap-1 ml-4">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[9px] font-mono font-bold transition-colors ${botConfig.isDemo ? 'text-amber-400' : 'text-slate-600'}`}>
+                    DEMO
+                  </span>
+                  <button
+                    onClick={() => !botState.isRunning && onUpdateConfig({ isDemo: !botConfig.isDemo })}
+                    disabled={botState.isRunning}
+                    title={botState.isRunning ? 'Stop the bot before switching accounts' : `Switch to ${botConfig.isDemo ? 'Real' : 'Demo'} mode`}
+                    className={`relative inline-flex items-center shrink-0 w-12 h-6 rounded-full border transition-all duration-300 cursor-pointer
+                      ${botState.isRunning ? 'opacity-50 cursor-not-allowed' : ''}
+                      ${!botConfig.isDemo
+                        ? 'bg-emerald-600 border-emerald-500 shadow-lg shadow-emerald-900/40'
+                        : 'bg-amber-600/60 border-amber-700/50'
+                      }`}
+                  >
+                    <span className={`inline-block w-4 h-4 rounded-full shadow-md transform transition-transform duration-300
+                      ${!botConfig.isDemo ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white/80'}`}
+                    />
+                  </button>
+                  <span className={`text-[9px] font-mono font-bold transition-colors ${!botConfig.isDemo ? 'text-emerald-400' : 'text-slate-600'}`}>
+                    REAL
+                  </span>
+                </div>
+                {!botConfig.isDemo && (
+                  <span className="text-[8px] font-mono text-rose-400/80 font-bold animate-pulse">
+                    ⚠ LIVE FUNDS AT RISK
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Show token form if: no account, OR on demo account */}
           {(!account || account.loginid?.startsWith('DEMO_')) ? (
@@ -520,7 +588,7 @@ export function BotTrader({
                   </div>
                   <div>
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">
-                      {account.is_virtual ? 'Deriv Demo' : 'Live Balance'}
+                      {botConfig.isDemo ? 'Demo Balance' : 'Live Balance'}
                     </span>
                     <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
                       ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {account.currency}
