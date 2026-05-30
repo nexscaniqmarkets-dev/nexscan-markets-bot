@@ -1,15 +1,133 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Dynamically mapped variables to allow seamless Binance Dark <=> Light Theme Switching */
+  --color-slate-50: var(--slate-50);
+  --color-slate-100: var(--slate-100);
+  --color-slate-200: var(--slate-200);
+  --color-slate-300: var(--slate-300);
+  --color-slate-400: var(--slate-400);
+  --color-slate-500: var(--slate-500);
+  --color-slate-600: var(--slate-600);
+  --color-slate-700: var(--slate-700);
+  --color-slate-800: var(--slate-800);
+  --color-slate-900: var(--slate-900);
+  --color-slate-950: var(--slate-950);
+
+  /* Overriding Indigo to Binance Gold/Yellow */
+  --color-indigo-50: var(--indigo-50);
+  --color-indigo-100: var(--indigo-100);
+  --color-indigo-200: var(--indigo-200);
+  --color-indigo-300: var(--indigo-300);
+  --color-indigo-400: var(--indigo-400);
+  --color-indigo-500: var(--indigo-500);
+  --color-indigo-600: var(--indigo-600);
+  --color-indigo-750: var(--indigo-750);
+  --color-indigo-800: var(--indigo-800);
+  --color-indigo-900: var(--indigo-900);
+  --color-indigo-950: var(--indigo-950);
+
+  /* Align Amber to keep uniform gold palette */
+  --color-amber-50: var(--indigo-50);
+  --color-amber-100: var(--indigo-100);
+  --color-amber-200: var(--indigo-200);
+  --color-amber-300: var(--indigo-300);
+  --color-amber-400: var(--indigo-400);
+  --color-amber-500: var(--indigo-500);
+  --color-amber-600: var(--indigo-600);
+  --color-amber-700: var(--indigo-750);
+  --color-amber-800: var(--indigo-800);
+  --color-amber-900: var(--indigo-900);
+  --color-amber-950: var(--indigo-950);
+
+  /* Overriding Emerald to Binance High-Octane Green for Wins/Bulls */
+  --color-emerald-50: #E6FBF2;
+  --color-emerald-100: #CEF8E5;
+  --color-emerald-200: #9DEFCB;
+  --color-emerald-300: #6CE7B1;
+  --color-emerald-400: #0ECB81;
+  --color-emerald-550: #02C076;
+  --color-emerald-500: #0ECB81;
+  --color-emerald-600: #03A66D;
+  --color-emerald-650: #02C076;
+  --color-emerald-700: #028C5C;
+
+  /* Overriding Rose/Red to Binance Crimson-Red for Losses/Bears */
+  --color-rose-50: #FFF5F6;
+  --color-rose-100: #FFE1E4;
+  --color-rose-200: #FFBDC4;
+  --color-rose-300: #FF98A4;
+  --color-rose-400: #F6465D;
+  --color-rose-500: #F6465D;
+  --color-rose-550: #D32F2F;
+  --color-rose-600: #CF3043;
+  --color-rose-650: #D32F2F;
+  --color-rose-700: #B01E2E;
+}
+
+:root {
+  /* Default Binance Dark Theme Coordinates */
+  --slate-50: #F8F9FA;
+  --slate-100: #F0F1F2;
+  --slate-200: #EAECEF;
+  --slate-300: #DCE0E5;
+  --slate-400: #B7BDC6;
+  --slate-500: #848E9C;
+  --slate-600: #474D57;
+  --slate-700: #363F4D;
+  --slate-800: #2B3139;
+  --slate-900: #1E2329;
+  --slate-950: #0B0E11;
+
+  --indigo-50: #FEFBF0;
+  --indigo-100: #FDF4D1;
+  --indigo-200: #FBE694;
+  --indigo-300: #F7D556;
+  --indigo-400: #F3BA2F;
+  --indigo-500: #F0B90B;
+  --indigo-600: #D49B00;
+  --indigo-750: #A87B00;
+  --indigo-800: #453503;
+  --indigo-900: #2C2202;
+  --indigo-950: #181301;
+}
+
+.cyber {
+  /* Premium Cyber Neon-Cyan & Royal Blue Theme coordinates from the NexScan IQ Logo */
+  --slate-950: #020512; /* Deep space dark blue backdrop */
+  --slate-900: #050a22; /* Sleek cosmic navy card surfaces */
+  --slate-800: #0c183a; /* Glowing dark sapphire border lines */
+  --slate-700: #14285c; /* Highly visible active item highlights */
+  --slate-600: #4961a8; /* Muted tech-slate for disabled buttons */
+  --slate-500: #6f89cf; /* High-readability secondary help text */
+  --slate-400: #9cb4f2; /* Clean, legible ice-blue body text */
+  --slate-300: #cbdfff; /* Distinct light ice headings */
+  --slate-200: #eaf1ff; /* Accent highlight typefaces */
+  --slate-100: #fafcff; /* Premium active menu texts */
+  --slate-50: #ffffff;  /* Supreme pure-white titles */
+
+  --indigo-50: #f0fdff;  /* Ice cyber-cyan aura tint */
+  --indigo-100: #ccf7ff; /* Neon cyan soft highlight */
+  --indigo-200: #8df2ff; /* Sparkling light cyan fill */
+  --indigo-300: #33e1ff; /* Vivid cyber-cyan indicator text */
+  --indigo-400: #00b3ff; /* Solid bright royal blue */
+  --indigo-500: #00E5FF; /* Official signature Cyber Cyan Core glow */
+  --indigo-600: #00a2cc; /* Rich deep ocean cyan border highlight */
+  --indigo-750: #007799; /* Intense cyber dark sapphire print */
+  --indigo-805: #004d66; /* Deep shadow layers */
+  --indigo-800: #004d66;
+  --indigo-900: #01223d; /* Darkest space blue highlights */
+  --indigo-950: #011124; /* Rich cyber gradient background fill card */
 }
 
 @layer base {
   body {
-    @apply antialiased text-slate-900 bg-slate-50 font-sans transition-colors duration-300;
+    @apply antialiased text-slate-100 bg-slate-950 font-sans transition-colors duration-300;
   }
 }
 
