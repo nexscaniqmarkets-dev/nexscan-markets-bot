@@ -1590,6 +1590,7 @@ async function run() {
     const userId = getUserId(req);
     const session = getSession(userId);
     session.botConfig.apiToken = '';
+    session.botConfig.isDemo = true; // revert to demo when user explicitly disconnects
     session.authorizedWsStatus = 'idle';
     if (session.authorizedPingInterval) {
       clearInterval(session.authorizedPingInterval);
