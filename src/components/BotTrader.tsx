@@ -436,10 +436,9 @@ export function BotTrader({
                 <button
                   onClick={() => {
                     if (botState.isRunning) return;
-                    const switchingToReal = botConfig.isDemo;
+                    // Toggle is purely a trading-mode switch — never disconnects the token.
+                    // Only the Disconnect button logs the user out.
                     onUpdateConfig({ isDemo: !botConfig.isDemo });
-                    // Clear any stale demo token from the input when flipping to Real
-                    if (switchingToReal) setTokenInput('');
                   }}
                   disabled={botState.isRunning}
                   title={botState.isRunning ? 'Stop the bot before switching modes' : `Switch to ${botConfig.isDemo ? 'Real' : 'Demo'} mode`}
@@ -543,7 +542,7 @@ export function BotTrader({
           ) : (
             /* ── REAL SIDE ── */
             <>
-              {/* If a real Deriv account is already connected — show balance + disconnect */}
+              {/* If any Deriv token is connected (real or virtual via token), show the account */}
               {account && !account.loginid?.startsWith('DEMO_') ? (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center p-3 bg-slate-950 rounded-xl border border-slate-800">
