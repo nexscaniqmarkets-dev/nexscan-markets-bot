@@ -30,14 +30,14 @@ export function ScannerTab({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Top Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 md:px-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-slate-900/40 border border-slate-800/80 rounded-xl p-3 md:px-4">
         <div>
-          <h2 className="text-sm font-bold font-mono uppercase tracking-wider text-slate-200 flex items-center gap-2">
-            <Sparkles className="w-4.5 h-4.5 text-indigo-400" /> Web-Socket Market Scanner
+          <h2 className="text-xs font-bold font-mono uppercase tracking-wider text-slate-200 flex items-center gap-1.5 leading-none">
+            <Sparkles className="w-4 h-4 text-indigo-400" /> Web-Socket Market Scanner
           </h2>
-          <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+          <p className="text-[10px] text-slate-500 mt-0.5 leading-none">
             Scanning all assets concurrently. Ticks and signal outcomes calibrate dynamically to build real-time accuracy percentages.
           </p>
         </div>
@@ -45,14 +45,14 @@ export function ScannerTab({
           <button
             id="restartScanningBtn"
             onClick={onRestartScanning}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 py-2 px-4 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider border border-rose-500/30 bg-rose-950/20 hover:bg-rose-900/30 text-rose-400 hover:text-rose-300 transition-all duration-200 cursor-pointer active:scale-97 select-none"
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg font-mono text-[10px] font-bold uppercase tracking-wider border border-rose-500/30 bg-rose-950/20 hover:bg-rose-900/30 text-rose-400 hover:text-rose-300 transition-all duration-200 cursor-pointer active:scale-97 select-none"
           >
-            <RefreshCw className="w-3.5 h-3.5" /> Restart Scanning
+            <RefreshCw className="w-3" /> Restart Scanning
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-1">
       {symbolList.map((state) => {
         const info = state.info;
         const colorAccent = getVolColor(info.vol);
@@ -65,15 +65,15 @@ export function ScannerTab({
           <div
             key={info.id}
             id={`scanner-card-${info.id}`}
-            className={`relative rounded-2xl bg-slate-900 border overflow-hidden p-5 transition-all duration-300 hover:scale-[1.015] hover:shadow-xl hover:shadow-indigo-950/5 group/card ${
+            className={`relative rounded-xl bg-slate-900 border overflow-hidden p-3.5 transition-all duration-300 hover:scale-[1.012] hover:shadow-lg hover:shadow-indigo-950/5 group/card ${
               isSignalActive
-                ? 'border-indigo-500 bg-indigo-950/10 shadow-lg shadow-indigo-500/5'
+                ? 'border-indigo-500 bg-indigo-950/10 shadow shadow-indigo-500/5'
                 : 'border-slate-800 hover:border-slate-700'
             }`}
           >
             {/* Top accent highlight */}
             <div
-              className="absolute top-0 left-0 right-0 h-1.5 transition-all duration-300"
+              className="absolute top-0 left-0 right-0 h-1 transition-all duration-300"
               style={{
                 backgroundColor: isSignalActive ? '#818cf8' : colorAccent,
                 opacity: isSignalActive ? 1 : 0.6,
@@ -81,38 +81,38 @@ export function ScannerTab({
             />
 
             {/* Card Header */}
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-2.5">
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 leading-none">
                   <span
-                    className="font-mono text-base font-black tracking-tight"
+                    className="font-mono text-sm font-black tracking-tight"
                     style={{ color: colorAccent }}
                   >
                     {info.short}
                   </span>
                   <span
-                    className={`font-mono text-[8px] font-bold px-1.5 py-0.5 rounded border ${
+                    className={`font-mono text-[7px] font-bold px-1.5 py-0.5 rounded border leading-none ${
                       info.tier === 'STD'
                         ? 'bg-emerald-950/40 text-emerald-400 border-emerald-800/40'
                         : 'bg-indigo-950/40 text-indigo-400 border-indigo-800/40'
                     }`}
                   >
-                    {info.tier === 'STD' ? 'STD Ticks' : '1-Sec Ticks'}
+                    {info.tier === 'STD' ? 'STD Ticks' : '1-Sec' }
                   </span>
                 </div>
-                <h3 className="text-xs text-slate-500 font-medium tracking-tight mt-1">
+                <h3 className="text-[10.5px] text-slate-500 font-medium tracking-tight mt-0.5 leading-none">
                   {info.name}
                 </h3>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 {isSignalActive && (
-                  <span className="font-mono text-[8px] font-extrabold bg-indigo-500 text-white px-2 py-0.5 rounded-full uppercase tracking-wider animate-bounce">
+                  <span className="font-mono text-[7px] font-extrabold bg-indigo-500 text-white px-1.5 py-0.5 rounded uppercase tracking-wider animate-bounce lider-none">
                     SIGNAL!
                   </span>
                 )}
                 <div
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-1.5 h-1.5 rounded-full ${
                     state.connected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-700'
                   }`}
                   title={state.connected ? 'Subscribed Realtime' : 'Disconnected'}
@@ -121,39 +121,39 @@ export function ScannerTab({
             </div>
 
             {/* Realtime Price Detail */}
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="font-mono text-2xl font-black text-slate-200 tracking-tight">
+            <div className="flex items-baseline gap-1.5 mb-2.5 leading-none">
+              <span className="font-mono text-xl font-black text-slate-200 tracking-tight leading-none">
                 {formatPrice(state.price, info.pip)}
               </span>
               {state.direction && (
                 <span
-                  className={`font-bold text-xs flex items-center ${
+                  className={`font-bold text-[10px] flex items-center leading-none ${
                     state.direction === 'rise' ? 'text-emerald-500' : 'text-rose-500'
                   }`}
                 >
                   {state.direction === 'rise' ? (
-                    <TrendingUp className="w-4.5 h-4.5 animate-pulse" />
+                    <TrendingUp className="w-3.5 h-3.5 animate-pulse" />
                   ) : (
-                    <TrendingDown className="w-4.5 h-4.5" />
+                    <TrendingDown className="w-3.5 h-3.5" />
                   )}
                 </span>
               )}
             </div>
 
             {/* Ticks Grid & Last Digit Visual */}
-            <div className="grid grid-cols-12 gap-2 mb-4 items-center">
-              <div className="col-span-4 flex flex-col">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider mb-1">
+            <div className="grid grid-cols-12 gap-1.5 mb-2.5 items-center">
+              <div className="col-span-4 flex flex-col items-start">
+                <span className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider mb-0.5 leading-none">
                   Last Digit
                 </span>
                 <span
                   title="Last decimal place tick digit"
-                  className="font-mono text-3xl font-extrabold leading-none transition-colors duration-200"
+                  className="font-mono text-2xl font-extrabold leading-none transition-colors duration-200"
                   style={{
                     color: digitColor(state.lastDigit),
                     textShadow:
                       state.lastDigit === 4 || state.lastDigit === 5
-                        ? `0 0 16px ${digitColor(state.lastDigit)}80`
+                        ? `0 0 12px ${digitColor(state.lastDigit)}80`
                         : 'none',
                   }}
                 >
@@ -161,21 +161,21 @@ export function ScannerTab({
                 </span>
               </div>
 
-              <div className="col-span-8 flex flex-col">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider mb-1">
-                  Trail History (Last 10 Ticks)
+              <div className="col-span-8 flex flex-col items-start">
+                <span className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider mb-1 leading-none">
+                  Trail (Last 10 Ticks)
                 </span>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-0.5">
                   {state.recentDigits.length > 0 ? (
                     state.recentDigits.map((dg, idx) => {
                       const c = digitColor(dg);
                       return (
                         <div
                           key={idx}
-                          className="w-5.5 h-5.5 rounded-md flex items-center justify-center font-mono text-[10px] font-bold border"
+                          className="w-[18px] h-[18px] rounded-md flex items-center justify-center font-mono text-[9px] font-bold border leading-none"
                           style={{
                             backgroundColor: `${c}10`,
-                            borderColor: `${c}40`,
+                            borderColor: `${c}35`,
                             color: c,
                           }}
                         >
@@ -184,21 +184,23 @@ export function ScannerTab({
                       );
                     })
                   ) : (
-                    <span className="text-[10px] font-mono text-slate-600">Waiting for data...</span>
+                    <span className="text-[9.5px] font-mono text-slate-600">Waiting for data...</span>
                   )}
                 </div>
               </div>
-            </div>            {/* Backtester Win Rate & Performance Score Indicators */}
-            <div className="border-t border-slate-800/80 pt-3 mt-3">
-              <div className="grid grid-cols-2 gap-4 mb-3">
+            </div>
+
+            {/* Backtester Win Rate & Performance Score Indicators */}
+            <div className="border-t border-slate-800/85 pt-2.5 mt-2.5">
+              <div className="grid grid-cols-2 gap-3 mb-2.5">
                 {/* Win Rate */}
                 <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">
+                  <div className="flex justify-between items-center mb-0.5 leading-none">
+                    <span className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider">
                       Win Rate
                     </span>
                     <span
-                      className="font-mono text-[11px] font-black"
+                      className="font-mono text-[10px] font-black"
                       style={{
                         color:
                           winRate === null
@@ -213,7 +215,7 @@ export function ScannerTab({
                       {winRate !== null ? `${winRate.toFixed(1)}%` : 'Scanning...'}
                     </span>
                   </div>
-                  <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-950 rounded-full h-1 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
@@ -233,12 +235,12 @@ export function ScannerTab({
 
                 {/* Performance Score */}
                 <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">
+                  <div className="flex justify-between items-center mb-0.5 leading-none">
+                    <span className="text-[7.5px] font-mono text-slate-500 uppercase tracking-wider">
                       Perf. Score
                     </span>
                     <span
-                      className="font-mono text-[11px] font-black"
+                      className="font-mono text-[10px] font-black"
                       style={{
                         color:
                           winRate === null
@@ -255,7 +257,7 @@ export function ScannerTab({
                         : 'Calibrating...'}
                     </span>
                   </div>
-                  <div className="w-full bg-slate-950 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-950 rounded-full h-1 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
                       style={{
@@ -274,28 +276,28 @@ export function ScannerTab({
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-1 mt-3">
-                <div className="bg-slate-950/40 rounded px-2 py-1 text-center font-mono">
-                  <div className="text-[7.5px] text-slate-600 leading-none">TICKS</div>
-                  <div className="text-xs font-bold text-slate-300 mt-0.5">{state.ticks}</div>
+              <div className="grid grid-cols-4 gap-1 mt-2.5">
+                <div className="bg-slate-950/40 rounded px-1.5 py-0.5 text-center font-mono">
+                  <div className="text-[7px] text-slate-600 leading-none">TICKS</div>
+                  <div className="text-[10.5px] font-bold text-slate-300 mt-0.5 leading-none">{state.ticks}</div>
                 </div>
-                <div className="bg-slate-950/40 rounded px-2 py-1 text-center font-mono">
-                  <div className="text-[7.5px] text-amber-500/80 leading-none">SIGS</div>
-                  <div className="text-xs font-bold text-amber-400 mt-0.5">{state.signals}</div>
+                <div className="bg-slate-950/40 rounded px-1.5 py-0.5 text-center font-mono">
+                  <div className="text-[7px] text-amber-500/80 leading-none">SIGS</div>
+                  <div className="text-[10.5px] font-bold text-amber-400 mt-0.5 leading-none">{state.signals}</div>
                 </div>
-                <div className="bg-slate-950/40 rounded px-2 py-1 text-center font-mono">
-                  <div className="text-[7.5px] text-emerald-500/80 leading-none">WINS</div>
-                  <div className="text-xs font-bold text-emerald-400 mt-0.5">{state.wins}</div>
+                <div className="bg-slate-950/40 rounded px-1.5 py-0.5 text-center font-mono">
+                  <div className="text-[7px] text-emerald-500/80 leading-none">WINS</div>
+                  <div className="text-[10.5px] font-bold text-emerald-400 mt-0.5 leading-none">{state.wins}</div>
                 </div>
-                <div className="bg-slate-950/40 rounded px-2 py-1 text-center font-mono">
-                  <div className="text-[7.5px] text-rose-500/80 leading-none">LOSS</div>
-                  <div className="text-xs font-bold text-rose-400 mt-0.5">{state.losses}</div>
+                <div className="bg-slate-950/40 rounded px-1.5 py-0.5 text-center font-mono">
+                  <div className="text-[7px] text-rose-500/80 leading-none">LOSS</div>
+                  <div className="text-[10.5px] font-bold text-rose-400 mt-0.5 leading-none">{state.losses}</div>
                 </div>
               </div>
             </div>
 
             {/* Click to Trade Overlay button */}
-            <div className="mt-4">
+            <div className="mt-3">
               <button
                 onClick={() => {
                   if (!isActiveTrading && !botRunning && !isCalibrationActive) {
@@ -303,7 +305,7 @@ export function ScannerTab({
                   }
                 }}
                 disabled={isCalibrationActive || (botRunning && !isActiveTrading)}
-                className={`w-full py-2 px-4 rounded-xl font-mono text-xs font-bold tracking-wider border transition-all duration-200 uppercase ${
+                className={`w-full py-1.5 px-3 rounded-lg font-mono text-[10.5px] font-bold tracking-wider border transition-all duration-200 uppercase leading-none ${
                   isCalibrationActive
                     ? 'bg-slate-950 text-slate-600 border-slate-900/60 cursor-not-allowed opacity-[0.55]'
                     : isActiveTrading
@@ -318,8 +320,8 @@ export function ScannerTab({
                   : isActiveTrading
                   ? '✓ CONNECTED TO ACTIVE BOT'
                   : botRunning
-                  ? '🔒 LOCKED DURING SESSION'
-                  : '🎯 CHOOSE PAIR TO AUTOMATE'}
+                  ? '🔒 LOCKED'
+                  : '🎯 CHOOSE PAIR'}
               </button>
             </div>
           </div>
