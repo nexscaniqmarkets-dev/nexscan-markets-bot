@@ -384,110 +384,100 @@ export function BotTrader({
         
         {/* Connection & Auth Block */}
         <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 shadow-sm">
+
+          {/* Header */}
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-sans font-bold text-slate-200 text-sm tracking-tight flex items-center gap-2">
               <Lock className="w-4 h-4 text-indigo-400" /> Deriv Secure Integration
             </h3>
-            {account && (
-              <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase ${
-                account.loginid?.startsWith('DEMO_')
-                  ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
-                  : botConfig.isDemo
-                    ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
-                    : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
-              }`}>
-                {account.loginid?.startsWith('DEMO_')
-                  ? 'Free Demo'
-                  : botConfig.isDemo
-                    ? 'Demo Trading'
-                    : '🔴 Real Account'}
-              </span>
-            )}
+            <span className={`font-mono text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase ${
+              botConfig.isDemo
+                ? 'bg-amber-950/40 text-amber-400 border-amber-900/50'
+                : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
+            }`}>
+              {botConfig.isDemo ? '🟡 Demo' : '🔴 Real'}
+            </span>
           </div>
 
-          {/* Demo / Real account toggle — only shown when a real Deriv account is connected */}
-          {account && !account.loginid?.startsWith('DEMO_') && (
-            <div className="mb-4 flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${
-                  botConfig.isDemo
-                    ? 'bg-amber-950/30 border-amber-900/40'
-                    : 'bg-emerald-950/30 border-emerald-900/40'
-                }`}>
-                  {botConfig.isDemo
-                    ? <ShieldAlert className="w-4 h-4 text-amber-400" />
-                    : <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  }
-                </div>
-                <div>
-                  <span className={`text-[10px] font-mono font-black uppercase tracking-wider block leading-none transition-colors ${
-                    botConfig.isDemo ? 'text-amber-300' : 'text-emerald-300'
-                  }`}>
-                    {botConfig.isDemo ? 'Demo Mode' : 'Real Mode'}
-                  </span>
-                  <p className="text-[9px] text-slate-500 font-sans mt-0.5 leading-snug">
-                    {botConfig.isDemo
-                      ? 'Trades simulated on your Deriv virtual/demo account.'
-                      : 'Live trades execute on your real Deriv account.'}
-                  </p>
-                </div>
+          {/* ── Demo / Real Toggle — always visible ── */}
+          <div className={`flex items-center justify-between p-3 rounded-xl border mb-4 transition-colors ${
+            botConfig.isDemo
+              ? 'bg-amber-950/15 border-amber-900/40'
+              : 'bg-emerald-950/15 border-emerald-900/40'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${
+                botConfig.isDemo ? 'bg-amber-950/40 border-amber-900/50' : 'bg-emerald-950/40 border-emerald-900/50'
+              }`}>
+                {botConfig.isDemo
+                  ? <ShieldAlert className="w-4 h-4 text-amber-400" />
+                  : <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                }
               </div>
-
-              {/* Toggle switch — Deriv-style */}
-              <div className="flex flex-col items-end gap-1 ml-4">
-                <div className="flex items-center gap-2">
-                  <span className={`text-[9px] font-mono font-bold transition-colors ${botConfig.isDemo ? 'text-amber-400' : 'text-slate-600'}`}>
-                    DEMO
-                  </span>
-                  <button
-                    onClick={() => !botState.isRunning && onUpdateConfig({ isDemo: !botConfig.isDemo })}
-                    disabled={botState.isRunning}
-                    title={botState.isRunning ? 'Stop the bot before switching accounts' : `Switch to ${botConfig.isDemo ? 'Real' : 'Demo'} mode`}
-                    className={`relative inline-flex items-center shrink-0 w-12 h-6 rounded-full border transition-all duration-300 cursor-pointer
-                      ${botState.isRunning ? 'opacity-50 cursor-not-allowed' : ''}
-                      ${!botConfig.isDemo
-                        ? 'bg-emerald-600 border-emerald-500 shadow-lg shadow-emerald-900/40'
-                        : 'bg-amber-600/60 border-amber-700/50'
-                      }`}
-                  >
-                    <span className={`inline-block w-4 h-4 rounded-full shadow-md transform transition-transform duration-300
-                      ${!botConfig.isDemo ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white/80'}`}
-                    />
-                  </button>
-                  <span className={`text-[9px] font-mono font-bold transition-colors ${!botConfig.isDemo ? 'text-emerald-400' : 'text-slate-600'}`}>
-                    REAL
-                  </span>
-                </div>
-                {!botConfig.isDemo && (
-                  <span className="text-[8px] font-mono text-rose-400/80 font-bold animate-pulse">
-                    ⚠ LIVE FUNDS AT RISK
-                  </span>
-                )}
+              <div>
+                <span className={`text-[10px] font-mono font-black uppercase tracking-wider block leading-none ${
+                  botConfig.isDemo ? 'text-amber-300' : 'text-emerald-300'
+                }`}>
+                  {botConfig.isDemo ? 'Demo Mode' : 'Real Mode'}
+                </span>
+                <p className="text-[9px] text-slate-500 font-sans mt-0.5 leading-snug">
+                  {botConfig.isDemo
+                    ? 'Trades use simulated funds only. No real money at risk.'
+                    : 'Live trades execute on your real Deriv account.'}
+                </p>
               </div>
             </div>
-          )}
 
-          {/* Show token form if: no account, OR on demo account */}
-          {(!account || account.loginid?.startsWith('DEMO_')) ? (
-            <form onSubmit={handleAuthorizeSubmit} className="space-y-4">
+            <div className="flex flex-col items-end gap-1 ml-4 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className={`text-[9px] font-mono font-bold transition-colors ${botConfig.isDemo ? 'text-amber-400' : 'text-slate-600'}`}>
+                  DEMO
+                </span>
+                <button
+                  onClick={() => !botState.isRunning && onUpdateConfig({ isDemo: !botConfig.isDemo })}
+                  disabled={botState.isRunning}
+                  title={botState.isRunning ? 'Stop the bot before switching modes' : `Switch to ${botConfig.isDemo ? 'Real' : 'Demo'} mode`}
+                  className={`relative inline-flex items-center shrink-0 w-12 h-6 rounded-full border transition-all duration-300 cursor-pointer
+                    ${botState.isRunning ? 'opacity-50 cursor-not-allowed' : ''}
+                    ${!botConfig.isDemo
+                      ? 'bg-emerald-600 border-emerald-500 shadow-lg shadow-emerald-900/40'
+                      : 'bg-amber-600/70 border-amber-700/60'
+                    }`}
+                >
+                  <span className={`inline-block w-4 h-4 rounded-full shadow-md transform transition-transform duration-300
+                    ${!botConfig.isDemo ? 'translate-x-6 bg-white' : 'translate-x-1 bg-white/90'}`}
+                  />
+                </button>
+                <span className={`text-[9px] font-mono font-bold transition-colors ${!botConfig.isDemo ? 'text-emerald-400' : 'text-slate-600'}`}>
+                  REAL
+                </span>
+              </div>
+              {!botConfig.isDemo && (
+                <span className="text-[8px] font-mono text-rose-400 font-bold animate-pulse">⚠ LIVE FUNDS</span>
+              )}
+            </div>
+          </div>
 
-              {/* Demo account banner — shown when user already has a demo balance */}
-              {account?.loginid?.startsWith('DEMO_') && (
-                <div className="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-amber-950/30 border border-amber-900/40 flex items-center justify-center">
-                      <Wallet className="w-4.5 h-4.5 text-amber-400" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Demo Balance</span>
-                      <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
-                        ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
-                      </span>
-                    </div>
+          {/* ── DEMO SIDE: free demo balance OR connected Deriv demo/real account in demo mode ── */}
+          {botConfig.isDemo ? (
+            <div className="space-y-3">
+              {/* Balance card */}
+              <div className="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-amber-950/30 border border-amber-900/40 flex items-center justify-center">
+                    <Wallet className="w-4.5 h-4.5 text-amber-400" />
                   </div>
-                  {account.balance < 1000 && (
+                  <div>
+                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Demo Balance</span>
+                    <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
+                      ${(account?.balance ?? 1000).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1.5">
+                  {/* Reset button — show if balance is below 1000 OR if on free demo */}
+                  {(account?.loginid?.startsWith('DEMO_') && (account?.balance ?? 0) < 1000) && (
                     <button
-                      type="button"
                       onClick={onResetDemoBalance}
                       disabled={botState.isRunning}
                       className="py-1.5 px-3 bg-amber-950/40 hover:bg-amber-900/30 text-amber-400 hover:text-amber-300 border border-amber-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -495,144 +485,164 @@ export function BotTrader({
                       ↺ RESET $1,000
                     </button>
                   )}
+                  {/* Disconnect button — shown when a real Deriv account is linked but in demo mode */}
+                  {account && !account.loginid?.startsWith('DEMO_') && (
+                    <button
+                      onClick={onDeauthorize}
+                      className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
+                    >
+                      DISCONNECT
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
 
-              <p className="text-xs text-slate-500 font-sans leading-relaxed">
-                {account?.loginid?.startsWith('DEMO_')
-                  ? 'You are trading on a free demo account. Link your Deriv API token below to switch to your real or Deriv demo account.'
-                  : 'Provide your private Deriv API Token to enable automated trades. Generating a token with "read" and "trade" scopes is required.'}
+              <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
+                {account && !account.loginid?.startsWith('DEMO_')
+                  ? `Trading in demo mode with your connected Deriv account (${account.loginid}). Switch to Real above to trade with live funds.`
+                  : 'You are on the free demo account. Flip the toggle above to link your Deriv API token and trade with real funds.'}
               </p>
-
-              <div className="p-3 bg-slate-950/35 border border-slate-800/60 rounded-xl space-y-1.5 text-left">
-                <div className="text-[10px] font-mono text-amber-500 font-bold uppercase tracking-wider flex items-center gap-1">
-                  💡 HOW TO GET YOUR API TOKEN:
-                </div>
-                <ol className="list-decimal list-inside text-[11px] text-slate-400 space-y-1 font-sans">
-                  <li>Log in to your Deriv Account (Demo or Real portfolio).</li>
-                  <li>Go to <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline font-mono inline-flex items-center gap-1">Deriv Settings → API Token <ExternalLink className="w-3 h-3" /></a>.</li>
-                  <li>Tick BOTH the <span className="text-slate-300 font-semibold">"Read"</span> and <span className="text-slate-300 font-semibold">"Trade"</span> checkboxes.</li>
-                  <li>Enter a token name (e.g., <code className="bg-slate-900 px-1 py-0.5 rounded text-indigo-300">NexScan IQ Bot</code>) and click <span className="text-slate-300 font-semibold">Create</span>.</li>
-                  <li>Copy the token and paste it below to trade. You can use Demo/Virtual tokens to test with fake funds first!</li>
-                </ol>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center justify-between p-3.5 bg-emerald-950/25 rounded-xl border border-emerald-900/40">
-                <div className="space-y-0.5 text-left">
-                  <div className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                    🚀 DON'T HAVE A DERIV ACCOUNT?
-                  </div>
-                  <p className="text-[11px] text-slate-400">Create your free Deriv account immediately using our sponsor link, then return here to authorize your token!</p>
-                </div>
-                <a
-                  href="https://deriv.partners/rx?sidc=C6D4FA86-827B-4AAF-844B-344F9FE57A0F&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU334564"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto shrink-0 text-center py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[10px] uppercase font-black tracking-wider rounded-lg shadow-md cursor-pointer transition-all active:scale-97 flex items-center justify-center gap-1.5"
-                >
-                  Create free Account <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-
-              {authorizedWsStatus === 'error' && (
-                <div className="flex gap-2.5 p-3.5 rounded-xl bg-rose-950/20 border border-rose-900/40 text-xs text-rose-200">
-                  <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <div className="font-bold font-sans">Token Verification Failed</div>
-                    <p className="text-slate-300 font-sans leading-relaxed">
-                      The supplied token was rejected by Deriv's secure server. Please ensure you copied the entire token correctly without any extra spaces or characters, and that the token has both <span className="font-bold text-rose-300">"Read"</span> and <span className="font-bold text-rose-300">"Trade"</span> scopes enabled.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
-                  <input
-                    type={showToken ? 'text' : 'password'}
-                    placeholder="Input Deriv API Token (e.g. mYSeCuReToKeN123)"
-                    value={tokenInput}
-                    onChange={(e) => setTokenInput(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl py-2.5 pl-10 pr-12 text-xs font-mono text-slate-200 placeholder-slate-600 outline-none transition-colors"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowToken(!showToken)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-500 hover:text-slate-300 cursor-pointer"
-                  >
-                    {showToken ? 'HIDE' : 'SHOW'}
-                  </button>
-                </div>
-                
-                <button
-                  type="submit"
-                  disabled={!tokenInput.trim()}
-                  className="sm:w-auto py-2.5 px-6 bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-xs font-bold rounded-xl border border-transparent shadow-lg shadow-indigo-900/20 active:scale-97 cursor-pointer transition-all disabled:opacity-50"
-                >
-                  AUTHORIZE SESSION
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Secure SSL local transport • Kept private
-              </div>
-            </form>
-          ) : (
-            /* Real Deriv account connected */
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-slate-950 rounded-xl border border-slate-850">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-emerald-950/30 border border-emerald-900/40 flex items-center justify-center">
-                    <Wallet className="w-4.5 h-4.5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">
-                      {botConfig.isDemo ? 'Demo Balance' : 'Live Balance'}
-                    </span>
-                    <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
-                      ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {account.currency}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  onClick={onDeauthorize}
-                  className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
-                >
-                  DISCONNECT
-                </button>
-              </div>
-
-              {/* Automatic preset triggers based on account sizes */}
-              <div>
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest font-bold mb-2 block">
-                  🛡️ Smart Presets (Based on Current Account Balance)
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => applyPresetParams('low')}
-                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                  >
-                    <div className="text-[9px] font-mono font-bold text-amber-400">Low Risk</div>
-                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake $0.35</div>
-                  </button>
-                  <button
-                    onClick={() => applyPresetParams('balanced')}
-                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                  >
-                    <div className="text-[9px] font-mono font-bold text-indigo-400">Balanced</div>
-                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 1%</div>
-                  </button>
-                  <button
-                    onClick={() => applyPresetParams('pro')}
-                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                  >
-                    <div className="text-[9px] font-mono font-bold text-purple-400">Pro Power</div>
-                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 2%</div>
-                  </button>
-                </div>
-              </div>
             </div>
+
+          ) : (
+            /* ── REAL SIDE ── */
+            <>
+              {/* If a real Deriv account is already connected — show balance + disconnect */}
+              {account && !account.loginid?.startsWith('DEMO_') ? (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-slate-950 rounded-xl border border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-950/30 border border-emerald-900/40 flex items-center justify-center">
+                        <Wallet className="w-4.5 h-4.5 text-emerald-400" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Live Balance</span>
+                        <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
+                          ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {account.currency}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={onDeauthorize}
+                      className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
+                    >
+                      DISCONNECT
+                    </button>
+                  </div>
+
+                  {/* Smart Presets */}
+                  <div>
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest font-bold mb-2 block">
+                      🛡️ Smart Presets (Based on Current Account Balance)
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      <button
+                        onClick={() => applyPresetParams('low')}
+                        className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
+                      >
+                        <div className="text-[9px] font-mono font-bold text-amber-400">Low Risk</div>
+                        <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake $0.35</div>
+                      </button>
+                      <button
+                        onClick={() => applyPresetParams('balanced')}
+                        className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
+                      >
+                        <div className="text-[9px] font-mono font-bold text-indigo-400">Balanced</div>
+                        <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 1%</div>
+                      </button>
+                      <button
+                        onClick={() => applyPresetParams('pro')}
+                        className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
+                      >
+                        <div className="text-[9px] font-mono font-bold text-purple-400">Pro Power</div>
+                        <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 2%</div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              ) : (
+                /* No real account connected yet — show token authorization form */
+                <form onSubmit={handleAuthorizeSubmit} className="space-y-4">
+                  <p className="text-xs text-slate-500 font-sans leading-relaxed">
+                    Provide your Deriv API Token to enable live automated trades. Generate a token with <span className="text-slate-300 font-semibold">"Read"</span> and <span className="text-slate-300 font-semibold">"Trade"</span> scopes.
+                  </p>
+
+                  <div className="p-3 bg-slate-950/35 border border-slate-800/60 rounded-xl space-y-1.5 text-left">
+                    <div className="text-[10px] font-mono text-amber-500 font-bold uppercase tracking-wider flex items-center gap-1">
+                      💡 HOW TO GET YOUR API TOKEN:
+                    </div>
+                    <ol className="list-decimal list-inside text-[11px] text-slate-400 space-y-1 font-sans">
+                      <li>Log in to your Deriv Account (Demo or Real portfolio).</li>
+                      <li>Go to <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 underline font-mono inline-flex items-center gap-1">Deriv Settings → API Token <ExternalLink className="w-3 h-3" /></a>.</li>
+                      <li>Tick BOTH the <span className="text-slate-300 font-semibold">"Read"</span> and <span className="text-slate-300 font-semibold">"Trade"</span> checkboxes.</li>
+                      <li>Enter a token name (e.g., <code className="bg-slate-900 px-1 py-0.5 rounded text-indigo-300">NexScan IQ Bot</code>) and click <span className="text-slate-300 font-semibold">Create</span>.</li>
+                      <li>Copy and paste it below to authorize live trading.</li>
+                    </ol>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center justify-between p-3.5 bg-emerald-950/25 rounded-xl border border-emerald-900/40">
+                    <div className="space-y-0.5 text-left">
+                      <div className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                        🚀 DON'T HAVE A DERIV ACCOUNT?
+                      </div>
+                      <p className="text-[11px] text-slate-400">Create your free Deriv account using our sponsor link, then return to authorize your token!</p>
+                    </div>
+                    <a
+                      href="https://deriv.partners/rx?sidc=C6D4FA86-827B-4AAF-844B-344F9FE57A0F&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU334564"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto shrink-0 text-center py-2 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[10px] uppercase font-black tracking-wider rounded-lg shadow-md cursor-pointer transition-all active:scale-97 flex items-center justify-center gap-1.5"
+                    >
+                      Create free Account <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+
+                  {authorizedWsStatus === 'error' && (
+                    <div className="flex gap-2.5 p-3.5 rounded-xl bg-rose-950/20 border border-rose-900/40 text-xs text-rose-200">
+                      <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <div className="font-bold font-sans">Token Verification Failed</div>
+                        <p className="text-slate-300 font-sans leading-relaxed">
+                          The token was rejected. Ensure it's copied correctly and has both <span className="font-bold text-rose-300">"Read"</span> and <span className="font-bold text-rose-300">"Trade"</span> scopes.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-500" />
+                      <input
+                        type={showToken ? 'text' : 'password'}
+                        placeholder="Paste Deriv API Token here..."
+                        value={tokenInput}
+                        onChange={(e) => setTokenInput(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl py-2.5 pl-10 pr-12 text-xs font-mono text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowToken(!showToken)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-mono font-bold text-slate-500 hover:text-slate-300 cursor-pointer"
+                      >
+                        {showToken ? 'HIDE' : 'SHOW'}
+                      </button>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={!tokenInput.trim()}
+                      className="sm:w-auto py-2.5 px-6 bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-xs font-bold rounded-xl border border-transparent shadow-lg shadow-indigo-900/20 active:scale-97 cursor-pointer transition-all disabled:opacity-50"
+                    >
+                      AUTHORIZE SESSION
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Secure SSL local transport • Kept private
+                  </div>
+                </form>
+              )}
+            </>
           )}
         </div>
 
