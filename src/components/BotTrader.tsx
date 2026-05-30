@@ -399,10 +399,41 @@ export function BotTrader({
             )}
           </div>
 
-          {!account ? (
+          {/* Show token form if: no account, OR on demo account */}
+          {(!account || account.loginid?.startsWith('DEMO_')) ? (
             <form onSubmit={handleAuthorizeSubmit} className="space-y-4">
+
+              {/* Demo account banner — shown when user already has a demo balance */}
+              {account?.loginid?.startsWith('DEMO_') && (
+                <div className="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-amber-950/30 border border-amber-900/40 flex items-center justify-center">
+                      <Wallet className="w-4.5 h-4.5 text-amber-400" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Demo Balance</span>
+                      <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
+                        ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+                      </span>
+                    </div>
+                  </div>
+                  {account.balance < 1000 && (
+                    <button
+                      type="button"
+                      onClick={onResetDemoBalance}
+                      disabled={botState.isRunning}
+                      className="py-1.5 px-3 bg-amber-950/40 hover:bg-amber-900/30 text-amber-400 hover:text-amber-300 border border-amber-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      ↺ RESET $1,000
+                    </button>
+                  )}
+                </div>
+              )}
+
               <p className="text-xs text-slate-500 font-sans leading-relaxed">
-                Provide your private Deriv API Token to enable automated trades. Generating a token with <span className="text-slate-300 font-semibold">"read"</span> and <span className="text-slate-300 font-semibold">"trade"</span> scopes is required. Your tokens are serialized strictly client-side.
+                {account?.loginid?.startsWith('DEMO_')
+                  ? 'You are trading on a free demo account. Link your Deriv API token below to switch to your real or Deriv demo account.'
+                  : 'Provide your private Deriv API Token to enable automated trades. Generating a token with "read" and "trade" scopes is required.'}
               </p>
 
               <div className="p-3 bg-slate-950/35 border border-slate-800/60 rounded-xl space-y-1.5 text-left">
@@ -480,6 +511,7 @@ export function BotTrader({
               </div>
             </form>
           ) : (
+            /* Real Deriv account connected */
             <div className="space-y-4">
               <div className="flex justify-between items-center p-3 bg-slate-950 rounded-xl border border-slate-850">
                 <div className="flex items-center gap-3">
@@ -488,35 +520,19 @@ export function BotTrader({
                   </div>
                   <div>
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">
-                      {account.loginid?.startsWith('DEMO_') ? 'Demo Balance' : 'Retrieving Balance'}
+                      {account.is_virtual ? 'Deriv Demo' : 'Live Balance'}
                     </span>
                     <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
                       ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {account.currency}
                     </span>
                   </div>
                 </div>
-
-                <div className="flex flex-col gap-1.5 items-end">
-                  {/* Reset demo balance button — shown only for demo users when balance is below $1000 */}
-                  {account.loginid?.startsWith('DEMO_') && account.balance < 1000 && (
-                    <button
-                      onClick={onResetDemoBalance}
-                      disabled={botState.isRunning}
-                      className="py-1.5 px-3 bg-amber-950/40 hover:bg-amber-900/30 text-amber-400 hover:text-amber-300 border border-amber-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="Reset demo balance back to $1,000"
-                    >
-                      ↺ RESET $1,000
-                    </button>
-                  )}
-                  {!account.loginid?.startsWith('DEMO_') && (
-                    <button
-                      onClick={onDeauthorize}
-                      className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
-                    >
-                      DISCONNECT
-                    </button>
-                  )}
-                </div>
+                <button
+                  onClick={onDeauthorize}
+                  className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
+                >
+                  DISCONNECT
+                </button>
               </div>
 
               {/* Automatic preset triggers based on account sizes */}
