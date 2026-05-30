@@ -1,9 +1,4 @@
-/**
- * Header.tsx — NexScan IQ Markets
- * Redesigned: slim top bar with logo, status and controls
- */
-
-import { Activity, Sparkles, Clock, Shield, HelpCircle, Square } from 'lucide-react';
+import { Shield, Sparkles, Activity, Clock, Wifi, User, HelpCircle, Send } from 'lucide-react';
 import { AccountInfo } from '../types';
 import nexscanLogo from '../assets/images/nexscan_iq_logo_main.png';
 
@@ -34,132 +29,142 @@ export function Header({
   isTelegram = false,
   tgUser = null,
 }: HeaderProps) {
-  const statusMap = {
-    idle:         { dot: '#475569', label: 'Idle' },
-    connecting:   { dot: '#f59e0b', label: 'Connecting' },
-    connected:    { dot: '#10b981', label: 'Live' },
-    error:        { dot: '#f43f5e', label: 'Error' },
-    disconnected: { dot: '#475569', label: 'Offline' },
+  const statusColorMap = {
+    idle: 'bg-slate-500 border-slate-400 text-slate-400',
+    connecting: 'bg-amber-500 border-amber-400 text-amber-500 animate-pulse',
+    connected: 'bg-emerald-500 border-emerald-400 text-emerald-400',
+    error: 'bg-rose-500 border-rose-400 text-rose-500 animate-bounce',
+    disconnected: 'bg-slate-600 border-slate-500 text-slate-500',
   };
-  const { dot, label } = statusMap[connectionStatus];
+
+  const statusLabelMap = {
+    idle: 'IDLE',
+    connecting: 'CONNECTING...',
+    connected: 'LIVE SCANNING',
+    error: 'WS ERROR',
+    disconnected: 'WS DISCONNECTED',
+  };
 
   return (
-    <header style={{
-      position: 'sticky', top: 0, zIndex: 50,
-      background: 'rgba(8, 15, 26, 0.92)',
-      backdropFilter: 'blur(12px)',
-      borderBottom: '1px solid rgba(255,255,255,0.07)',
-      padding: '10px 12px',
-      fontFamily: '"Inter", system-ui, sans-serif',
-    }}>
-      {/* Row 1: Logo + controls */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <div style={{ position: 'relative' }}>
-            <img src={nexscanLogo} alt="NexScan IQ" style={{
-              width: 36, height: 36, borderRadius: 9,
-              objectFit: 'contain', background: '#0f172a',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }} />
-            <span style={{
-              position: 'absolute', top: -3, right: -3,
-              width: 9, height: 9, borderRadius: '50%',
-              background: dot, border: '2px solid #080f1a',
-              display: 'block',
-            }} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 14, fontWeight: 800, fontFamily: 'monospace', color: '#e2e8f0', letterSpacing: '-0.01em' }}>
-                NEXSCAN <span style={{ color: '#6366f1' }}>IQ</span>
-              </span>
-              <span style={{
-                fontSize: 9, fontFamily: 'monospace', fontWeight: 700,
-                padding: '2px 6px', borderRadius: 4,
-                background: '#052e16', color: '#10b981',
-                border: '1px solid #10b98133', letterSpacing: '0.05em',
-              }}>
-                MARKETS
-              </span>
-              {isTelegram && (
-                <span style={{
-                  fontSize: 9, fontFamily: 'monospace', padding: '2px 6px',
-                  borderRadius: 4, background: '#0c1a2e', color: '#38bdf8',
-                  border: '1px solid #38bdf833',
-                }}>
-                  TG {tgUser?.first_name ? `· ${tgUser.first_name}` : ''}
-                </span>
-              )}
-            </div>
-            <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#334155', marginTop: 1 }}>
-              Digit Over · Martingale Recovery
-            </div>
-          </div>
+    <header className="bg-slate-950/70 backdrop-blur-md border-b border-slate-800/60 sticky top-0 z-50 px-4 py-3 md:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <img
+            src={nexscanLogo}
+            alt="NexScan IQ Markets Logo"
+            className="w-12 h-12 rounded-xl shadow-lg border border-slate-800/80 object-contain bg-slate-900/60"
+            referrerPolicy="no-referrer"
+          />
+          <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-indigo-500 border-2 border-slate-950 rounded-full animate-ping" />
+          <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-indigo-500 border-2 border-slate-950 rounded-full" />
         </div>
-
-        {/* Right controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button onClick={onOpenAdminHub} title="Administrator" style={{
-            background: 'transparent', border: '1px solid #1e293b',
-            borderRadius: 8, width: 32, height: 32,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#475569',
-          }}>
-            <Shield size={14} color="#10b981" />
-          </button>
-          <button onClick={onOpenOnboarding} title="How to Use" style={{
-            background: 'transparent', border: '1px solid #1e293b',
-            borderRadius: 8, width: 32, height: 32,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#475569',
-          }}>
-            <HelpCircle size={14} color="#6366f1" />
-          </button>
-          {botRunning && (
-            <button onClick={onStopAll} style={{
-              background: '#1a0000', border: '1px solid #f43f5e55',
-              borderRadius: 8, padding: '6px 12px',
-              display: 'flex', alignItems: 'center', gap: 5,
-              cursor: 'pointer', color: '#f43f5e',
-              fontSize: 11, fontFamily: 'monospace', fontWeight: 700,
-            }}>
-              <Square size={11} fill="#f43f5e" /> STOP
-            </button>
-          )}
+        
+        <div>
+          <h1 className="font-sans font-extrabold text-lg text-slate-100 tracking-tight leading-none flex flex-wrap items-center gap-2">
+            NEXSCAN <span className="text-cyan-400">IQ</span>
+            <span className="text-xs font-mono font-bold tracking-widest bg-emerald-950/60 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-800/60">
+              MARKETS
+            </span>
+            {isTelegram && (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-sky-500/10 border border-sky-500/30 text-sky-450 font-mono text-[9px] font-bold rounded-lg animate-pulse tracking-wide uppercase">
+                <Send className="w-2.5 h-2.5 rotate-45 text-sky-400" /> WebApp {tgUser?.first_name ? `(${tgUser.first_name})` : ''}
+              </span>
+            )}
+          </h1>
+          <p className="text-[10px] font-mono text-slate-500 tracking-tight mt-1">
+            DIGIT OVER (PRED: 4) • TARGET: LAST DIGIT 4 | 5 & RISE • MARTINGALE RECOVERY
+          </p>
         </div>
       </div>
 
-      {/* Row 2: Stats strip */}
-      <div style={{
-        display: 'flex', gap: 6,
-        background: '#0a0f1e', borderRadius: 9,
-        border: '1px solid rgba(255,255,255,0.05)',
-        padding: '8px 12px',
-      }}>
-        {[
-          { Icon: Activity, value: ticksCount.toLocaleString(), label: 'Ticks', color: '#6366f1' },
-          { Icon: Sparkles, value: signalsCount.toString(), label: 'Signals', color: '#f59e0b' },
-          { Icon: Clock, value: sessionTime, label: 'Session', color: '#64748b' },
-        ].map(({ Icon, value, label: l, color }, i) => (
-          <div key={i} style={{
-            flex: 1, display: 'flex', alignItems: 'center', gap: 6,
-            paddingRight: i < 2 ? 6 : 0,
-            borderRight: i < 2 ? '1px solid #1e293b' : 'none',
-          }}>
-            <Icon size={12} color={color} />
-            <div>
-              <div style={{ fontSize: 12, fontFamily: 'monospace', fontWeight: 700, color: '#e2e8f0', lineHeight: 1.1 }}>{value}</div>
-              <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#334155', lineHeight: 1.1 }}>{l}</div>
+      <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3 md:gap-5 w-full sm:w-auto">
+        <div className="flex items-center gap-3 bg-slate-900/65 px-4 py-2 rounded-xl border border-slate-800/80 text-xs text-slate-400">
+          <div className="flex flex-col">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Global Ticks</span>
+            <span className="font-mono text-sm font-bold text-slate-200 mt-0.5 flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-indigo-500" />
+              {ticksCount.toLocaleString()}
+            </span>
+          </div>
+          
+          <div className="w-px h-7 bg-slate-800" />
+          
+          <div className="flex flex-col">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Scanner Signals</span>
+            <span className="font-mono text-sm font-bold text-amber-400 mt-0.5 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              {signalsCount}
+            </span>
+          </div>
+          
+          <div className="w-px h-7 bg-slate-800" />
+          
+          <div className="flex flex-col">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Active Time</span>
+            <span className="font-mono text-sm font-bold text-slate-200 mt-0.5 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-slate-500" />
+              {sessionTime}
+            </span>
+          </div>
+        </div>
+
+        {/* Account Details Panel */}
+        {account && (
+          <div className="flex items-center gap-2.5 bg-slate-900/40 border border-slate-800/80 px-3 py-1.5 rounded-xl text-xs">
+            <div className="w-7 h-7 rounded-lg bg-indigo-950/40 border border-indigo-800/50 flex items-center justify-center">
+              <User className="w-4 h-4 text-indigo-400" />
+            </div>
+            <div className="text-left">
+              <div className="text-[10px] font-mono font-medium text-slate-200 leading-none">
+                {account.fullname}
+              </div>
+              <div className="flex items-center gap-1 text-[9px] font-mono text-slate-500 mt-0.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${account.is_virtual ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+                {account.loginid} ({account.is_virtual ? 'Demo' : 'Real'})
+              </div>
             </div>
           </div>
-        ))}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 5,
-          paddingLeft: 6, borderLeft: '1px solid #1e293b',
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: dot, display: 'inline-block', flexShrink: 0 }} />
-          <span style={{ fontSize: 9, fontFamily: 'monospace', color: dot }}>{label}</span>
+        )}
+
+        <div className="flex items-center gap-2">
+          {/* Administrator Settings Button */}
+          <button
+            onClick={onOpenAdminHub}
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-900/65 hover:bg-slate-850 hover:text-emerald-400 border border-slate-800 hover:border-slate-705 text-slate-300 rounded-xl font-mono text-[11px] font-bold tracking-wider cursor-pointer transition-colors active:scale-97"
+            title="Configure Custom App ID, Affiliate Token, and Broker Fees"
+          >
+            <Shield className="w-4 h-4 text-emerald-400" />
+            <span>ADMINISTRATOR</span>
+          </button>
+
+          {/* Onboarding Guide Button */}
+          <button
+            onClick={onOpenOnboarding}
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-900/65 hover:bg-slate-850 hover:text-indigo-400 border border-slate-800 hover:border-slate-705 text-slate-300 rounded-xl font-mono text-[11px] font-bold tracking-wider cursor-pointer transition-colors active:scale-97"
+            title="Open Interactive Onboarding & Guide"
+          >
+            <HelpCircle className="w-4 h-4 text-indigo-400 animate-pulse" />
+            <span>HOW TO USE</span>
+          </button>
+
+          {/* Signal Indicator Dot */}
+          <div className="flex items-center gap-2 bg-slate-900/65 border border-slate-800/80 px-3 py-2 rounded-xl text-xs">
+            <span className={`w-2 h-2 rounded-full ${statusColorMap[connectionStatus].split(' ')[0]}`} />
+            <span className="font-mono font-bold tracking-wider text-[11px] text-slate-300">
+              {statusLabelMap[connectionStatus]}
+            </span>
+          </div>
+
+          {/* Master Stop Button */}
+          {botRunning && (
+            <button
+              id="headerStopBtn"
+              onClick={onStopAll}
+              className="px-4 py-2 border border-rose-500/40 hover:border-rose-500 text-rose-400 hover:text-rose-100 bg-rose-955/20 hover:bg-rose-900/50 rounded-xl font-mono text-xs font-bold tracking-widest cursor-pointer transition-all duration-150 shadow-md shadow-rose-950/10 active:scale-95"
+            >
+              STOP BOT
+            </button>
+          )}
         </div>
       </div>
     </header>
