@@ -507,6 +507,20 @@ export default function App() {
     }
   };
 
+  const handleResetDemoBalance = async () => {
+    const userId = sessionUserId;
+    try {
+      await fetch('/api/reset-demo-balance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tgUserId: userId }),
+      });
+      addLog('success', '🔄 Demo balance reset to $1,000.00 USD.');
+    } catch(e) {
+      addLog('error', 'Failed to reset demo balance.');
+    }
+  };
+
   const handleCloseOnboarding = () => {
     setOnboardingOpen(false);
     localStorage.setItem(STORAGE_KEY_ONBOARDING, 'true');
@@ -742,6 +756,7 @@ export default function App() {
                     setIsAdvancedMode(val);
                     handleUpdateConfig({ tradingMode: val ? 'advanced' : 'normal' });
                   }}
+                  onResetDemoBalance={handleResetDemoBalance}
                 />
                 <TermsAgreementModal
                   isOpen={!termsAccepted}
