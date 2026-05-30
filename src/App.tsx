@@ -844,23 +844,16 @@ export default function App() {
                   {activeTab === 'intelligence' && <span className="w-1 h-1 rounded-full bg-indigo-400 mt-0.5" />}
                 </button>
 
-                {/* History */}
+                {/* Wallet */}
                 <button
-                  onClick={() => setActiveTab('history')}
-                  className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all cursor-pointer relative ${
-                    activeTab === 'history' ? 'text-indigo-400' : 'text-slate-600 hover:text-slate-400'
+                  onClick={() => setActiveTab('wallet')}
+                  className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all cursor-pointer ${
+                    activeTab === 'wallet' ? 'text-emerald-400' : 'text-slate-600 hover:text-slate-400'
                   }`}
                 >
-                  <div className="relative">
-                    <History className={`w-5 h-5 transition-all ${activeTab === 'history' ? 'scale-110' : ''}`} />
-                    {pastTrades.length > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-indigo-500 rounded-full text-[7px] font-black text-white flex items-center justify-center">
-                        {pastTrades.length > 9 ? '9+' : pastTrades.length}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">History</span>
-                  {activeTab === 'history' && <span className="w-1 h-1 rounded-full bg-indigo-400 mt-0.5" />}
+                  <Wallet className={`w-5 h-5 transition-all ${activeTab === 'wallet' ? 'scale-110' : ''}`} />
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">Wallet</span>
+                  {activeTab === 'wallet' && <span className="w-1 h-1 rounded-full bg-emerald-400 mt-0.5" />}
                 </button>
 
                 {/* Trader — raised center button */}
@@ -884,16 +877,23 @@ export default function App() {
                   {activeTab === 'trader' && <span className="w-1 h-1 rounded-full bg-indigo-400" />}
                 </button>
 
-                {/* Wallet */}
+                {/* History */}
                 <button
-                  onClick={() => setActiveTab('wallet')}
-                  className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all cursor-pointer ${
-                    activeTab === 'wallet' ? 'text-emerald-400' : 'text-slate-600 hover:text-slate-400'
+                  onClick={() => setActiveTab('history')}
+                  className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all cursor-pointer relative ${
+                    activeTab === 'history' ? 'text-indigo-400' : 'text-slate-600 hover:text-slate-400'
                   }`}
                 >
-                  <Wallet className={`w-5 h-5 transition-all ${activeTab === 'wallet' ? 'scale-110' : ''}`} />
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">Wallet</span>
-                  {activeTab === 'wallet' && <span className="w-1 h-1 rounded-full bg-emerald-400 mt-0.5" />}
+                  <div className="relative">
+                    <History className={`w-5 h-5 transition-all ${activeTab === 'history' ? 'scale-110' : ''}`} />
+                    {pastTrades.length > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-indigo-500 rounded-full text-[7px] font-black text-white flex items-center justify-center">
+                        {pastTrades.length > 9 ? '9+' : pastTrades.length}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">History</span>
+                  {activeTab === 'history' && <span className="w-1 h-1 rounded-full bg-indigo-400 mt-0.5" />}
                 </button>
 
                 {/* Premium */}
