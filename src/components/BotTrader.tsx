@@ -164,186 +164,205 @@ export function BotTrader({
           ══════════════════════════════════════════ */}
       <div className="rounded-2xl overflow-hidden border border-slate-800 bg-slate-900">
 
-        {/* ── Toggle: Demo / Real ── */}
-        <div className="grid grid-cols-2 p-1.5 gap-1.5 bg-slate-950/60">
+        {/* ── Toggle: Demo / Real — matches illustration exactly ── */}
+        <div className="flex p-3 gap-2 bg-slate-900">
           <button
             onClick={() => { if (!botState.isRunning) onUpdateConfig({ isDemo: true }); }}
             disabled={botState.isRunning}
-            className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-200 disabled:cursor-not-allowed ${
               isOnDemo
-                ? 'bg-slate-800 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-300'
-            } disabled:cursor-not-allowed`}
+                ? 'border-indigo-500 text-indigo-400 bg-indigo-950/20'
+                : 'border-slate-700 text-slate-500 bg-transparent hover:border-slate-600 hover:text-slate-400'
+            }`}
           >
-            <FlaskConical className={`w-4 h-4 ${isOnDemo ? 'text-cyan-400' : 'text-slate-600'}`} />
+            <FlaskConical className="w-4 h-4" />
             Demo
           </button>
           <button
             onClick={() => { if (!botState.isRunning) onUpdateConfig({ isDemo: false }); }}
             disabled={botState.isRunning}
-            className={`flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-200 disabled:cursor-not-allowed ${
               !isOnDemo
-                ? 'bg-slate-800 text-white shadow-sm'
-                : 'text-slate-500 hover:text-slate-300'
-            } disabled:cursor-not-allowed`}
+                ? 'border-emerald-500 text-emerald-400 bg-emerald-950/20'
+                : 'border-slate-700 text-slate-500 bg-transparent hover:border-slate-600 hover:text-slate-400'
+            }`}
           >
-            <Shield className={`w-4 h-4 ${!isOnDemo ? 'text-emerald-400' : 'text-slate-600'}`} />
+            <Shield className="w-4 h-4" />
             Real
           </button>
         </div>
 
-        {/* ── DEMO VIEW ── */}
+        <div className="border-t border-slate-800" />
+
+        {/* ══ DEMO VIEW ══ */}
         {isOnDemo && (
-          <div className="p-5 space-y-4">
-            {/* Icon + label */}
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-cyan-950/40 border border-cyan-900/40 flex items-center justify-center">
-                <FlaskConical className="w-5 h-5 text-cyan-400" />
+          <div className="p-6 space-y-5">
+            {/* Centered icon + heading — matches illustration */}
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-indigo-950/50 border-2 border-indigo-800/60 flex items-center justify-center">
+                <FlaskConical className="w-7 h-7 text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-200">Demo Account</p>
-                <p className="text-xs text-slate-500">Practice trading with virtual funds</p>
+                <p className="text-lg font-bold text-slate-100">Demo Account</p>
+                <p className="text-xs text-slate-500 mt-0.5">Practice trading with virtual funds.</p>
               </div>
             </div>
 
-            {/* Divider */}
             <div className="border-t border-slate-800" />
 
-            {/* Balance */}
+            {/* Balance — left-aligned label, big number, profit line */}
             <div>
-              <p className="text-xs font-mono text-slate-500 uppercase tracking-widest mb-1">Demo Balance</p>
-              <p className="text-4xl font-black font-mono text-white tracking-tight">
+              <p className="text-xs text-slate-500 mb-1">Demo Balance</p>
+              <p className="text-4xl font-black text-slate-100 tracking-tight">
                 ${demoBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                <span className="text-base font-normal text-slate-500 ml-2">USD</span>
               </p>
-              {demoBalance !== 1000 && (
-                <p className={`text-sm font-mono mt-1 ${demoBalance >= 1000 ? 'text-emerald-400' : 'text-red-400'}`}>
-                  {demoBalance >= 1000 ? '+' : ''}${(demoBalance - 1000).toFixed(2)} from start
-                </p>
-              )}
+              {/* Always show profit/loss vs $1,000 start — matches illustration */}
+              <p className={`text-sm font-semibold mt-1 ${demoBalance >= 1000 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {demoBalance >= 1000 ? '+' : ''}${(demoBalance - 1000).toFixed(2)}{' '}
+                <span className="font-normal opacity-80">({demoBalance >= 1000 ? 'Profit' : 'Loss'})</span>
+              </p>
             </div>
 
-            {/* Info box */}
-            <div className="flex gap-2.5 p-3 rounded-xl bg-cyan-950/20 border border-cyan-900/30">
-              <div className="w-4 h-4 rounded-full bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-cyan-400 text-[9px] font-black">i</span>
+            {/* Info note — matches illustration's blue info box */}
+            <div className="flex gap-2.5 p-3.5 rounded-xl bg-indigo-950/30 border border-indigo-900/40">
+              <div className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-500/50 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-indigo-400 text-[10px] font-black">i</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Your demo balance starts at $1,000.00 and changes based on your trading performance. No real money involved.
+                Your demo balance starts at $1,000.00 and changes based on your trading performance.
               </p>
             </div>
 
-            {/* Reset button — only when below $1000 */}
+            {/* Reset — only shown when below $1,000 */}
             {demoBalance < 1000 && (
               <button onClick={onResetDemoBalance} disabled={botState.isRunning}
-                className="w-full py-2.5 rounded-xl border border-slate-700 text-slate-400 text-xs font-mono font-bold hover:bg-slate-800 hover:text-slate-200 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
+                className="w-full py-2.5 rounded-xl border border-slate-700 text-slate-400 text-xs font-bold hover:bg-slate-800 hover:text-slate-200 disabled:opacity-40 transition-colors flex items-center justify-center gap-2">
                 <RotateCcw className="w-3.5 h-3.5" /> Reset to $1,000.00
               </button>
             )}
           </div>
         )}
 
-        {/* ── REAL VIEW ── */}
+        {/* ══ REAL VIEW ══ */}
         {!isOnDemo && (
-          <div className="p-5 space-y-4">
-            {/* Icon + label */}
-            <div className="flex items-center gap-3">
-              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${
-                realAccount
-                  ? 'bg-emerald-950/40 border border-emerald-900/40'
-                  : 'bg-slate-800 border border-slate-700'
-              }`}>
-                <Shield className={`w-5 h-5 ${realAccount ? 'text-emerald-400' : 'text-slate-500'}`} />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-200">Real Account</p>
-                <p className={`text-xs font-mono ${realAccount ? 'text-emerald-500' : 'text-slate-500'}`}>
-                  {realAccount ? `Connected · ${realAccount.loginid}` : 'Connect your Deriv account'}
-                </p>
-              </div>
-            </div>
+          <div className="p-6 space-y-5">
 
-            <div className="border-t border-slate-800" />
-
-            {/* NOT connected — token form */}
+            {/* ── NOT CONNECTED ── */}
             {!realAccount && (
-              <form onSubmit={handleAuthorizeSubmit} className="space-y-3">
-                <div>
-                  <label className="text-xs font-mono text-slate-400 uppercase tracking-widest block mb-2">
-                    Enter your Deriv Token
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showToken ? 'text' : 'password'}
-                      placeholder="Enter Deriv token..."
-                      value={tokenInput}
-                      onChange={e => setTokenInput(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-600 rounded-xl py-3.5 pl-4 pr-12 text-sm font-mono text-slate-200 placeholder-slate-600 outline-none transition-colors"
-                    />
-                    <button type="button" onClick={() => setShowToken(v => !v)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
-                      {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
+              <>
+                {/* Centered icon + heading + subtitle — matches illustration */}
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-16 h-16 rounded-full bg-emerald-950/40 border-2 border-emerald-800/50 flex items-center justify-center">
+                    <Shield className="w-7 h-7 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-slate-100">Real Account</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Connect your Deriv account<br />to trade with real funds.</p>
                   </div>
                 </div>
 
-                {authorizedWsStatus === 'connecting' && (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-indigo-950/30 border border-indigo-900/40 text-xs text-indigo-300">
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" />
-                    Connecting to Deriv...
-                  </div>
-                )}
-                {authorizedWsStatus === 'error' && (
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-red-950/30 border border-red-900/40 text-xs text-red-300">
-                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                    Token rejected — ensure it has Read &amp; Trade scopes.
-                  </div>
-                )}
+                <div className="border-t border-slate-800" />
 
-                <button type="submit" disabled={!tokenInput.trim() || authorizedWsStatus === 'connecting'}
-                  className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-600 text-white text-sm font-bold transition-all flex items-center justify-center gap-2">
-                  <ShieldCheck className="w-4 h-4" />
-                  {authorizedWsStatus === 'connecting' ? 'Connecting...' : 'Connect Account'}
-                </button>
+                {/* Token form — exactly as illustrated */}
+                <form onSubmit={handleAuthorizeSubmit} className="space-y-3">
+                  <div>
+                    <label className="text-sm font-semibold text-slate-300 block mb-2">Enter your Deriv Token</label>
+                    <div className="relative">
+                      <input
+                        type={showToken ? 'text' : 'password'}
+                        placeholder="Enter Deriv token..."
+                        value={tokenInput}
+                        onChange={e => setTokenInput(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-700 focus:border-emerald-600 rounded-xl py-3.5 pl-4 pr-12 text-sm font-mono text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                      />
+                      <button type="button" onClick={() => setShowToken(v => !v)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
+                        {showToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
 
-                <div className="flex items-center justify-between pt-1">
-                  <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer"
-                    className="text-[11px] text-slate-500 hover:text-slate-300 inline-flex items-center gap-1 transition-colors">
-                    <Key className="w-3 h-3" /> Get API token
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                  <a href="https://deriv.partners/rx?sidc=C6D4FA86-827B-4AAF-844B-344F9FE57A0F&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU334564"
-                    target="_blank" rel="noopener noreferrer"
-                    className="text-[11px] text-slate-500 hover:text-slate-300 inline-flex items-center gap-1 transition-colors">
-                    No account? Sign up free <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-              </form>
+                  {authorizedWsStatus === 'connecting' && (
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-indigo-950/30 border border-indigo-900/40 text-xs text-indigo-300">
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin shrink-0" /> Connecting to Deriv...
+                    </div>
+                  )}
+                  {authorizedWsStatus === 'error' && (
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-red-950/30 border border-red-900/40 text-xs text-red-300">
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Token rejected — check Read &amp; Trade scopes.
+                    </div>
+                  )}
+
+                  {/* Solid green Connect button — exactly as illustrated */}
+                  <button type="submit"
+                    disabled={!tokenInput.trim() || authorizedWsStatus === 'connecting'}
+                    className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 disabled:bg-slate-800 disabled:text-slate-600 text-white text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30">
+                    {authorizedWsStatus === 'connecting'
+                      ? <><RefreshCw className="w-4 h-4 animate-spin" /> Connecting...</>
+                      : <><ShieldCheck className="w-4 h-4" /> Connect Account</>
+                    }
+                  </button>
+
+                  <div className="flex items-center justify-between">
+                    <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] text-slate-500 hover:text-slate-300 inline-flex items-center gap-1 transition-colors">
+                      <Key className="w-3 h-3" /> Get API token <ExternalLink className="w-3 h-3" />
+                    </a>
+                    <a href="https://deriv.partners/rx?sidc=C6D4FA86-827B-4AAF-844B-344F9FE57A0F&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU334564"
+                      target="_blank" rel="noopener noreferrer"
+                      className="text-[11px] text-slate-500 hover:text-slate-300 inline-flex items-center gap-1 transition-colors">
+                      No account? Sign up <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </form>
+              </>
             )}
 
-            {/* CONNECTED — balance display */}
+            {/* ── CONNECTED ── */}
             {realAccount && (
-              <div className="space-y-4">
+              <>
+                {/* Centered icon + "Real Account" + green "Connected" status — matches illustration */}
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div className="w-16 h-16 rounded-full bg-emerald-950/40 border-2 border-emerald-600/60 flex items-center justify-center">
+                    <Shield className="w-7 h-7 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-slate-100">Real Account</p>
+                    <p className="text-sm font-semibold text-emerald-400">Connected</p>
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-800" />
+
+                {/* Real balance + profit — matches illustration */}
                 <div>
-                  <p className="text-xs font-mono text-slate-500 uppercase tracking-widest mb-1">Real Balance</p>
-                  <p className="text-4xl font-black font-mono text-white tracking-tight">
+                  <p className="text-xs text-slate-500 mb-1">Real Balance</p>
+                  <p className="text-4xl font-black text-slate-100 tracking-tight">
                     ${realBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     <span className="text-base font-normal text-slate-500 ml-2">{activeCurrency}</span>
                   </p>
+                  {botState.profit !== 0 && (
+                    <p className={`text-sm font-semibold mt-1 ${botState.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {botState.profit >= 0 ? '+' : ''}${botState.profit.toFixed(2)}{' '}
+                      <span className="font-normal opacity-80">({botState.profit >= 0 ? 'Profit' : 'Loss'})</span>
+                    </p>
+                  )}
                 </div>
 
-                <div className="flex gap-2 p-3 rounded-xl bg-emerald-950/20 border border-emerald-900/30">
+                {/* Confirmation note — matches illustration's green info box */}
+                <div className="flex gap-2.5 p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-900/40">
                   <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    This is your actual Deriv account balance. Trades execute with real funds on your account.
+                    This is your actual Deriv account balance.
                   </p>
                 </div>
 
+                {/* Disconnect — subtle, low emphasis */}
                 <button onClick={onDeauthorize} disabled={botState.isRunning}
-                  className="w-full py-2.5 rounded-xl border border-slate-700 text-slate-500 text-xs font-mono font-bold hover:text-red-400 hover:border-red-900/50 disabled:opacity-40 transition-colors">
-                  Disconnect Account
+                  className="w-full py-2 text-xs text-slate-600 hover:text-red-400 font-mono disabled:opacity-40 transition-colors">
+                  Disconnect account
                 </button>
-              </div>
+              </>
             )}
           </div>
         )}
