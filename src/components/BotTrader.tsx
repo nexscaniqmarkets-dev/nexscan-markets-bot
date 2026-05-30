@@ -12,6 +12,8 @@ interface BotTraderProps {
   symbolsState: Record<string, SymbolState>;
   onSelectSymbolForTrading: (symbolId: string, autoStartAfterLoad?: boolean) => void;
   account: AccountInfo | null;
+  demoAccount?: AccountInfo | null;
+  realAccount?: AccountInfo | null;
   botConfig: BotConfig;
   onUpdateConfig: (config: Partial<BotConfig>) => void;
   onAuthorize: (token: string) => void;
@@ -38,6 +40,8 @@ export function BotTrader({
   symbolsState,
   onSelectSymbolForTrading,
   account,
+  demoAccount,
+  realAccount,
   botConfig,
   onUpdateConfig,
   onAuthorize,
@@ -463,10 +467,10 @@ export function BotTrader({
             </div>
           </div>
 
-          {/* ── DEMO SIDE: free demo balance OR connected Deriv demo/real account in demo mode ── */}
+          {/* ── DEMO SIDE ── */}
           {botConfig.isDemo ? (
             <div className="space-y-3">
-              {/* Balance card */}
+              {/* Demo balance card */}
               <div className="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-amber-950/30 border border-amber-900/40 flex items-center justify-center">
@@ -475,13 +479,15 @@ export function BotTrader({
                   <div>
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Demo Balance</span>
                     <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
-                      ${(account?.balance ?? 1000).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+                      ${((demoAccount ?? account)?.balance ?? 1000).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+                    </span>
+                    <span className="text-[9px] font-mono text-amber-600 block mt-0.5">
+                      {(demoAccount ?? account)?.loginid || 'Demo Account'}
                     </span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5">
-                  {/* Reset button — show if balance is below 1000 OR if on free demo */}
-                  {(account?.loginid?.startsWith('DEMO_') && (account?.balance ?? 0) < 1000) && (
+                  {((demoAccount ?? account)?.balance ?? 0) < 1000 && (
                     <button
                       onClick={onResetDemoBalance}
                       disabled={botState.isRunning}
@@ -490,48 +496,66 @@ export function BotTrader({
                       ↺ RESET $1,000
                     </button>
                   )}
-                  {/* Disconnect button — shown when a real Deriv account is linked but in demo mode */}
-                  {account && !account.loginid?.startsWith('DEMO_') && (
-                    <button
-                      onClick={onDeauthorize}
-                      className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
-                    >
-                      DISCONNECT
-                    </button>
-                  )}
                 </div>
               </div>
 
-              <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
-                {account && !account.loginid?.startsWith('DEMO_')
-                  ? `Trading in demo mode with your connected Deriv account (${account.loginid}). Switch to Real above to trade with live funds.`
-                  : 'You are on the free demo account. Flip the toggle above to link your Deriv API token and trade with real funds.'}
-              </p>
+              {/* Real account quick-switch — shown if a real account is already connected */}
+              {realAccount && (
+                <div className="flex items-center justify-between p-3 bg-emerald-950/10 rounded-xl border border-emerald-900/30">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-950/30 border border-emerald-900/40 flex items-center justify-center">
+                      <Wallet className="w-4.5 h-4.5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">
+                        {realAccount.is_virtual ? 'Deriv Demo' : 'Real Account'}
+                      </span>
+                      <span className="text-sm font-mono font-black text-slate-100 mt-1 block">
+                        ${realAccount.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {realAccount.currency}
+                      </span>
+                      <span className="text-[9px] font-mono text-emerald-600 block mt-0.5">{realAccount.loginid}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <button
+                      onClick={() => onUpdateConfig({ isDemo: false })}
+                      disabled={botState.isRunning}
+                      className="py-1.5 px-3 bg-emerald-700 hover:bg-emerald-600 text-white border border-emerald-600 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      SWITCH →
+                    </button>
+                    <button
+                      onClick={onDeauthorize}
+                      disabled={botState.isRunning}
+                      className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40"
+                    >
+                      DISCONNECT
+                    </button>
+                  </div>
+                </div>
+              )}
 
-              {/* Smart Presets — shown on demo side too */}
+              {!realAccount && (
+                <p className="text-[11px] text-slate-500 font-sans leading-relaxed">
+                  You are on the free demo account. Flip the toggle above to link your Deriv API token and trade with real funds.
+                </p>
+              )}
+
+              {/* Smart Presets */}
               <div>
                 <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest font-bold mb-2 block">
                   🛡️ Smart Presets (Based on Current Account Balance)
                 </span>
                 <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => applyPresetParams('low')}
-                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                  >
+                  <button onClick={() => applyPresetParams('low')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
                     <div className="text-[9px] font-mono font-bold text-amber-400">Low Risk</div>
                     <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake $0.35</div>
                   </button>
-                  <button
-                    onClick={() => applyPresetParams('balanced')}
-                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                  >
+                  <button onClick={() => applyPresetParams('balanced')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
                     <div className="text-[9px] font-mono font-bold text-indigo-400">Balanced</div>
                     <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 1%</div>
                   </button>
-                  <button
-                    onClick={() => applyPresetParams('pro')}
-                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
-                  >
+                  <button onClick={() => applyPresetParams('pro')} className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97">
                     <div className="text-[9px] font-mono font-bold text-purple-400">Pro Power</div>
                     <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 2%</div>
                   </button>
@@ -542,19 +566,23 @@ export function BotTrader({
           ) : (
             /* ── REAL SIDE ── */
             <>
-              {/* If any Deriv token is connected (real or virtual via token), show the account */}
-              {account && !account.loginid?.startsWith('DEMO_') ? (
+              {/* If real Deriv account is connected, show it */}
+              {realAccount ? (
                 <div className="space-y-4">
+                  {/* Real account balance */}
                   <div className="flex justify-between items-center p-3 bg-slate-950 rounded-xl border border-slate-800">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-emerald-950/30 border border-emerald-900/40 flex items-center justify-center">
                         <Wallet className="w-4.5 h-4.5 text-emerald-400" />
                       </div>
                       <div>
-                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Live Balance</span>
-                        <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
-                          ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {account.currency}
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">
+                          {realAccount.is_virtual ? 'Deriv Virtual' : 'Live Balance'}
                         </span>
+                        <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
+                          ${realAccount.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {realAccount.currency}
+                        </span>
+                        <span className="text-[9px] font-mono text-emerald-600 block mt-0.5">{realAccount.loginid}</span>
                       </div>
                     </div>
                     <button
@@ -562,6 +590,29 @@ export function BotTrader({
                       className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
                     >
                       DISCONNECT
+                    </button>
+                  </div>
+
+                  {/* Demo account quick-switch */}
+                  <div className="flex items-center justify-between p-3 bg-amber-950/10 rounded-xl border border-amber-900/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-amber-950/30 border border-amber-900/40 flex items-center justify-center">
+                        <Wallet className="w-4.5 h-4.5 text-amber-400" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">Demo Account</span>
+                        <span className="text-sm font-mono font-black text-slate-100 mt-1 block">
+                          ${((demoAccount)?.balance ?? 1000).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD
+                        </span>
+                        <span className="text-[9px] font-mono text-amber-600 block mt-0.5">Sandbox — no real money</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => onUpdateConfig({ isDemo: true })}
+                      disabled={botState.isRunning}
+                      className="py-1.5 px-3 bg-amber-700 hover:bg-amber-600 text-white border border-amber-600 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      SWITCH →
                     </button>
                   </div>
 
@@ -597,7 +648,6 @@ export function BotTrader({
                 </div>
 
               ) : (
-                /* No real account connected yet — show token authorization form */
                 <form onSubmit={handleAuthorizeSubmit} className="space-y-4">
                   <p className="text-xs text-slate-500 font-sans leading-relaxed">
                     Provide your Deriv API Token to enable live automated trades. Generate a token with <span className="text-slate-300 font-semibold">"Read"</span> and <span className="text-slate-300 font-semibold">"Trade"</span> scopes.
