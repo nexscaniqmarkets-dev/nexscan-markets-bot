@@ -434,7 +434,13 @@ export function BotTrader({
                   DEMO
                 </span>
                 <button
-                  onClick={() => !botState.isRunning && onUpdateConfig({ isDemo: !botConfig.isDemo })}
+                  onClick={() => {
+                    if (botState.isRunning) return;
+                    const switchingToReal = botConfig.isDemo;
+                    onUpdateConfig({ isDemo: !botConfig.isDemo });
+                    // Clear any stale demo token from the input when flipping to Real
+                    if (switchingToReal) setTokenInput('');
+                  }}
                   disabled={botState.isRunning}
                   title={botState.isRunning ? 'Stop the bot before switching modes' : `Switch to ${botConfig.isDemo ? 'Real' : 'Demo'} mode`}
                   className={`relative inline-flex items-center shrink-0 w-12 h-6 rounded-full border transition-all duration-300 cursor-pointer
@@ -502,6 +508,36 @@ export function BotTrader({
                   ? `Trading in demo mode with your connected Deriv account (${account.loginid}). Switch to Real above to trade with live funds.`
                   : 'You are on the free demo account. Flip the toggle above to link your Deriv API token and trade with real funds.'}
               </p>
+
+              {/* Smart Presets — shown on demo side too */}
+              <div>
+                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest font-bold mb-2 block">
+                  🛡️ Smart Presets (Based on Current Account Balance)
+                </span>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => applyPresetParams('low')}
+                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
+                  >
+                    <div className="text-[9px] font-mono font-bold text-amber-400">Low Risk</div>
+                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake $0.35</div>
+                  </button>
+                  <button
+                    onClick={() => applyPresetParams('balanced')}
+                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
+                  >
+                    <div className="text-[9px] font-mono font-bold text-indigo-400">Balanced</div>
+                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 1%</div>
+                  </button>
+                  <button
+                    onClick={() => applyPresetParams('pro')}
+                    className="py-2.5 px-2 bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 hover:border-slate-700/80 rounded-xl text-center cursor-pointer transition-all active:scale-97"
+                  >
+                    <div className="text-[9px] font-mono font-bold text-purple-400">Pro Power</div>
+                    <div className="text-[8px] font-mono text-slate-500 mt-0.5">Stake 2%</div>
+                  </button>
+                </div>
+              </div>
             </div>
 
           ) : (
