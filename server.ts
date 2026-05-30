@@ -380,9 +380,16 @@ let sessionStartTime = Date.now();
 interface UserSession {
   botConfig: BotConfig;
   botState: BotState;
+  // The account currently active for trading (points to either demoAccount or realAccount)
   account: AccountInfo | null;
+  // Always-present sandbox account — persists independently of real account
+  demoAccount: AccountInfo;
+  // The user's real Deriv account once they authorize (null until linked)
+  realAccount: AccountInfo | null;
   logs: LogMessage[];
   pastTrades: any[];
+  demoPastTrades: any[];   // trades made in demo mode
+  realPastTrades: any[];   // trades made in real/live mode
   authorizedWsStatus: 'idle' | 'connecting' | 'connected' | 'error';
   authorizedWs: WebSocket | null;
   authorizedPingInterval: NodeJS.Timeout | null;
@@ -419,7 +426,7 @@ function getSession(userId: string): UserSession {
         lastTradeResult: null,
       },
       // Auto-assign demo account — balance loaded from MongoDB on first request
-      account: {
+      demoAccount: {
         balance: 1000.00,
         currency: 'USD',
         email: '',
@@ -428,8 +435,13 @@ function getSession(userId: string): UserSession {
         loginid: `DEMO_${userId}`,
         scopes: ['read', 'trade'],
       },
+      realAccount: null,
+      get account() { return this.botConfig.isDemo ? this.demoAccount : (this.realAccount ?? this.demoAccount); },
+      set account(_v) { /* managed via demoAccount/realAccount */ },
       logs: [],
       pastTrades: [],
+      demoPastTrades: [],
+      realPastTrades: [],
       authorizedWsStatus: 'idle',
       authorizedWs: null,
       authorizedPingInterval: null,
@@ -443,19 +455,19 @@ function getSession(userId: string): UserSession {
       const session = userSessions.get(userId);
       if (!session) return;
       if (saved) {
-        // Restore saved balance and trades — only if user hasn't linked a real token yet
-        if (!session.botConfig.apiToken) {
-          session.account = {
-            balance: saved.balance,
-            currency: 'USD',
-            email: '',
-            fullname: 'Demo Trader',
-            is_virtual: true,
-            loginid: `DEMO_${userId}`,
-            scopes: ['read', 'trade'],
-          };
-          session.pastTrades = saved.trades;
-          console.log(`✅ Restored demo data for user ${userId}: balance=$${saved.balance}, trades=${saved.trades.length}`);
+        session.demoAccount = {
+          balance: saved.balance,
+          currency: 'USD',
+          email: '',
+          fullname: 'Demo Trader',
+          is_virtual: true,
+          loginid: `DEMO_${userId}`,
+          scopes: ['read', 'trade'],
+        };
+        session.demoPastTrades = saved.trades;
+        // Sync pastTrades with the current active account
+        if (session.botConfig.isDemo) session.pastTrades = session.demoPastTrades;
+        console.log(`✅ Restored demo data for user ${userId}: balance=$${saved.balance}, trades=${saved.trades.length}`);
         }
       } else {
         // First-time user — save their initial $1000 balance to MongoDB
@@ -1051,7 +1063,6 @@ function settleContract(userId: string, session: UserSession, status: 'won' | 'l
     description: description,
     isAutopilot: isAutopilotActive,
   };
-  session.pastTrades.unshift(newTrade);
 
   addSessionLog(
     session,
@@ -1099,14 +1110,19 @@ function settleContract(userId: string, session: UserSession, status: 'won' | 'l
     lastTradeResult: isWin ? 'win' : 'loss',
   };
 
-  // Update balance for demo/sandbox users
-  const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_') || session.botConfig.isDemo || session.account?.is_virtual;
-  if (session.account) {
-    if (isDemo) {
-      session.account.balance = parseFloat((session.account.balance + profitValue).toFixed(2));
-      // Persist demo balance and trades to MongoDB so it survives refreshes
-      saveUserDemoData(userId, session.account.balance, session.pastTrades);
-    }
+  // Update balance and trade history for the correct account side
+  const isDemo = session.botConfig.isDemo || !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_') || session.account?.is_virtual;
+
+  if (isDemo) {
+    // Update demo account balance and demo trade list
+    session.demoAccount.balance = parseFloat((session.demoAccount.balance + profitValue).toFixed(2));
+    session.demoPastTrades.unshift(newTrade);
+    session.pastTrades = session.demoPastTrades;
+    saveUserDemoData(userId, session.demoAccount.balance, session.demoPastTrades);
+  } else {
+    // Real account balance is updated live from the Deriv balance subscription — just track trades
+    session.realPastTrades.unshift(newTrade);
+    session.pastTrades = session.realPastTrades;
   }
 
   // Update creator/owner markup metrics dynamically
@@ -1356,7 +1372,7 @@ function initAuthorizedSocketForUser(userId: string, token: string) {
 
     if (msgType === 'authorize') {
       const auth = data.authorize;
-      session.account = {
+      const authorizedAccount = {
         balance: parseFloat(auth.balance),
         currency: auth.currency,
         email: auth.email,
@@ -1365,6 +1381,12 @@ function initAuthorizedSocketForUser(userId: string, token: string) {
         loginid: auth.loginid,
         scopes: auth.scopes,
       };
+      // Store as realAccount — demo account is preserved independently
+      session.realAccount = authorizedAccount;
+      // Auto-switch to the appropriate mode based on account type
+      session.botConfig.isDemo = auth.is_virtual === 1;
+      // Sync pastTrades to the real side
+      session.pastTrades = session.realPastTrades;
 
       upsertRegistryUser({
         loginid: auth.loginid,
@@ -1376,7 +1398,6 @@ function initAuthorizedSocketForUser(userId: string, token: string) {
       });
 
       session.botConfig.apiToken = token;
-      // Auto-detect account type: mirror is_virtual into isDemo so the toggle reflects reality
       session.botConfig.isDemo = auth.is_virtual === 1;
       session.authorizedWsStatus = 'connected';
       addSessionLog(session, 'success', `🔐 ID ${auth.loginid} Authorize Verified (${auth.is_virtual ? 'Demo' : 'Live Real'}).`);
@@ -1392,8 +1413,8 @@ function initAuthorizedSocketForUser(userId: string, token: string) {
     }
 
     else if (msgType === 'balance') {
-      if (session.account) {
-        session.account.balance = parseFloat(data.balance.balance);
+      if (session.realAccount) {
+        session.realAccount.balance = parseFloat(data.balance.balance);
       }
     }
 
@@ -1467,11 +1488,15 @@ async function run() {
       symbolsState,
       logs: session.logs,
       account: session.account,
+      demoAccount: session.demoAccount,
+      realAccount: session.realAccount,
       connectionStatus,
       authorizedWsStatus: session.authorizedWsStatus,
       globalTicks,
       globalSignals,
       pastTrades: session.pastTrades,
+      demoPastTrades: session.demoPastTrades,
+      realPastTrades: session.realPastTrades,
       sessionTime: sessionTimeFormatted,
       sessionUptime: elapsed,
       maintenanceMode: adminSettings.maintenanceMode,
@@ -1484,9 +1509,14 @@ async function run() {
   // API Route: Update configuration parameters
   app.post('/api/config', (req, res) => {
     const session = getSession(getUserId(req));
+    const prev = session.botConfig.isDemo;
     session.botConfig = { ...session.botConfig, ...req.body };
     if (!session.botState.isRunning) {
       session.botState.currentStake = session.botConfig.stake;
+    }
+    // If the demo/real toggle changed, swap the active pastTrades view
+    if (prev !== session.botConfig.isDemo) {
+      session.pastTrades = session.botConfig.isDemo ? session.demoPastTrades : session.realPastTrades;
     }
     res.json({ success: true, botConfig: session.botConfig });
   });
@@ -1555,7 +1585,7 @@ async function run() {
 
     const isMock = token.trim() === 'DEMO_MOCK_TOKEN' || token.trim().toUpperCase().startsWith('MOCK_DEMO_');
     if (isMock) {
-      session.account = {
+      session.realAccount = {
         balance: 10000.00,
         currency: 'USD',
         email: 'demo-sandbox@nexscaniq.example',
@@ -1564,6 +1594,8 @@ async function run() {
         loginid: 'VRTC1007421',
         scopes: ['read', 'trade'],
       };
+      session.botConfig.isDemo = true; // it's still virtual
+      session.pastTrades = session.realPastTrades;
 
       upsertRegistryUser({
         loginid: 'VRTC1007421',
@@ -1590,7 +1622,7 @@ async function run() {
     const userId = getUserId(req);
     const session = getSession(userId);
     session.botConfig.apiToken = '';
-    session.botConfig.isDemo = true; // revert to demo when user explicitly disconnects
+    session.botConfig.isDemo = true; // switch back to demo mode
     session.authorizedWsStatus = 'idle';
     if (session.authorizedPingInterval) {
       clearInterval(session.authorizedPingInterval);
@@ -1600,19 +1632,12 @@ async function run() {
       try { session.authorizedWs.close(); } catch(e){}
       session.authorizedWs = null;
     }
-    // Restore user's demo account with their saved balance and trades
-    const saved = await loadUserDemoData(userId);
-    session.account = {
-      balance: saved?.balance ?? 1000.00,
-      currency: 'USD',
-      email: '',
-      fullname: 'Demo Trader',
-      is_virtual: true,
-      loginid: `DEMO_${userId}`,
-      scopes: ['read', 'trade'],
-    };
-    session.pastTrades = saved?.trades ?? [];
-    addSessionLog(session, 'warning', '🔓 Deriv token disconnected. Returned to your demo account.');
+    // Clear the real account — demo account is already preserved in demoAccount
+    session.realAccount = null;
+    session.realPastTrades = [];
+    // Switch active trades view back to demo
+    session.pastTrades = session.demoPastTrades;
+    addSessionLog(session, 'warning', '🔓 Deriv token disconnected. Switched back to your demo account.');
     res.json({ success: true });
   });
 
@@ -1628,11 +1653,13 @@ async function run() {
   app.post('/api/clear-trades', (req, res) => {
     const userId = getUserId(req);
     const session = getSession(userId);
-    session.pastTrades = [];
-    // Persist cleared trades for demo users
-    const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_') || session.botConfig.isDemo || session.account?.is_virtual;
-    if (isDemo && session.account) {
-      saveUserDemoData(userId, session.account.balance, []);
+    if (session.botConfig.isDemo) {
+      session.demoPastTrades = [];
+      session.pastTrades = [];
+      saveUserDemoData(userId, session.demoAccount.balance, []);
+    } else {
+      session.realPastTrades = [];
+      session.pastTrades = [];
     }
     addSessionLog(session, 'info', '🗑️ Past trading history cleared.');
     res.json({ success: true });
@@ -1642,20 +1669,10 @@ async function run() {
   app.post('/api/reset-demo-balance', (req, res) => {
     const userId = getUserId(req);
     const session = getSession(userId);
-    const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_');
-    if (!isDemo) {
-      return res.status(400).json({ error: 'Reset only available for demo accounts.' });
-    }
-    session.account = {
-      balance: 1000.00,
-      currency: 'USD',
-      email: '',
-      fullname: 'Demo Trader',
-      is_virtual: true,
-      loginid: `DEMO_${userId}`,
-      scopes: ['read', 'trade'],
-    };
-    saveUserDemoData(userId, 1000.00, session.pastTrades);
+    session.demoAccount.balance = 1000.00;
+    session.demoPastTrades = [];
+    if (session.botConfig.isDemo) session.pastTrades = [];
+    saveUserDemoData(userId, 1000.00, []);
     addSessionLog(session, 'success', '🔄 Demo balance reset to $1,000.00 USD.');
     res.json({ success: true, balance: 1000.00 });
   });
