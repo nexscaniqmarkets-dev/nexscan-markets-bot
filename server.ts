@@ -978,7 +978,8 @@ function triggerBotEntry(session: UserSession, symId: string, entryDigit: number
   addSessionLog(session, 'trade', `🎯 Background Trigger Locked: Last decimal was ${entryDigit} on ${symId}. Evaluating trade params...`);
 
   const acct = session.account;
-  const isDemo = !acct || acct.fullname.toLowerCase().includes('sandbox') || acct.fullname.toLowerCase().includes('demo');
+  // isDemo is true if: no account linked, on a free DEMO_ account, user toggled demo mode on, or account is virtual (Deriv demo)
+  const isDemo = !acct || acct.loginid?.startsWith('DEMO_') || session.botConfig.isDemo || acct.is_virtual;
 
   // Simple sandbox simulator mode matching live market outcome rules exactly
   if (isDemo) {
@@ -1099,7 +1100,7 @@ function settleContract(userId: string, session: UserSession, status: 'won' | 'l
   };
 
   // Update balance for demo/sandbox users
-  const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_');
+  const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_') || session.botConfig.isDemo || session.account?.is_virtual;
   if (session.account) {
     if (isDemo) {
       session.account.balance = parseFloat((session.account.balance + profitValue).toFixed(2));
@@ -1624,10 +1625,9 @@ async function run() {
     const session = getSession(userId);
     session.pastTrades = [];
     // Persist cleared trades for demo users
-    const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_');
+    const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_') || session.botConfig.isDemo || session.account?.is_virtual;
     if (isDemo && session.account) {
       saveUserDemoData(userId, session.account.balance, []);
-    }
     addSessionLog(session, 'info', '🗑️ Past trading history cleared.');
     res.json({ success: true });
   });
