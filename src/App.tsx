@@ -96,6 +96,8 @@ export default function App() {
 
   // User credentials & authorized account data
   const [account, setAccount] = useState<AccountInfo | null>(null);
+  const [demoAccount, setDemoAccount] = useState<AccountInfo | null>(null);
+  const [realAccount, setRealAccount] = useState<AccountInfo | null>(null);
 
   // Bot risk configs
   const [botConfig, setBotConfig] = useState<BotConfig>({
@@ -236,6 +238,8 @@ export default function App() {
         setBotConfig(data.botConfig);
         setLogs(data.logs);
         setAccount(data.account);
+        if (data.demoAccount) setDemoAccount(data.demoAccount);
+        if (data.realAccount !== undefined) setRealAccount(data.realAccount);
         setGlobalTicks(data.globalTicks);
         setGlobalSignals(data.globalSignals);
         setPastTrades(data.pastTrades || []);
@@ -735,6 +739,8 @@ export default function App() {
                   symbolsState={symbolsState}
                   onSelectSymbolForTrading={handleSelectSymbolForTrading}
                   account={account}
+                  demoAccount={demoAccount}
+                  realAccount={realAccount}
                   botConfig={botConfig}
                   onUpdateConfig={handleUpdateConfig}
                   onAuthorize={handleAuthorize}
