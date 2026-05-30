@@ -160,6 +160,26 @@ export default function App() {
     return getOrCreateWebSessionId();
   });
 
+  // Dynamic Theme state for Binance Gold / Cyber Cyan-Blue switching
+  const [theme, setTheme] = useState<'dark' | 'cyber'>(() => {
+    const saved = localStorage.getItem('nexscan_app_theme');
+    if (saved === 'light' || saved === 'cyber') return 'cyber';
+    return (saved as 'dark' | 'cyber') || 'dark';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('nexscan_app_theme', theme);
+    if (theme === 'cyber') {
+      document.documentElement.classList.add('cyber');
+      document.body.classList.add('cyber');
+      document.documentElement.classList.remove('light');
+      document.body.classList.remove('light');
+    } else {
+      document.documentElement.classList.remove('cyber');
+      document.body.classList.remove('cyber');
+    }
+  }, [theme]);
+
   useEffect(() => {
     if (window.Telegram?.WebApp) {
       try {
@@ -557,7 +577,7 @@ export default function App() {
   const activeTradingSymbol = SYMBOLS.find((s) => s.id === botState.symbol) || SYMBOLS[0];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white selection:font-bold">
+    <div className={`min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white selection:font-bold transition-colors duration-300 ${theme}`}>
       
       {/* Dynamic News Broadcast Marquee Banner */}
       {adminAlert && (
@@ -595,6 +615,8 @@ export default function App() {
         onOpenAdminHub={handleAdminTriggerClick}
         isTelegram={isTelegram}
         tgUser={tgUser}
+        theme={theme}
+        onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'cyber' : 'dark'))}
       />
 
       {maintenanceMode ? (
@@ -706,6 +728,7 @@ export default function App() {
                     handleUpdateConfig({ tradingMode: val ? 'advanced' : 'normal' });
                   }}
                   onResetDemoBalance={handleResetDemoBalance}
+                  onNavigateToWallet={() => setActiveTab('wallet')}
                 />
                 <TermsAgreementModal
                   isOpen={!termsAccepted}
@@ -727,10 +750,16 @@ export default function App() {
             {activeTab === 'wallet' && (
               <CashierTab
                 account={account}
+                demoAccount={demoAccount}
+                realAccount={realAccount}
                 pastTrades={pastTrades}
+                botConfig={botConfig}
+                onUpdateConfig={handleUpdateConfig}
                 onAuthorize={handleAuthorize}
+                onDeauthorize={handleDeauthorize}
                 authorizedWsStatus={authorizedWsStatus}
-                apiToken={botConfig.apiToken}
+                onResetDemoBalance={handleResetDemoBalance}
+                botState={botState}
               />
             )}
 
