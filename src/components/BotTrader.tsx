@@ -30,6 +30,7 @@ interface BotTraderProps {
   onResumeWithSymbol?: (symbolId: string) => void;
   isAdvancedMode?: boolean;
   onToggleAdvancedMode?: (val: boolean) => void;
+  onResetDemoBalance?: () => void;
 }
 
 export function BotTrader({
@@ -55,6 +56,7 @@ export function BotTrader({
   onResumeWithSymbol = () => {},
   isAdvancedMode = false,
   onToggleAdvancedMode = () => {},
+  onResetDemoBalance = () => {},
 }: BotTraderProps) {
   const [tokenInput, setTokenInput] = useState(botConfig.apiToken);
   const [showToken, setShowToken] = useState(false);
@@ -89,15 +91,10 @@ export function BotTrader({
     }
   }, [autoTriggerResume]);
 
-  // Auto-countdown on session end is a Premium Autopilot feature only.
-  // For normal (non-premium) users, the session complete/lost popup handles next steps manually.
+  // Monitor trade state to trigger the 10s countdown ONLY on completed trade cycle (won_limit or lost_limit)
   const lastBotStatusRef = useRef(botState.status);
   useEffect(() => {
-    const premStatus = localStorage.getItem('mamba_premium_status');
-    const isPremiumActive = premStatus && premStatus !== 'idle';
-
     if (
-      isPremiumActive &&
       (botState.status === 'won_limit' || botState.status === 'lost_limit') &&
       lastBotStatusRef.current !== botState.status
     ) {
@@ -397,7 +394,7 @@ export function BotTrader({
                   ? 'bg-amber-950/40 text-amber-400 border-amber-900/50' 
                   : 'bg-emerald-950/40 text-emerald-400 border-emerald-900/50'
               }`}>
-                {account.is_virtual ? 'Demo Sandbox' : 'Real Account'}
+                {account.loginid?.startsWith('DEMO_') ? 'Free Demo' : account.is_virtual ? 'Deriv Demo' : 'Real Account'}
               </span>
             )}
           </div>
@@ -436,23 +433,6 @@ export function BotTrader({
                 >
                   Create free Account <ExternalLink className="w-3.5 h-3.5" />
                 </a>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2.5 items-start sm:items-center justify-between p-3.5 bg-slate-950/40 rounded-xl border border-slate-850">
-                <div className="space-y-0.5">
-                  <div className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-wider">🎯 NO TOKEN YET? TEST INSTANTLY!</div>
-                  <p className="text-[11px] text-slate-400">Load our integrated sandbox simulation profile to demonstrate the automatic bot trade cycles.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setTokenInput('DEMO_MOCK_TOKEN');
-                    onAuthorize('DEMO_MOCK_TOKEN');
-                  }}
-                  className="w-full sm:w-auto shrink-0 py-1.5 px-3.5 bg-indigo-950/60 hover:bg-indigo-900/40 text-indigo-400 hover:text-indigo-300 font-mono text-[10px] font-bold rounded-lg border border-indigo-900/50 cursor-pointer transition-all active:scale-97"
-                >
-                  LOAD SIMULATOR TOKEN
-                </button>
               </div>
 
               {authorizedWsStatus === 'error' && (
@@ -508,7 +488,7 @@ export function BotTrader({
                   </div>
                   <div>
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest leading-none block">
-                      Retrieving Balance
+                      {account.loginid?.startsWith('DEMO_') ? 'Demo Balance' : 'Retrieving Balance'}
                     </span>
                     <span className="text-lg font-mono font-black text-slate-100 mt-1 block">
                       ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })} {account.currency}
@@ -516,12 +496,27 @@ export function BotTrader({
                   </div>
                 </div>
 
-                <button
-                  onClick={onDeauthorize}
-                  className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
-                >
-                  DISCONNECT
-                </button>
+                <div className="flex flex-col gap-1.5 items-end">
+                  {/* Reset demo balance button — shown only for demo users when balance is below $1000 */}
+                  {account.loginid?.startsWith('DEMO_') && account.balance < 1000 && (
+                    <button
+                      onClick={onResetDemoBalance}
+                      disabled={botState.isRunning}
+                      className="py-1.5 px-3 bg-amber-950/40 hover:bg-amber-900/30 text-amber-400 hover:text-amber-300 border border-amber-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title="Reset demo balance back to $1,000"
+                    >
+                      ↺ RESET $1,000
+                    </button>
+                  )}
+                  {!account.loginid?.startsWith('DEMO_') && (
+                    <button
+                      onClick={onDeauthorize}
+                      className="py-1.5 px-3 bg-slate-900 hover:bg-slate-800 text-rose-400 hover:text-rose-200 border border-slate-800 hover:border-rose-900/40 rounded-lg font-mono text-[9px] font-bold cursor-pointer transition-colors"
+                    >
+                      DISCONNECT
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Automatic preset triggers based on account sizes */}
