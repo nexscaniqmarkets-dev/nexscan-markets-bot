@@ -269,6 +269,31 @@ async function saveTradesHistory() {
   } catch (err) { console.error('Failed to save trades history:', err); }
 }
 
+// ── Per-User Demo Account Persistence ────────────────────────────────────────
+// Saves each user's demo balance and trade history to MongoDB so it survives restarts/refreshes
+
+async function loadUserDemoData(userId: string): Promise<{ balance: number; trades: any[] } | null> {
+  const c = col('userDemoData');
+  if (!c) return null;
+  try {
+    const doc = await c.findOne({ userId } as any);
+    if (doc) return { balance: Number(doc.balance) || 1000, trades: Array.isArray(doc.trades) ? doc.trades : [] };
+  } catch (err) { console.error('Failed to load user demo data:', err); }
+  return null;
+}
+
+async function saveUserDemoData(userId: string, balance: number, trades: any[]) {
+  const c = col('userDemoData');
+  if (!c) return;
+  try {
+    await c.replaceOne(
+      { userId } as any,
+      { userId, balance, trades, updatedAt: new Date().toISOString() },
+      { upsert: true }
+    );
+  } catch (err) { console.error('Failed to save user demo data:', err); }
+}
+
 // Bootstrap: connect MongoDB then load all persisted data
 connectMongo().then(async () => {
   await loadAdminSettings();
@@ -393,7 +418,16 @@ function getSession(userId: string): UserSession {
         status: 'idle',
         lastTradeResult: null,
       },
-      account: null,
+      // Auto-assign demo account — balance loaded from MongoDB on first request
+      account: {
+        balance: 1000.00,
+        currency: 'USD',
+        email: '',
+        fullname: 'Demo Trader',
+        is_virtual: true,
+        loginid: `DEMO_${userId}`,
+        scopes: ['read', 'trade'],
+      },
       logs: [],
       pastTrades: [],
       authorizedWsStatus: 'idle',
@@ -402,6 +436,32 @@ function getSession(userId: string): UserSession {
       processedContracts: new Set(),
       sessionStartTime: Date.now(),
       pendingSimulatedTrade: null,
+    });
+
+    // Asynchronously load persisted demo balance and trades from MongoDB
+    loadUserDemoData(userId).then((saved) => {
+      const session = userSessions.get(userId);
+      if (!session) return;
+      if (saved) {
+        // Restore saved balance and trades — only if user hasn't linked a real token yet
+        if (!session.botConfig.apiToken) {
+          session.account = {
+            balance: saved.balance,
+            currency: 'USD',
+            email: '',
+            fullname: 'Demo Trader',
+            is_virtual: true,
+            loginid: `DEMO_${userId}`,
+            scopes: ['read', 'trade'],
+          };
+          session.pastTrades = saved.trades;
+          console.log(`✅ Restored demo data for user ${userId}: balance=$${saved.balance}, trades=${saved.trades.length}`);
+        }
+      } else {
+        // First-time user — save their initial $1000 balance to MongoDB
+        saveUserDemoData(userId, 1000.00, []);
+        console.log(`🆕 New user ${userId} initialized with $1000 demo balance.`);
+      }
     });
   }
   return userSessions.get(userId)!;
@@ -803,7 +863,7 @@ function initPublicSocket() {
       const newDigit = getLastDigit(newPrice, pip);
 
       // Settle simulated contract on actual next live tick update — per session
-      for (const session of userSessions.values()) {
+      for (const [uid, session] of userSessions.entries()) {
         if (session.pendingSimulatedTrade && session.pendingSimulatedTrade.symbol === symId) {
           const trade = session.pendingSimulatedTrade;
           session.pendingSimulatedTrade = null; // Clear to prevent double processing
@@ -812,6 +872,7 @@ function initPublicSocket() {
           const profitValue = didWin ? parseFloat((trade.stake * 0.95).toFixed(2)) : -trade.stake;
 
           settleContract(
+            uid,
             session,
             didWin ? 'won' : 'lost',
             profitValue,
@@ -969,7 +1030,7 @@ function triggerBotEntry(session: UserSession, symId: string, entryDigit: number
 }
 
 // Settle contract outcomes — accepts a user session for per-user state isolation
-function settleContract(session: UserSession, status: 'won' | 'lost', profitValue: number, buyPrice: number, description: string) {
+function settleContract(userId: string, session: UserSession, status: 'won' | 'lost', profitValue: number, buyPrice: number, description: string) {
   const isWin = status === 'won';
 
   const updatedWins = isWin ? session.botState.wins + 1 : session.botState.wins;
@@ -979,7 +1040,7 @@ function settleContract(session: UserSession, status: 'won' | 'lost', profitValu
 
   // Add settled trade to session pastTrades history
   const isAutopilotActive = autopilotState.status === 'trading' || autopilotState.status !== 'idle';
-  session.pastTrades.unshift({
+  const newTrade = {
     id: Math.random().toString(36).substring(2, 9),
     symbol: session.botState.symbol,
     timestamp: new Date().toISOString(),
@@ -988,8 +1049,8 @@ function settleContract(session: UserSession, status: 'won' | 'lost', profitValu
     profit: profitValue,
     description: description,
     isAutopilot: isAutopilotActive,
-  });
-  saveTradesHistory();
+  };
+  session.pastTrades.unshift(newTrade);
 
   addSessionLog(
     session,
@@ -1037,8 +1098,14 @@ function settleContract(session: UserSession, status: 'won' | 'lost', profitValu
     lastTradeResult: isWin ? 'win' : 'loss',
   };
 
-  if (session.account && (!session.botConfig.apiToken || session.account.fullname.toLowerCase().includes('sandbox'))) {
-    session.account.balance = parseFloat((session.account.balance + profitValue).toFixed(2));
+  // Update balance for demo/sandbox users
+  const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_');
+  if (session.account) {
+    if (isDemo) {
+      session.account.balance = parseFloat((session.account.balance + profitValue).toFixed(2));
+      // Persist demo balance and trades to MongoDB so it survives refreshes
+      saveUserDemoData(userId, session.account.balance, session.pastTrades);
+    }
   }
 
   // Update creator/owner markup metrics dynamically
@@ -1186,6 +1253,7 @@ function initAuthorizedSocket(token: string) {
         const defaultSession = getSession('default');
         if (defaultSession.botState.isRunning) {
           settleContract(
+            'default',
             defaultSession,
             status,
             parseFloat(contract.profit),
@@ -1339,6 +1407,7 @@ function initAuthorizedSocketForUser(userId: string, token: string) {
 
       if (session.botState.isRunning) {
         settleContract(
+          userId,
           session,
           status,
           parseFloat(contract.profit),
@@ -1512,9 +1581,9 @@ async function run() {
   });
 
   // API Route: Deauthorize
-  app.post('/api/deauthorize', (req, res) => {
-    const session = getSession(getUserId(req));
-    session.account = null;
+  app.post('/api/deauthorize', async (req, res) => {
+    const userId = getUserId(req);
+    const session = getSession(userId);
     session.botConfig.apiToken = '';
     session.authorizedWsStatus = 'idle';
     if (session.authorizedPingInterval) {
@@ -1525,7 +1594,19 @@ async function run() {
       try { session.authorizedWs.close(); } catch(e){}
       session.authorizedWs = null;
     }
-    addSessionLog(session, 'warning', '🔓 Profile credentials cleared. Returned to anonymous simulator.');
+    // Restore user's demo account with their saved balance and trades
+    const saved = await loadUserDemoData(userId);
+    session.account = {
+      balance: saved?.balance ?? 1000.00,
+      currency: 'USD',
+      email: '',
+      fullname: 'Demo Trader',
+      is_virtual: true,
+      loginid: `DEMO_${userId}`,
+      scopes: ['read', 'trade'],
+    };
+    session.pastTrades = saved?.trades ?? [];
+    addSessionLog(session, 'warning', '🔓 Deriv token disconnected. Returned to your demo account.');
     res.json({ success: true });
   });
 
@@ -1539,11 +1620,38 @@ async function run() {
 
   // API Route: Clear past trades history
   app.post('/api/clear-trades', (req, res) => {
-    const session = getSession(getUserId(req));
+    const userId = getUserId(req);
+    const session = getSession(userId);
     session.pastTrades = [];
-    saveTradesHistory();
+    // Persist cleared trades for demo users
+    const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_');
+    if (isDemo && session.account) {
+      saveUserDemoData(userId, session.account.balance, []);
+    }
     addSessionLog(session, 'info', '🗑️ Past trading history cleared.');
     res.json({ success: true });
+  });
+
+  // API Route: Reset demo balance back to $1000 (user-initiated)
+  app.post('/api/reset-demo-balance', (req, res) => {
+    const userId = getUserId(req);
+    const session = getSession(userId);
+    const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_');
+    if (!isDemo) {
+      return res.status(400).json({ error: 'Reset only available for demo accounts.' });
+    }
+    session.account = {
+      balance: 1000.00,
+      currency: 'USD',
+      email: '',
+      fullname: 'Demo Trader',
+      is_virtual: true,
+      loginid: `DEMO_${userId}`,
+      scopes: ['read', 'trade'],
+    };
+    saveUserDemoData(userId, 1000.00, session.pastTrades);
+    addSessionLog(session, 'success', '🔄 Demo balance reset to $1,000.00 USD.');
+    res.json({ success: true, balance: 1000.00 });
   });
 
   // API Route: Restart scanning and reset all statistics
