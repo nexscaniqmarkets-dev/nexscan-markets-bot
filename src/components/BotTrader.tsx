@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { BotConfig, BotState, AccountInfo, LogMessage, SymbolInfo, SymbolState } from '../types';
 import { getVolColor, formatPrice } from '../constants';
