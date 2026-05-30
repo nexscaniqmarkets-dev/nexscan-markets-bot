@@ -84,71 +84,71 @@ export function LeaderboardTab({
   const medals = ['🥇', '🥈', '🥉'];
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto p-1">
+    <div className="space-y-4 max-w-5xl mx-auto p-0.5">
       {/* Target Trade Banner - Locked when Top Symbol hits high probability */}
       {meetsCriteria ? (
-        <div id="locked-pair-banner" className="relative rounded-2xl bg-gradient-to-br from-indigo-950/25 to-slate-900 border border-indigo-500 p-6 shadow-2xl shadow-indigo-500/10 animate-fade-in overflow-hidden">
+        <div id="locked-pair-banner" className="relative rounded-xl bg-gradient-to-br from-indigo-950/20 to-slate-900/90 border border-indigo-500/40 p-3.5 shadow-lg shadow-indigo-500/5 animate-fade-in overflow-hidden">
           {/* Subtle radar glowing line */}
           <div className="absolute inset-0 bg-indigo-500/5 animate-pulse" />
-          <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
+          <div className="absolute top-0 right-0 w-36 h-36 bg-indigo-500/10 rounded-full blur-2xl -mr-12 -mt-12" />
 
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
             <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-950 text-indigo-400 border border-indigo-800/40 text-[10px] font-mono font-bold uppercase tracking-wider mb-3 leading-none animate-pulse">
-                <Flame className="w-3.5 h-3.5 fill-current animate-bounce" /> Recommended Golden Pair Signal
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-indigo-950 text-indigo-400 border border-indigo-800/30 text-[8.5px] font-mono font-bold uppercase tracking-wider mb-2 leading-none animate-pulse">
+                <Flame className="w-2.5 h-2.5 fill-current animate-bounce" /> Recommended Golden Pair Signal
               </span>
 
-              <h2 className="text-3xl font-black font-sans text-slate-100 flex items-center gap-3 tracking-tight">
+              <h2 className="text-[17px] font-extrabold font-sans text-slate-150 flex items-center gap-2 tracking-tight leading-none">
                 <span style={{ color: getVolColor(topPair.info.vol) }}>{topPair.info.short}</span>
-                <span className="text-lg text-slate-400 font-medium">({topPair.info.name})</span>
+                <span className="text-[11px] text-slate-450 font-medium">({topPair.info.name})</span>
               </h2>
-              <p className="text-xs text-slate-500 font-mono mt-1.5">
+              <p className="text-[10px] text-slate-500 font-mono mt-1">
                 Golden Ratio win-rate detected. Highly optimal probability for 1-tick DigitOver trading!
               </p>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
-                <div className="bg-slate-950/40 border border-slate-800/60 rounded-xl p-3 text-center">
-                  <div className="text-[9px] text-slate-500 font-mono tracking-wider uppercase">Win Rate</div>
-                  <div className="text-xl font-mono font-black text-emerald-400 mt-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2.5">
+                <div className="bg-slate-950/50 border border-slate-850/60 rounded-lg p-1.5 text-center">
+                  <div className="text-[7.5px] text-slate-500 font-mono tracking-wider uppercase leading-none">Win Rate</div>
+                  <div className="text-sm font-mono font-extrabold text-emerald-450 mt-1 leading-none">
                     {topPair.winRate?.toFixed(1)}%
                   </div>
                 </div>
 
-                <div className="bg-slate-950/40 border border-slate-800/60 rounded-xl p-3 text-center">
-                  <div className="text-[9px] text-slate-500 font-mono tracking-wider uppercase">Performance Score</div>
-                  <div className="text-xl font-mono font-black text-indigo-400 mt-1">
+                <div className="bg-slate-950/50 border border-slate-850/60 rounded-lg p-1.5 text-center">
+                  <div className="text-[7.5px] text-slate-500 font-mono tracking-wider uppercase leading-none">Perf Score</div>
+                  <div className="text-sm font-mono font-extrabold text-indigo-400 mt-1 leading-none">
                     {topPair.score.toFixed(1)}
                   </div>
                 </div>
 
-                <div className="bg-slate-950/40 border border-slate-800/60 rounded-xl p-3 text-center">
-                  <div className="text-[9px] text-slate-500 font-mono tracking-wider uppercase">Wins / losses</div>
-                  <div className="text-base font-mono font-black mt-2">
-                    <span className="text-emerald-400">{topPair.wins}</span>
-                    <span className="text-slate-600 px-1">/</span>
-                    <span className="text-rose-400">{topPair.losses}</span>
+                <div className="bg-slate-950/50 border border-slate-850/60 rounded-lg p-1.5 text-center">
+                  <div className="text-[7.5px] text-slate-500 font-mono tracking-wider uppercase leading-none">Wins / losses</div>
+                  <div className="text-[10px] font-mono font-extrabold mt-1 leading-none">
+                    <span className="text-emerald-450">{topPair.wins}</span>
+                    <span className="text-slate-605 px-0.5">/</span>
+                    <span className="text-rose-455">{topPair.losses}</span>
                   </div>
                 </div>
 
-                <div className="bg-slate-950/40 border border-slate-800/60 rounded-xl p-3 text-center">
-                  <div className="text-[9px] text-slate-500 font-mono tracking-wider uppercase">Signals Count</div>
-                  <div className="text-xl font-mono font-black text-amber-400 mt-1">
+                <div className="bg-slate-950/50 border border-slate-850/60 rounded-lg p-1.5 text-center">
+                  <div className="text-[7.5px] text-slate-500 font-mono tracking-wider uppercase leading-none">Signals</div>
+                  <div className="text-sm font-mono font-extrabold text-amber-500 mt-1 leading-none">
                     {topPair.signals}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col items-center md:items-end gap-3 w-full md:w-auto">
+            <div className="flex flex-col items-center md:items-end gap-2 w-full md:w-auto">
               {/* Countdown panel */}
-              <div className="text-center md:text-right bg-slate-950/80 px-4 py-2.5 rounded-2xl border border-slate-850 w-full sm:w-auto">
-                <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block mb-0.5">
+              <div className="text-center md:text-right bg-slate-950/90 px-2.5 py-1.5 rounded-lg border border-slate-850/80 w-full sm:w-auto">
+                <span className="text-[7.5px] font-mono text-slate-500 uppercase tracking-widest block mb-0.5 leading-none">
                   Opportunity Expiry
                 </span>
-                <span className={`font-mono text-2xl font-black ${countdown <= 30 ? 'text-rose-500 animate-pulse' : 'text-emerald-400'}`}>
+                <span className={`font-mono text-base font-black leading-none ${countdown <= 30 ? 'text-rose-550 animate-pulse' : 'text-emerald-450'}`}>
                   {formatTime(countdown)}
                 </span>
-                <span className="text-[8px] font-mono text-slate-600 block mt-0.5">
+                <span className="text-[7px] font-mono text-slate-600 block mt-0.5 leading-none">
                   Will auto-assess on tick expiry
                 </span>
               </div>
@@ -162,81 +162,81 @@ export function LeaderboardTab({
                   }
                 }}
                 disabled={botRunning && activeTradingSymbolId !== topPair.info.id}
-                className={`w-full sm:w-auto py-3 px-6 font-mono text-xs font-black tracking-widest rounded-xl transition-all duration-100 uppercase border ${
+                className={`w-full sm:w-auto py-1.5 px-3.5 font-mono text-[9px] font-extrabold tracking-wider rounded-lg transition-all duration-100 uppercase border ${
                   activeTradingSymbolId === topPair.info.id
-                    ? 'bg-indigo-950/40 text-indigo-400 border-indigo-500/50 cursor-default'
+                    ? 'bg-indigo-950/30 text-indigo-400 border-indigo-500/30 cursor-default'
                     : botRunning
-                    ? 'bg-slate-900 text-slate-600 border-slate-950/45 cursor-not-allowed opacity-50'
-                    : 'bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-450 hover:to-indigo-550 text-white border-transparent shadow-lg hover:shadow-indigo-500/20 active:scale-95 cursor-pointer'
+                    ? 'bg-slate-900 text-slate-600 border-slate-950/30 cursor-not-allowed opacity-50'
+                    : 'bg-gradient-to-r from-indigo-600 to-indigo-500 hover:bg-indigo-500 text-white border-transparent shadow hover:shadow-indigo-500/5 active:scale-97 cursor-pointer'
                 }`}
               >
                 {activeTradingSymbolId === topPair.info.id 
                   ? '✓ CURRENTLY ACTIVE TRADER' 
                   : botRunning 
                   ? '🔒 LOCKED DURING SESSION' 
-                  : '🎯 LOAD & AUTOMATE TRADES NOW'}
+                  : '🎯 LOAD & AUTOMATE TRADES'}
               </button>
             </div>
           </div>
         </div>
       ) : (
-        <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-6 shadow-2xl relative overflow-hidden select-none">
+        <div className="rounded-xl bg-gradient-to-br from-slate-900 to-slate-950/95 border border-slate-800/80 p-3.5 shadow-lg relative overflow-hidden select-none">
           {/* Ambient grid background overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.06),transparent_50%)] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.04),transparent_50%)] pointer-events-none" />
           
-          <div className="relative z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
+          <div className="relative z-10 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
             
             {/* Visual Radar Unit + Details */}
-            <div className="flex flex-col sm:flex-row items-center gap-5 flex-1">
+            <div className="flex flex-col sm:flex-row items-center gap-4 flex-1">
               
               {/* Tactical Radar Display */}
-              <div className="w-20 h-20 bg-slate-950 border border-slate-850 rounded-full flex items-center justify-center relative overflow-hidden shadow-inner shrink-0 scale-105">
+              <div className="w-14 h-14 bg-slate-950 border border-slate-850 rounded-full flex items-center justify-center relative overflow-hidden shadow-inner shrink-0 leading-none">
                 {/* Endless conic gradient rotating light block */}
-                <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_55%,rgba(99,102,241,0.25))] rounded-full animate-spin [animation-duration:2.8s]" />
+                <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_55%,rgba(99,102,241,0.2))] rounded-full animate-spin [animation-duration:2.8s]" />
                 
                 {/* Target radial grids */}
-                <div className="absolute w-14 h-14 rounded-full border border-slate-900" />
-                <div className="absolute w-8 h-8 rounded-full border border-slate-900/60" />
+                <div className="absolute w-10 h-10 rounded-full border border-slate-900/80" />
+                <div className="absolute w-6 h-6 rounded-full border border-slate-900/40" />
                 
                 {/* Horizontal & Vertical Crosshairs */}
-                <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-slate-900/80" />
-                <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-slate-900/80" />
+                <div className="absolute top-0 bottom-0 left-1/2 w-[1px] bg-slate-900/70" />
+                <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-slate-900/70" />
                 
                 {/* Live glowing synthetic targets simulation */}
-                <div className="absolute top-6 left-5 w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
-                <div className="absolute bottom-5 right-6 w-1 h-1 bg-indigo-400 rounded-full animate-pulse [animation-duration:1.2s]" />
+                <div className="absolute top-4 left-4 w-1 h-1 bg-emerald-400 rounded-full animate-ping" />
+                <div className="absolute bottom-4 right-4 w-0.5 h-0.5 bg-indigo-405 rounded-full animate-pulse [animation-duration:1.2s]" />
                 
                 {/* Core Antenna Center Hub */}
-                <div className="absolute w-2.5 h-2.5 bg-indigo-500 rounded-full border-2 border-slate-950 z-10 shadow-[0_0_10px_rgba(99,102,241,0.8)]" />
+                <div className="absolute w-1.5 h-1.5 bg-indigo-500 rounded-full border border-slate-950 z-10 shadow-[0_0_8px_rgba(99,102,241,0.7)]" />
               </div>
 
               {/* Ticker text information */}
               <div className="text-center sm:text-left">
                 {isCalibrationActive ? (
                   <>
-                    <span className="inline-flex items-center gap-1.5 text-[8.5px] font-mono text-indigo-400 font-extrabold uppercase tracking-widest bg-indigo-950/50 border border-indigo-900/40 px-2.5 py-0.5 rounded-full mb-2 leading-none animate-pulse">
-                      <Activity className="w-3 h-3 text-indigo-400 animate-spin" />
+                    <span className="inline-flex items-center gap-1 text-[7.5px] font-mono text-indigo-400 font-extrabold uppercase tracking-wider bg-indigo-950/40 border border-indigo-900/30 px-2 py-0.5 rounded-full mb-1 leading-none animate-pulse">
+                      <Activity className="w-2.5 h-2.5 text-indigo-400 animate-spin" />
                       Scanner Calibrating • {formatTime(timeLeft)} Remaining
                     </span>
                     
-                    <h4 className="text-base font-sans font-black text-slate-100 tracking-tight">
+                    <h4 className="text-[13px] font-sans font-extrabold text-slate-100 tracking-tight">
                       Collecting Live Market Feed...
                     </h4>
-                    <p className="text-xs text-slate-400 font-mono mt-1.5 max-w-md leading-relaxed">
+                    <p className="text-[10px] text-slate-500 font-mono mt-0.5 max-w-md leading-relaxed">
                       Continuous 5-minute initial scanner feed calibration is active to run and evaluate statistical indicators safely.
                     </p>
                   </>
                 ) : (
                   <>
-                    <span className="inline-flex items-center gap-1.5 text-[8.5px] font-mono text-indigo-400 font-extrabold uppercase tracking-widest bg-indigo-950/50 border border-indigo-900/40 px-2.5 py-0.5 rounded-full mb-2 leading-none">
-                      <Activity className="w-3 h-3 text-indigo-400 animate-pulse" />
+                    <span className="inline-flex items-center gap-1 text-[7.5px] font-mono text-indigo-400 font-extrabold uppercase tracking-wider bg-indigo-950/40 border border-indigo-900/30 px-2 py-0.5 rounded-full mb-1 leading-none">
+                      <Activity className="w-2.5 h-2.5 text-indigo-400 animate-pulse" />
                       Scanner Active • Live API Feed
                     </span>
                     
-                    <h4 className="text-base font-sans font-black text-slate-100 tracking-tight">
+                    <h4 className="text-[13px] font-sans font-extrabold text-slate-100 tracking-tight">
                       Searching for high-probability setups...
                     </h4>
-                    <p className="text-xs text-slate-400 font-mono mt-1.5 max-w-md leading-relaxed">
+                    <p className="text-[10px] text-slate-500 font-mono mt-0.5 max-w-md leading-relaxed">
                       Scanning Volatility and Jump index pools to source a recommended 1-tick <span className="text-indigo-400 font-bold">DigitOver (4)</span> opportunity.
                     </p>
                   </>
@@ -246,26 +246,26 @@ export function LeaderboardTab({
 
             {/* Live Threshold Alignment Center widget */}
             {topPair && (
-              <div className="bg-slate-950/70 border border-slate-850 rounded-xl p-4 min-w-[280px]">
+              <div className="bg-slate-950/50 border border-slate-850/60 rounded-lg p-2.5 min-w-[210px] text-left">
                 {/* Lead Candidate Label */}
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider font-bold">Top Match Candidate:</span>
-                  <span className="font-mono text-xs font-black text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-800" style={{ color: getVolColor(topPair.info.vol) }}>
+                <div className="flex justify-between items-center mb-1.5 leading-none">
+                  <span className="text-[7px] font-mono text-slate-550 uppercase tracking-wider font-bold">Top Match:</span>
+                  <span className="font-mono text-[9px] font-black text-slate-200 bg-slate-900 border border-slate-850 px-1 py-0.5 rounded leading-none" style={{ color: getVolColor(topPair.info.vol) }}>
                     {topPair.info.short}
                   </span>
                 </div>
 
                 {/* Requirements checkmarks comparing top to minimum guidelines */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {/* Win Rate Progress */}
                   <div>
-                    <div className="flex justify-between text-[9px] font-mono mb-1">
-                      <span className="text-slate-500">Win Rate Goal (≥ 55%):</span>
-                      <span className={`font-bold ${topPair.winRate && topPair.winRate >= 55 ? 'text-emerald-400' : 'text-slate-400'}`}>
+                    <div className="flex justify-between text-[7.5px] font-mono mb-0.5 leading-none">
+                      <span className="text-slate-500">Win Rate (≥ 55%):</span>
+                      <span className={`font-extrabold ${topPair.winRate && topPair.winRate >= 55 ? 'text-emerald-450' : 'text-slate-400'}`}>
                         {topPair.winRate !== null ? `${topPair.winRate.toFixed(1)}%` : '0.0%'}
                       </span>
                     </div>
-                    <div className="w-full bg-slate-900 h-1 rounded-full overflow-hidden">
+                    <div className="w-full bg-slate-900 h-0.5 rounded-full overflow-hidden">
                       <div 
                         className={`h-full transition-all duration-300 ${topPair.winRate && topPair.winRate >= 55 ? 'bg-emerald-500' : 'bg-slate-700'}`} 
                         style={{ width: `${Math.min(100, topPair.winRate || 0)}%` }}
@@ -275,9 +275,9 @@ export function LeaderboardTab({
 
                   {/* Signals volume */}
                   <div>
-                    <div className="flex justify-between text-[9px] font-mono">
-                      <span className="text-slate-500">Min Signals (≥ 5 req):</span>
-                      <span className={`font-bold ${topPair.signals >= 5 ? 'text-emerald-400 animate-pulse' : 'text-amber-400'}`}>
+                    <div className="flex justify-between text-[7.5px] font-mono leading-none">
+                      <span className="text-slate-500">Min Signals (≥ 5):</span>
+                      <span className={`font-extrabold ${topPair.signals >= 5 ? 'text-emerald-450' : 'text-amber-500'}`}>
                         {topPair.signals} / 5
                       </span>
                     </div>
@@ -291,9 +291,9 @@ export function LeaderboardTab({
               <button
                 onClick={handleManualRefresh}
                 disabled={lockDisabled || isCalibrationActive}
-                className="w-full lg:w-auto h-full flex items-center justify-center gap-2 py-3 px-5 bg-slate-950 hover:bg-slate-900 text-slate-400 hover:text-indigo-400 active:text-indigo-300 rounded-xl border border-slate-850 text-xs font-mono font-bold cursor-pointer transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full lg:w-auto h-full flex items-center justify-center gap-1 px-3 py-1.5 bg-slate-950 hover:bg-slate-900 text-slate-400 hover:text-indigo-400 active:text-indigo-300 rounded-lg border border-slate-850 text-[10px] font-mono font-bold cursor-pointer transition-all active:scale-97 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <RefreshCw className={`w-4 h-4 ${lockDisabled ? 'animate-spin text-indigo-400' : ''}`} />
+                <RefreshCw className={`w-3 h-3 ${lockDisabled ? 'animate-spin text-indigo-400' : ''}`} />
                 <span>{isCalibrationActive ? 'CALIBRATING' : 'SWEEP FEEDS'}</span>
               </button>
             </div>
@@ -304,15 +304,15 @@ export function LeaderboardTab({
 
       {/* Leaderboard Rankings List */}
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-          <h3 className="font-mono text-[10px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-1.5">
-            <Trophy className="w-4 h-4 text-amber-500 shrink-0" /> PERFORMANCE LEADERBOARD (RANKED BY SCORING ENGINE)
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <h3 className="font-mono text-[9px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-1 my-1">
+            <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" /> PERFORMANCE LEADERBOARD (RANKED BY SCORING ENGINE)
           </h3>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 justify-between sm:justify-end">
             {refreshedToast && (
-              <span className="font-mono text-[9px] text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-800/40 animate-in fade-in duration-200 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="font-mono text-[8px] text-emerald-400 bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-800/30 animate-in fade-in duration-100 flex items-center gap-1">
+                <span className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />
                 Rankings Updated
               </span>
             )}
@@ -320,15 +320,15 @@ export function LeaderboardTab({
               id="refreshLeaderboardBtn"
               onClick={handleManualRefresh}
               disabled={lockDisabled}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-950 hover:bg-slate-900 border border-slate-850 hover:border-slate-750 text-[10px] font-mono font-bold text-slate-400 hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95 transition-all"
+              className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-950 hover:bg-slate-900 border border-slate-850 hover:border-slate-750 text-[9px] font-mono font-bold text-slate-400 hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-97 transition-all leading-none"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${lockDisabled ? 'animate-spin text-indigo-400' : ''}`} />
-              <span>{lockDisabled ? 'SCANNING...' : 'REFRESH RANKINGS'}</span>
+              <RefreshCw className={`w-3 h-3 ${lockDisabled ? 'animate-spin text-indigo-400' : ''}`} />
+              <span>{lockDisabled ? 'SCANNING...' : 'REFRESH LIST'}</span>
             </button>
           </div>
         </div>
         
-        <div className="space-y-2.5">
+        <div className="space-y-1.5">
           {rankedSymbols.map((sym, idx) => {
             const hasData = sym.winRate !== null;
             const colorAccent = getVolColor(sym.info.vol);
@@ -336,104 +336,104 @@ export function LeaderboardTab({
             const isCurrentlySelected = activeTradingSymbolId === sym.info.id;
             
             const stateColor = !hasData 
-              ? 'text-slate-600' 
+              ? 'text-slate-650' 
               : sym.winRate && sym.winRate >= 55 
               ? 'text-emerald-400' 
               : sym.winRate && sym.winRate >= 45 
-              ? 'text-amber-400' 
-              : 'text-rose-500';
+              ? 'text-amber-450' 
+              : 'text-rose-455';
 
             return (
               <div
                 key={sym.info.id}
-                className={`group flex flex-col sm:flex-row items-center justify-between p-4 bg-slate-900 border rounded-2xl transition-all ${
+                className={`group flex flex-col sm:flex-row items-center justify-between p-2 bg-slate-900/90 border rounded-lg transition-all ${
                   isCurrentlySelected 
-                    ? 'border-indigo-500 bg-indigo-950/5' 
-                    : 'border-slate-800/80 hover:border-slate-700/80'
-                } ${idx === 0 && hasData ? 'shadow-lg shadow-indigo-500/5' : ''}`}
+                    ? 'border-indigo-500 bg-indigo-950/10' 
+                    : 'border-slate-850/70 hover:border-slate-800'
+                }`}
               >
-                <div className="flex items-center gap-4 w-full sm:w-auto mb-3 sm:mb-0">
+                <div className="flex items-center gap-2 w-full sm:w-auto mb-1.5 sm:mb-0">
                   {/* Rank badge */}
-                  <div className="w-8 text-center font-mono text-base">
+                  <div className="w-5 text-center font-mono text-[11px] font-bold">
                     {hasData ? (medals[idx] || `#${idx + 1}`) : '—'}
                   </div>
 
                   {/* Asset Details info */}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-black tracking-tight" style={{ color: colorAccent }}>
+                  <div className="text-left pl-1">
+                    <div className="flex items-center gap-1 leading-none">
+                      <span className="font-mono text-[11px] font-black tracking-tight" style={{ color: colorAccent }}>
                         {sym.info.short}
                       </span>
-                      <span className="font-mono text-[8px] text-slate-500 bg-slate-950 border border-slate-850 px-1 py-0.5 rounded leading-none">
+                      <span className="font-mono text-[6.5px] text-slate-500 bg-slate-950 border border-slate-850 px-1 py-0.5 rounded leading-none">
                         {sym.info.tier}
                       </span>
                       {isCurrentlySelected && (
-                        <span className="font-mono text-[8px] text-indigo-400 bg-indigo-950 border border-indigo-900 px-1.5 py-0.5 rounded leading-none font-bold">
-                          ACTIVE BOT ASSET
+                        <span className="font-mono text-[6.5px] text-indigo-400 bg-indigo-950 border border-indigo-900 px-1 py-0.5 rounded leading-none font-bold">
+                          ACTIVE
                         </span>
                       )}
                     </div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">{sym.info.name}</div>
+                    <div className="text-[9.5px] text-slate-500 font-medium mt-0.5 leading-none">{sym.info.name}</div>
                   </div>
                 </div>
 
                 {/* Performance Metrics items */}
-                <div className="flex flex-wrap items-center justify-between sm:justify-end gap-6 w-full sm:w-auto bg-slate-950/40 p-3 sm:p-0 rounded-xl border border-slate-850 sm:border-transparent sm:bg-transparent">
-                  <div className="text-center min-w-[50px]">
-                    <span className="text-[7.5px] font-mono text-slate-600 uppercase tracking-widest block leading-none">Signals</span>
-                    <span className="font-mono text-sm font-bold text-amber-500 block mt-1">{sym.signals}</span>
+                <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3 w-full sm:w-auto bg-slate-950/20 p-1.5 sm:p-0 rounded-md border border-slate-850/60 sm:border-transparent sm:bg-transparent">
+                  <div className="text-center min-w-[40px]">
+                    <span className="text-[6.5px] font-mono text-slate-500 uppercase tracking-wider block leading-none">Signals</span>
+                    <span className="font-mono text-[10px] font-extrabold text-amber-500 block mt-0.5">{sym.signals}</span>
                   </div>
 
-                  <div className="text-center min-w-[60px]">
-                    <span className="text-[7.5px] font-mono text-slate-600 uppercase tracking-widest block leading-none">W / L</span>
-                    <span className="font-mono text-xs font-bold block mt-1">
-                      <span className="text-emerald-400">{sym.wins}</span>
+                  <div className="text-center min-w-[50px]">
+                    <span className="text-[6.5px] font-mono text-slate-500 uppercase tracking-wider block leading-none">W / L</span>
+                    <span className="font-mono text-[9px] font-extrabold block mt-0.5">
+                      <span className="text-emerald-450">{sym.wins}</span>
                       <span className="text-slate-700 px-0.5">/</span>
-                      <span className="text-rose-400">{sym.losses}</span>
+                      <span className="text-rose-455">{sym.losses}</span>
                     </span>
                   </div>
 
-                  <div className="text-center min-w-[70px]">
-                    <span className="text-[7.5px] font-mono text-slate-600 uppercase tracking-widest block leading-none">Win rate</span>
-                    <span className={`font-mono text-sm font-black block mt-1 ${stateColor}`}>
+                  <div className="text-center min-w-[55px]">
+                    <span className="text-[6.5px] font-mono text-slate-500 uppercase tracking-wider block leading-none">Win rate</span>
+                    <span className={`font-mono text-[10px] font-black block mt-0.5 ${stateColor}`}>
                       {hasData ? `${sym.winRate?.toFixed(1)}%` : '—'}
                     </span>
                   </div>
 
                   {/* Rating Score bar progress */}
-                  <div className="w-full sm:w-[130px] flex flex-col justify-center">
-                    <div className="flex justify-between items-center text-[8px] font-mono mb-1 leading-none">
-                      <span className="text-slate-600 uppercase tracking-widest">Score</span>
-                      <span className="text-indigo-400 font-bold">{hasData ? sym.score.toFixed(1) : '—'}</span>
+                  <div className="w-full sm:w-[95px] flex flex-col justify-center">
+                    <div className="flex justify-between items-center text-[7px] font-mono mb-0.5 leading-none">
+                      <span className="text-slate-600 uppercase tracking-wider">Score</span>
+                      <span className="text-indigo-400 font-extrabold">{hasData ? sym.score.toFixed(1) : '—'}</span>
                     </div>
-                    <div className="w-full bg-slate-950 rounded-full h-1 overflow-hidden">
+                    <div className="w-full bg-slate-950 rounded-full h-0.5 overflow-hidden animate-pulse">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-650 transition-all duration-300"
+                        className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-300"
                         style={{ width: `${scoreBarWidth}%` }}
                       />
                     </div>
                   </div>
 
                   {/* Connect quick load button */}
-                  <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                  <div className="w-full sm:w-auto mt-0.5 sm:mt-0">
                     <button
                       onClick={() => {
                         if (!isCurrentlySelected && !botRunning && !isCalibrationActive) {
-                          onSelectSymbolForTrading(sym.info.id);
+                           onSelectSymbolForTrading(sym.info.id);
                         }
                       }}
                       disabled={isCalibrationActive || (botRunning && !isCurrentlySelected)}
-                      className={`w-full sm:w-auto py-1.5 px-3 rounded-lg font-mono text-[10px] font-bold transition-all duration-150 border ${
+                      className={`w-full sm:w-auto py-1 px-2.5 rounded-md font-mono text-[8.5px] font-extrabold transition-all duration-150 border uppercase ${
                         isCalibrationActive
-                          ? 'bg-slate-950 border-slate-900/40 text-slate-600 cursor-not-allowed opacity-50'
+                          ? 'bg-slate-950 border-slate-900/30 text-slate-650 cursor-not-allowed opacity-50'
                           : isCurrentlySelected
-                          ? 'bg-indigo-950 text-indigo-400 border-indigo-800 cursor-default'
+                          ? 'bg-indigo-950/20 text-indigo-400 border-indigo-800/40 cursor-default'
                           : botRunning
-                          ? 'bg-slate-900 border-slate-950/40 text-slate-650 cursor-not-allowed opacity-40'
-                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-transparent hover:text-white cursor-pointer active:scale-95'
+                          ? 'bg-slate-905 border-slate-950/30 text-slate-655 cursor-not-allowed opacity-40'
+                          : 'bg-slate-800 hover:bg-slate-700 text-slate-350 border-transparent hover:text-white cursor-pointer active:scale-97'
                       }`}
                     >
-                      {isCalibrationActive ? 'Calibrating' : isCurrentlySelected ? 'Selected' : botRunning ? 'Locked' : 'Load Pair'}
+                      {isCalibrationActive ? 'Calib' : isCurrentlySelected ? 'Selected' : botRunning ? 'Locked' : 'Load'}
                     </button>
                   </div>
                 </div>
@@ -444,32 +444,32 @@ export function LeaderboardTab({
       </div>
 
       {/* Embedded documentation card to reinforce trust and knowledge */}
-      <div className="bg-slate-950/40 p-5 rounded-2xl border border-slate-800/80">
-        <h4 className="font-sans font-bold text-slate-300 text-xs mb-3 uppercase tracking-wider flex items-center gap-1.5">
-          <Zap className="w-4 h-4 text-amber-500" /> Scanner Algorithmic Blueprint & Scoring
+      <div className="bg-slate-950/50 p-4 rounded-xl border border-slate-850/60">
+        <h4 className="font-sans font-bold text-slate-300 text-[10.5px] mb-2 uppercase tracking-wider flex items-center gap-1 leading-none">
+          <Zap className="w-3.5 h-3.5 text-amber-500" /> Scanner Algorithmic Blueprint & Scoring
         </h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-[10px] font-mono leading-relaxed">
           <div>
-            <div className="text-slate-600 font-bold uppercase tracking-widest text-[8px] mb-1">Target Threshold</div>
-            <p className="text-slate-400 leading-snug">
-              Auto-locks and highlights the first asset that achieves a simulated win-rate of <span className="text-emerald-400">55% and higher</span> after a minimum of <span className="text-amber-400">5 triggers</span>.
+            <div className="text-slate-600 font-bold uppercase tracking-wider text-[7px] mb-0.5">Target Threshold</div>
+            <p className="text-slate-400 font-normal">
+              Auto-locks and highlights the first asset that achieves a simulated win-rate of <span className="text-emerald-400">55% and higher</span> after a minimum of <span className="text-amber-500">5 triggers</span>.
             </p>
           </div>
           <div>
-            <div className="text-slate-600 font-bold uppercase tracking-widest text-[8px] mb-1">Scoring Metric</div>
-            <p className="text-slate-400 leading-snug">
+            <div className="text-slate-600 font-bold uppercase tracking-wider text-[7px] mb-0.5">Scoring Metric</div>
+            <p className="text-slate-400 font-normal">
               Calculates index indexability using a weighted formula: <span className="text-slate-300">65% weight on Win Rate %</span> and <span className="text-slate-300">35% weight on frequency pacing</span>.
             </p>
           </div>
           <div>
-            <div className="text-slate-600 font-bold uppercase tracking-widest text-[8px] mb-1">Opportunity Timer</div>
-            <p className="text-slate-400 leading-snug">
+            <div className="text-slate-600 font-bold uppercase tracking-wider text-[7px] mb-0.5">Opportunity Timer</div>
+            <p className="text-slate-400 font-normal">
               Alert configurations lock for <span className="text-slate-300">3 minutes</span>. This allows ample window period for manual trade parameters execution before the tracker re-appraises index ratings.
             </p>
           </div>
           <div>
-            <div className="text-slate-600 font-bold uppercase tracking-widest text-[8px] mb-1">Continuous Scan</div>
-            <p className="text-slate-400 leading-snug">
+            <div className="text-slate-600 font-bold uppercase tracking-wider text-[7px] mb-0.5">Continuous Scan</div>
+            <p className="text-slate-400 font-normal">
               The socket subscription continues to record background price ticks. New metrics are added endlessly to capture trends.
             </p>
           </div>
