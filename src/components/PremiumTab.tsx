@@ -1015,33 +1015,33 @@ export function PremiumTab({
       </div>
 
       {activePremiumSubTab === 'config' ? (
-        <div id="autopilot-config-panel" className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 space-y-6 animate-fade-in text-left">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl ${activeTheme.iconContainer} flex items-center justify-center shrink-0`}>
-              <Zap className="w-5 h-5 fill-current animate-pulse" />
+        <div id="autopilot-config-panel" className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl rounded-xl p-4 md:p-5 space-y-4 animate-fade-in text-left">
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-lg ${activeTheme.iconContainer} flex items-center justify-center shrink-0`}>
+              <Zap className="w-4.5 h-4.5 fill-current animate-pulse" />
             </div>
             <div>
-              <h2 className="text-sm md:text-base font-black text-slate-100 uppercase tracking-widest font-sans">Fine-Tune Autopilot Settings</h2>
-              <p className="text-[11px] text-slate-400 font-mono mt-0.5">Customize risk filters, stake calculations, and martingale escalations.</p>
+              <h2 className="text-xs md:text-sm font-black text-slate-100 uppercase tracking-widest font-sans">Fine-Tune Autopilot Settings</h2>
+              <p className="text-[10px] text-slate-400 font-mono mt-0.5">Customize risk filters, stake calculations, and martingale escalations.</p>
             </div>
           </div>
 
-          <form onSubmit={handleSaveParameters} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form onSubmit={handleSaveParameters} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
               {/* Order Sizing Block */}
-              <div className="bg-slate-950/40 border border-slate-800 rounded-2xl p-5 space-y-4">
-                <h3 className="text-xs font-bold font-mono text-amber-450 uppercase tracking-widest flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-amber-500" /> Capital & Order Sizing
+              <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-3.5 space-y-3">
+                <h3 className="text-[11px] font-bold font-mono text-amber-450 uppercase tracking-widest flex items-center gap-1.5 leading-none">
+                  <BarChart3 className="w-3.5 h-3.5 text-amber-500" /> Capital & Order Sizing
                 </h3>
 
-                <div className="space-y-2 font-mono text-left">
-                  <label className="text-[9px] uppercase font-extrabold text-slate-400">Automated Order Stake Volume</label>
+                <div className="space-y-1.5 font-mono text-left">
+                  <label className="text-[8.5px] uppercase font-extrabold text-slate-400">Automated Order Stake Volume</label>
                   <select
                     id="autopilot-stake-mode"
                     value={autopilotStakeMode}
                     onChange={(e) => setAutopilotStakeMode(e.target.value as 'percent' | 'fixed')}
-                    className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-105 font-mono cursor-pointer"
+                    className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-105 font-mono cursor-pointer"
                   >
                     <option value="percent">1% to 10% of Balance Weight (Safe Preset)</option>
                     <option value="fixed">Custom Fixed Trading Stake</option>
@@ -1049,9 +1049,9 @@ export function PremiumTab({
                 </div>
 
                 {autopilotStakeMode === 'percent' ? (
-                  <div className="space-y-2 font-mono text-left">
-                    <label className="text-[9px] uppercase font-extrabold text-slate-400">Total Account Weight Allocation (%)</label>
-                    <div className="flex gap-2">
+                  <div className="space-y-1.5 font-mono text-left">
+                    <label className="text-[8.5px] uppercase font-extrabold text-slate-400">Total Account Weight Allocation (%)</label>
+                    <div className="flex gap-1.5">
                       <input
                         id="autopilot-stake-percent"
                         type="number"
@@ -1060,21 +1060,21 @@ export function PremiumTab({
                         step="1"
                         value={customStakePercent}
                         onChange={(e) => setCustomStakePercent(parseInt(e.target.value, 10) || 1)}
-                        className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-150 font-mono"
+                        className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-150 font-mono"
                       />
-                      <span className="flex items-center justify-center bg-slate-900 px-3 border border-slate-800 rounded-xl text-xs text-slate-400 font-mono">%</span>
+                      <span className="flex items-center justify-center bg-slate-900 px-2.5 border border-slate-800 rounded-lg text-[11px] text-slate-400 font-mono">%</span>
                     </div>
-                    <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-lg p-2.5 text-[9.5px] text-emerald-400 leading-normal flex items-start gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                    <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-md p-2 text-[9px] text-emerald-400 leading-tight flex items-start gap-1">
+                      <CheckCircle2 className="w-3 h-3 mt-0.5 shrink-0" />
                       <div>
                         Initial Stake Lock: <span className="font-extrabold underline">${(getComputedStake()).toFixed(2)} USD</span> based on synced broker balance.
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-2 font-mono text-left">
-                    <label className="text-[9px] uppercase font-extrabold text-slate-400">Fixed Session Stake ($ USD)</label>
-                    <div className="flex gap-2">
+                  <div className="space-y-1.5 font-mono text-left">
+                    <label className="text-[8.5px] uppercase font-extrabold text-slate-400">Fixed Session Stake ($ USD)</label>
+                    <div className="flex gap-1.5">
                       <input
                         id="autopilot-fixed-stake"
                         type="number"
@@ -1083,22 +1083,22 @@ export function PremiumTab({
                         step="0.05"
                         value={customFixedStake}
                         onChange={(e) => setCustomFixedStake(parseFloat(e.target.value) || 0.35)}
-                        className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-150 font-mono"
+                        className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-150 font-mono"
                       />
-                      <span className="flex items-center justify-center bg-slate-900 px-4 border border-slate-800 rounded-xl text-xs text-slate-400 font-mono">$</span>
+                      <span className="flex items-center justify-center bg-slate-900 px-3 border border-slate-800 rounded-lg text-[11px] text-slate-400 font-mono">$</span>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Bot Safety Boundaries Block */}
-              <div className="bg-slate-950/40 border border-slate-800 rounded-2xl p-5 space-y-4 font-mono">
-                <h3 className="text-xs font-bold font-mono text-amber-450 uppercase tracking-widest flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-amber-500" /> Autonomic Safety Thresholds
+              <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-3.5 space-y-3 font-mono">
+                <h3 className="text-[11px] font-bold font-mono text-amber-450 uppercase tracking-widest flex items-center gap-1.5 leading-none">
+                  <Shield className="w-3.5 h-3.5 text-amber-500" /> Autonomic Safety Thresholds
                 </h3>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[9px] uppercase font-extrabold text-slate-400">Session Wins Exit Objective (Target: 2)</label>
+                <div className="space-y-1 text-left">
+                  <label className="text-[8.5px] uppercase font-extrabold text-slate-400">Session Wins Exit Objective (Target: 2)</label>
                   <input
                     id="autopilot-max-wins"
                     type="number"
@@ -1107,13 +1107,13 @@ export function PremiumTab({
                     step="1"
                     value={customMaxWins}
                     onChange={(e) => setCustomMaxWins(parseInt(e.target.value, 10) || 1)}
-                    className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-150 font-mono"
+                    className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-150 font-mono"
                   />
-                  <p className="text-[8.5px] text-slate-500">Stops and resets scanning when reaching this number of successful wins in a single loop run.</p>
+                  <p className="text-[8px] text-slate-500">Stops and resets scanning when reaching this number of successful wins in a single loop run.</p>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[9px] uppercase font-extrabold text-slate-400">Consecutive Losses Halting Streak (Target: 5)</label>
+                <div className="space-y-1 text-left">
+                  <label className="text-[8.5px] uppercase font-extrabold text-slate-400">Consecutive Losses Halting Streak (Target: 5)</label>
                   <input
                     id="autopilot-max-losses"
                     type="number"
@@ -1122,13 +1122,13 @@ export function PremiumTab({
                     step="1"
                     value={customMaxLosses}
                     onChange={(e) => setCustomMaxLosses(parseInt(e.target.value, 10) || 1)}
-                    className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-150 font-mono"
+                    className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-150 font-mono"
                   />
-                  <p className="text-[8.5px] text-slate-500">Capital Protection: Forces 30-minute cooldown protection lockdown if this consecutive losses limit is hit.</p>
+                  <p className="text-[8px] text-slate-500">Capital Protection: Forces 30-minute cooldown protection lockdown if this consecutive losses limit is hit.</p>
                 </div>
 
-                <div className="space-y-2 text-left">
-                  <label className="text-[9px] uppercase font-extrabold text-slate-400">Martingale Recovery Weight Factor (Target: 2.0)</label>
+                <div className="space-y-1 text-left">
+                  <label className="text-[8.5px] uppercase font-extrabold text-slate-400">Martingale Recovery Weight Factor (Target: 2.0)</label>
                   <input
                     id="autopilot-martingale"
                     type="number"
@@ -1137,39 +1137,39 @@ export function PremiumTab({
                     step="0.1"
                     value={customMartingale}
                     onChange={(e) => setCustomMartingale(parseFloat(e.target.value) || 2.0)}
-                    className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-150 font-mono"
+                    className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-150 font-mono"
                   />
-                  <p className="text-[8.5px] text-slate-500">Martingale factor to recover former spot loss exposures automatically.</p>
+                  <p className="text-[8px] text-slate-500">Martingale factor to recover former spot loss exposures automatically.</p>
                 </div>
               </div>
 
             </div>
 
             {saveSuccess && (
-              <div className="p-3.5 bg-emerald-950/30 border border-emerald-900/60 text-xs text-emerald-400 rounded-xl text-center font-bold">
+              <div className="p-2 bg-emerald-955/20 border border-emerald-900/40 text-[11px] text-emerald-400 rounded-lg text-center font-bold">
                 ✓ {saveSuccess}
               </div>
             )}
 
             {saveError && (
-              <div className="p-3.5 bg-rose-950/30 border border-rose-900/60 text-xs text-rose-400 rounded-xl text-center font-bold">
+              <div className="p-2 bg-rose-950/30 border border-rose-900/60 text-[11px] text-rose-400 rounded-lg text-center font-bold">
                 ⚠ {saveError}
               </div>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setActivePremiumSubTab('dashboard')}
-                className="w-1/3 py-3.5 bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 transition-all rounded-xl font-mono text-xs font-bold uppercase tracking-wider cursor-pointer"
+                className="w-1/3 py-2 bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 transition-all rounded-lg font-mono text-[10.5px] font-bold uppercase tracking-wider cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className={`w-2/3 py-3.5 ${activeTheme.btnAccent} active:scale-[0.98] transition-all rounded-xl font-mono text-xs font-black uppercase tracking-widest cursor-pointer flex items-center justify-center gap-1.5`}
+                className={`w-2/3 py-2 ${activeTheme.btnAccent} active:scale-[0.98] transition-all rounded-lg font-mono text-[10.5px] font-black uppercase tracking-widest cursor-pointer flex items-center justify-center gap-1.5`}
               >
-                <RefreshCw className="w-4 h-4 animate-spin-slow" /> SAVE PARAMETERS & LOCK
+                <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" /> SAVE PARAMETERS & LOCK
               </button>
             </div>
           </form>
@@ -1177,37 +1177,37 @@ export function PremiumTab({
       ) : (
         <>
           {/* Autopilot Hero Dashboard Banner details */}
-          <div className={`relative rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-black border ${activeTheme.borderMain} shadow-2xl p-6 md:p-8`}>
+          <div className={`relative rounded-xl bg-gradient-to-br from-slate-950 via-slate-900 to-black border ${activeTheme.borderMain} shadow-2xl p-4 md:p-5`}>
             <div className={`absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(${premiumTheme === 'obsidian-gold' ? '245,158,11' : premiumTheme === 'cyber-pulse' ? '16,185,129' : premiumTheme === 'corporate-platinum' ? '148,163,184' : '139,92,246'},0.05),transparent)] pointer-events-none`} />
-            <div className={`absolute top-0 right-0 w-64 h-64 ${premiumTheme === 'obsidian-gold' ? 'bg-amber-500/5' : premiumTheme === 'cyber-pulse' ? 'bg-emerald-500/5' : premiumTheme === 'corporate-platinum' ? 'bg-slate-400/5' : 'bg-violet-500/5'} rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none`} />
+            <div className={`absolute top-0 right-0 w-48 h-48 ${premiumTheme === 'obsidian-gold' ? 'bg-amber-500/5' : premiumTheme === 'cyber-pulse' ? 'bg-emerald-500/5' : premiumTheme === 'corporate-platinum' ? 'bg-slate-400/5' : 'bg-violet-500/5'} rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none`} />
             
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${activeTheme.badgeText} text-[9px] font-mono font-bold uppercase tracking-wider mb-3 leading-none select-none`}>
-                  <Crown className="w-3.5 h-3.5 fill-current animate-pulse" /> Premium VIP Copilot Running
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full ${activeTheme.badgeText} text-[8px] font-mono font-bold uppercase tracking-wider mb-2 leading-none select-none`}>
+                  <Crown className="w-3 h-3 fill-current animate-pulse" /> Premium VIP Copilot Running
                 </span>
-                <h2 className="text-xl md:text-2xl font-black font-sans text-slate-100 uppercase tracking-wide">
+                <h2 className="text-base md:text-lg font-black font-sans text-slate-100 uppercase tracking-wide">
                   NexScan IQ <span className={`text-transparent bg-clip-text bg-gradient-to-r ${activeTheme.headingAccent}`}>Premium Autopilot</span>
                 </h2>
-                <p className="text-[11px] text-slate-400 max-w-xl font-mono mt-1.5 leading-relaxed">
-                  Autopilot continuously scans the global market feed. The moment any asset pair matches your set guidelines (Win Rate &gt;= 60.0% and Perf. Score &gt;= 55.0%), the system automatically loads that asset and starts execution without requiring manual intervention.
+                <p className="text-[10px] text-slate-400 max-w-xl font-mono mt-1 leading-relaxed">
+                  Autopilot scans global feeds concurrently. When key targets match your set parameters (Win Rate &gt;= 60.0% & Score &gt;= 55.0%), the system loads that asset pool instantly.
                 </p>
 
-                <div className="mt-4 flex items-center flex-wrap gap-2 text-xs font-mono">
-                  <span className="text-slate-500 uppercase text-[8px] tracking-widest font-extrabold font-sans">Session:</span>
-                  <span className={`font-extrabold ${activeTheme.textAccent} ${activeTheme.borderColor} bg-slate-950 px-2.5 py-1 rounded leading-none text-[10px]`}>
+                <div className="mt-3 flex items-center flex-wrap gap-2 text-[10.5px] font-mono">
+                  <span className="text-slate-500 uppercase text-[7.5px] tracking-widest font-extrabold font-sans">Session:</span>
+                  <span className={`font-extrabold ${activeTheme.textAccent} ${activeTheme.borderColor} bg-slate-950 px-2 py-0.5 rounded leading-none text-[9.5px]`}>
                     {premiumUsername}
                   </span>
                   <button
                     type="button"
                     onClick={handlePremiumLogout}
-                    className="text-[8.5px] font-bold text-rose-450 hover:text-rose-350 bg-rose-955/15 border border-rose-900/40 px-2 py-1 rounded-xl leading-none transition-all hover:scale-102 cursor-pointer uppercase tracking-wider"
+                    className="text-[7.5px] font-bold text-rose-450 hover:text-rose-350 bg-rose-955/15 border border-rose-900/40 px-1.5 py-0.5 rounded-md leading-none transition-all hover:scale-102 cursor-pointer uppercase tracking-wider"
                   >
                     Logout Key
                   </button>
 
-                  <div className="ml-2 sm:ml-4 flex gap-1 items-center bg-slate-950/80 p-1.5 rounded-xl border border-slate-855 leading-none shrink-0" title="Quick change style option">
-                    <span className="text-[8px] text-slate-500 font-bold uppercase tracking-widest mr-1.5 hidden sm:inline-block font-sans">Visual preset:</span>
+                  <div className="ml-2 sm:ml-3 flex gap-1 items-center bg-slate-950/80 p-1 rounded-md border border-slate-855 leading-none shrink-0" title="Quick change style option">
+                    <span className="text-[7.5px] text-slate-500 font-bold uppercase tracking-widest mr-1 hidden sm:inline-block font-sans">Theme:</span>
                     {[
                       { id: 'obsidian-gold', color: 'bg-amber-500', title: 'Obsidian Gold' },
                       { id: 'cyber-pulse', color: 'bg-emerald-500', title: 'Cyber Pulse' },
@@ -1219,7 +1219,7 @@ export function PremiumTab({
                         type="button"
                         onClick={() => applyPremiumTheme(themeOpt.id as any)}
                         title={themeOpt.title}
-                        className={`w-3.5 h-3.5 rounded-full ${themeOpt.color} transition-all cursor-pointer ${
+                        className={`w-3 h-3 rounded-full ${themeOpt.color} transition-all cursor-pointer ${
                           premiumTheme === themeOpt.id ? 'ring-2 ring-indigo-500 ring-offset-1 ring-offset-slate-950 scale-110' : 'opacity-60 hover:opacity-100'
                         }`}
                       />
@@ -1234,107 +1234,107 @@ export function PremiumTab({
                     type="button"
                     onClick={startAutopilotSurvey}
                     disabled={!account}
-                    className={`w-full md:w-auto flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-mono text-xs font-black uppercase tracking-widest ${activeTheme.btnAccent} active:scale-97 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed select-none`}
+                    className={`w-full md:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg font-mono text-[10.5px] font-black uppercase tracking-widest ${activeTheme.btnAccent} active:scale-97 transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed select-none`}
                   >
-                    <Play className="w-4 h-4 fill-current" /> Launch VIP Autopilot
+                    <Play className="w-3.5 h-3.5 fill-current" /> Launch VIP Autopilot
                   </button>
                 )}
 
                 {autopilotState === 'scanning' && (
-                  <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full">
+                  <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full">
                     {/* Scanning radar indicator */}
-                    <div className="bg-slate-955/90 border border-emerald-500/30 px-5 py-3 rounded-xl flex items-center justify-center gap-4 min-w-[210px] relative overflow-hidden">
+                    <div className="bg-slate-955/90 border border-emerald-500/30 px-3.5 py-2 rounded-lg flex items-center justify-center gap-3 min-w-[180px] relative overflow-hidden">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.05),transparent)] animate-ping" />
-                      <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
+                      <Loader2 className="w-4.5 h-4.5 text-emerald-400 animate-spin" />
                       <div className="text-left font-mono">
-                        <span className="text-[8px] text-slate-500 uppercase block tracking-widest">REAL-TIME SURVEY</span>
-                        <span className="text-[13px] font-black text-emerald-400 leading-none uppercase tracking-wide">SCANNING ALL PAIRS</span>
+                        <span className="text-[7.5px] text-slate-505 uppercase block tracking-widest">REAL-TIME SURVEY</span>
+                        <span className="text-[11px] font-black text-emerald-400 leading-none uppercase tracking-wide">SCANNING ALL PAIRS</span>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={stopAutopilot}
-                      className="px-4 py-3 bg-rose-950/15 hover:bg-rose-900/35 border border-rose-905/45 text-rose-400 rounded-xl font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-2 select-none"
+                      className="px-3 py-2 bg-rose-950/15 hover:bg-rose-900/35 border border-rose-905/45 text-rose-450 rounded-lg font-mono text-[8.5px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-1.5 select-none"
                     >
-                      <Square className="w-3.5 h-3.5 fill-current" /> Terminate
+                      <Square className="w-3 h-3 fill-current" /> Terminate
                     </button>
                   </div>
                 )}
 
                 {autopilotState === 'cooldown' && (
-                   <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full">
-                    <div className="bg-slate-955/95 border border-rose-500/40 px-5 py-3 rounded-xl flex items-center justify-center gap-4 min-w-[210px] shadow-red-500/5 shadow-lg relative">
-                      <Flame className="w-5 h-5 text-rose-500 animate-pulse" />
+                   <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full">
+                    <div className="bg-slate-955/95 border border-rose-500/40 px-3.5 py-2 rounded-lg flex items-center justify-center gap-3 min-w-[180px] shadow-red-500/5 shadow-lg relative">
+                      <Flame className="w-4.5 h-4.5 text-rose-500 animate-pulse" />
                       <div className="text-left font-mono">
-                        <span className="text-[8px] text-rose-450 font-extrabold uppercase block tracking-widest">Loss Protection Cooldown</span>
-                        <span className="text-base font-black text-rose-450 leading-none">{formatCountdown(countdown)} Remaining</span>
+                        <span className="text-[7.5px] text-rose-450 font-extrabold uppercase block tracking-widest">Loss Protection Cooldown</span>
+                        <span className="text-xs font-black text-rose-450 leading-none">{formatCountdown(countdown)} Remaining</span>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={stopAutopilot}
-                      className="px-4 py-3 bg-rose-955/25 hover:bg-rose-900/35 border border-rose-905/45 text-rose-400 rounded-xl font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-2 select-none"
+                      className="px-3 py-2 bg-rose-955/25 hover:bg-rose-900/35 border border-rose-905/45 text-rose-450 rounded-lg font-mono text-[8.5px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-1.5 select-none"
                     >
-                      <Square className="w-3.5 h-3.5 fill-current" /> Deactivate
+                      <Square className="w-3 h-3 fill-current" /> Deactivate
                     </button>
                   </div>
                 )}
 
                 {autopilotState === 'countdown_next' && (
-                  <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full">
-                    <div className="bg-slate-955/95 border border-amber-500/40 px-5 py-3 rounded-xl flex items-center justify-center gap-4 min-w-[210px] shadow-amber-500/10 shadow-lg relative animate-pulse">
-                      <Zap className="w-5 h-5 text-amber-500 animate-bounce" />
+                  <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full">
+                    <div className="bg-slate-955/95 border border-amber-500/40 px-3.5 py-2 rounded-lg flex items-center justify-center gap-3 min-w-[180px] shadow-amber-500/10 shadow-lg relative animate-pulse">
+                      <Zap className="w-4.5 h-4.5 text-amber-500 animate-bounce" />
                       <div className="text-left font-mono">
-                        <span className="text-[8px] text-amber-450 font-extrabold uppercase block tracking-widest">LOOP COUNTDOWN</span>
-                        <span className="text-base font-black text-amber-400 leading-none">Re-Scanning in {countdown}s</span>
+                        <span className="text-[7.5px] text-amber-450 font-extrabold uppercase block tracking-widest">LOOP COUNTDOWN</span>
+                        <span className="text-xs font-black text-amber-400 leading-none">Re-Scanning in {countdown}s</span>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={stopAutopilot}
-                      className="px-4 py-3 bg-rose-955/25 hover:bg-rose-900/35 border border-rose-905/45 text-rose-400 rounded-xl font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-2 select-none"
+                      className="px-3 py-2 bg-rose-955/25 hover:bg-rose-900/35 border border-rose-905/45 text-rose-450 rounded-lg font-mono text-[8.5px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-1.5 select-none"
                     >
-                      <Square className="w-3.5 h-3.5 fill-current" /> Terminate
+                      <Square className="w-3 h-3 fill-current" /> Terminate
                     </button>
                   </div>
                 )}
 
                 {autopilotState === 'warmup' && (
-                  <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full">
-                    <div className="bg-slate-955/95 border border-indigo-500/40 px-5 py-3 rounded-xl flex items-center justify-center gap-4 min-w-[210px] shadow-indigo-500/10 shadow-lg relative overflow-hidden">
+                  <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full">
+                    <div className="bg-slate-955/95 border border-indigo-500/40 px-3.5 py-2 rounded-lg flex items-center justify-center gap-3 min-w-[180px] shadow-indigo-500/10 shadow-lg relative overflow-hidden">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.06),transparent)] animate-ping" />
-                      <Loader2 className="w-5 h-5 text-indigo-400 animate-spin" />
+                      <Loader2 className="w-4.5 h-4.5 text-indigo-400 animate-spin" />
                       <div className="text-left font-mono">
-                        <span className="text-[8.5px] text-indigo-400 font-extrabold uppercase block tracking-widest">PRE-SCAN WARMUP</span>
-                        <span className="text-[13px] font-black text-indigo-300 leading-none">BEGINS IN {formatCountdown(countdown)}</span>
+                        <span className="text-[7.5px] text-indigo-400 font-extrabold uppercase block tracking-widest">PRE-SCAN WARMUP</span>
+                        <span className="text-[11px] font-black text-indigo-300 leading-none">BEGINS IN {formatCountdown(countdown)}</span>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={stopAutopilot}
-                      className="px-4 py-3 bg-rose-950/15 hover:bg-rose-900/35 border border-rose-905/45 text-rose-400 rounded-xl font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-2 select-none"
+                      className="px-3 py-2 bg-rose-950/15 hover:bg-rose-900/35 border border-rose-905/45 text-rose-450 rounded-lg font-mono text-[8.5px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-1.5 select-none"
                     >
-                      <Square className="w-3.5 h-3.5 fill-current" /> Terminate
+                      <Square className="w-3 h-3 fill-current" /> Terminate
                     </button>
                   </div>
                 )}
 
                 {autopilotState === 'trading' && (
-                  <div className="flex flex-col sm:flex-row items-stretch gap-3 w-full">
-                    <div className="bg-amber-955/20 border border-amber-500/40 px-5 py-3 rounded-xl flex items-center justify-center gap-4 min-w-[210px] shadow-amber-500/10 shadow-lg relative overflow-hidden">
+                  <div className="flex flex-col sm:flex-row items-stretch gap-2 w-full">
+                    <div className="bg-amber-955/20 border border-amber-500/40 px-3.5 py-2 rounded-lg flex items-center justify-center gap-3 min-w-[180px] shadow-amber-500/10 shadow-lg relative overflow-hidden">
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.06),transparent)] animate-ping" />
-                      <Activity className="w-5 h-5 text-amber-400 animate-pulse shrink-0" />
+                      <Activity className="w-4.5 h-4.5 text-amber-400 animate-pulse shrink-0" />
                       <div className="text-left font-mono">
-                        <span className="text-[8.5px] text-amber-400 font-extrabold uppercase block tracking-widest text-left">🔥 TRADING IN SESSION</span>
-                        <span className="text-[13px] font-black text-slate-100 leading-none block mt-1">LOCKED: {targetCandidate || botState.symbol.toUpperCase()}</span>
+                        <span className="text-[7.5px] text-amber-400 font-extrabold uppercase block tracking-widest text-left">🔥 TRADING IN SESSION</span>
+                        <span className="text-[11px] font-black text-slate-100 leading-none block mt-0.5">LOCKED: {targetCandidate || botState.symbol.toUpperCase()}</span>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={stopAutopilot}
-                      className="px-4 py-3 bg-rose-950/15 hover:bg-rose-900/35 border border-rose-905/45 text-rose-400 rounded-xl font-mono text-[9px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-2 select-none"
+                      className="px-3 py-2 bg-rose-950/15 hover:bg-rose-900/35 border border-rose-905/45 text-rose-455 rounded-lg font-mono text-[8.5px] font-bold uppercase tracking-wider cursor-pointer active:scale-97 transition-all flex items-center justify-center gap-1.5 select-none"
                     >
-                      <Square className="w-3.5 h-3.5 fill-current" /> Terminate
+                      <Square className="w-3 h-3 fill-current" /> Terminate
                     </button>
                   </div>
                 )}
@@ -1343,96 +1343,96 @@ export function PremiumTab({
                   <button
                     type="button"
                     onClick={stopAutopilot}
-                    className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-mono text-xs font-black uppercase tracking-wider bg-rose-955/20 hover:bg-rose-900/30 text-rose-400 border border-rose-900/50 hover:border-rose-800 shadow-inner active:scale-97 transition-all cursor-pointer select-none"
+                    className="w-full md:w-auto flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-955/20 hover:bg-rose-900/30 text-rose-400 border border-rose-900/50 hover:border-rose-800 shadow-inner active:scale-97 transition-all cursor-pointer select-none rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider"
                   >
-                    <Square className="w-4 h-4 fill-current" /> Deactivate Autopilot
+                    <Square className="w-3.5 h-3.5 fill-current" /> Deactivate Autopilot
                   </button>
                 )}
               </div>
             </div>
 
             {/* Micro Checkpoints Indicator Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 border-t border-slate-900/90 pt-6 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 border-t border-slate-900/90 pt-4 mt-4">
               
               {/* Win Rate Requirement */}
-              <div className="bg-slate-950/45 border border-slate-800/60 rounded-xl p-4 flex gap-3.5 items-start">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+              <div className="bg-slate-950/45 border border-slate-800/60 rounded-lg p-2.5 flex gap-2.5 items-start">
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border ${
                   (currentBest?.winRate || 0) >= 60.0
-                    ? 'bg-emerald-950/30 border-emerald-900/50 text-emerald-400'
+                    ? 'bg-emerald-955/20 border-emerald-900/40 text-emerald-400'
                     : 'bg-slate-900/40 border-slate-800/80 text-slate-500'
                 }`}>
-                  <Activity className="w-4 h-4" />
+                  <Activity className="w-3.5 h-3.5" />
                 </div>
                 <div className="font-mono">
-                  <span className="text-[8.5px] text-slate-500 uppercase block tracking-wider font-extrabold">A: WIN RATE THRESHOLD</span>
-                  <span className="text-slate-200 text-xs font-bold leading-none mt-1 block">
+                  <span className="text-[7.5px] text-slate-505 uppercase block tracking-wider font-extrabold">A: WIN RATE THRESHOLD</span>
+                  <span className="text-slate-205 text-[11px] font-bold leading-none mt-0.5 block">
                     {(currentBest?.winRate || 0).toFixed(1)}% / <span className="text-amber-400 font-extrabold">&gt;= 60.0%</span>
                   </span>
-                  <span className="text-[8.5px] text-slate-550 block mt-1 uppercase font-bold text-[8px] tracking-tight">
+                  <span className="text-[7.5px] text-slate-550 block mt-0.5 uppercase font-bold tracking-tight">
                     {(currentBest?.winRate || 0) >= 60.0 ? '✓ MATCHED' : '⏳ SEEKING TARGETS'}
                   </span>
                 </div>
               </div>
 
               {/* Performance Score Requirement */}
-              <div className="bg-slate-950/45 border border-slate-800/60 rounded-xl p-4 flex gap-3.5 items-start">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+              <div className="bg-slate-950/45 border border-slate-800/60 rounded-lg p-2.5 flex gap-2.5 items-start">
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border ${
                   (currentBest?.score || 0) >= 55.0
-                    ? 'bg-emerald-950/30 border-emerald-900/50 text-indigo-400'
+                    ? 'bg-emerald-955/20 border-emerald-900/40 text-indigo-400'
                     : 'bg-slate-900/40 border-slate-800/80 text-slate-500'
                 }`}>
-                  <Zap className="w-4 h-4" />
+                  <Zap className="w-3.5 h-3.5" />
                 </div>
                 <div className="font-mono">
-                  <span className="text-[8.5px] text-slate-500 uppercase block tracking-wider font-extrabold">B: PERF. SCORE TARGET</span>
-                  <span className="text-slate-200 text-xs font-bold leading-none mt-1 block">
+                  <span className="text-[7.5px] text-slate-505 uppercase block tracking-wider font-extrabold">B: PERF. SCORE TARGET</span>
+                  <span className="text-slate-205 text-[11px] font-bold leading-none mt-0.5 block">
                     {(currentBest?.score || 0).toFixed(1)} / <span className="text-amber-400 font-extrabold">&gt;= 55.0</span>
                   </span>
-                  <span className="text-[8.5px] text-slate-550 block mt-1 uppercase font-bold text-[8px] tracking-tight">
+                  <span className="text-[7.5px] text-slate-550 block mt-0.5 uppercase font-bold tracking-tight">
                     {(currentBest?.score || 0) >= 55.0 ? '✓ MATCHED' : '⏳ SEEKING TARGETS'}
                   </span>
                 </div>
               </div>
 
               {/* Status of Sync Broker Account */}
-              <div className="bg-slate-950/45 border border-slate-800/60 rounded-xl p-4 flex gap-3.5 items-start">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+              <div className="bg-slate-950/45 border border-slate-800/60 rounded-lg p-2.5 flex gap-2.5 items-start">
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border ${
                   account
                     ? 'bg-amber-950/15 border-amber-800/40 text-amber-400'
                     : 'bg-slate-900/40 border-slate-800/80 text-rose-500 font-bold animate-pulse'
                 }`}>
-                  <Shield className="w-4 h-4" />
+                  <Shield className="w-3.5 h-3.5" />
                 </div>
                 <div className="font-mono">
-                  <span className="text-[8.5px] text-slate-500 uppercase block tracking-wider font-extrabold">C: SECURE LINK GATEWAY</span>
-                  <span className="text-slate-200 text-xs font-bold leading-none mt-1 block truncate max-w-[150px]">
+                  <span className="text-[7.5px] text-slate-505 uppercase block tracking-wider font-extrabold">C: SECURE LINK GATEWAY</span>
+                  <span className="text-slate-205 text-[11px] font-bold leading-none mt-0.5 block truncate max-w-[120px]">
                     {account ? account.fullname : 'NOT DETECTED'}
                   </span>
-                  <span className="text-[8.5px] text-slate-550 block mt-1 uppercase font-bold text-[8px] tracking-tight">
+                  <span className="text-[7.5px] text-slate-550 block mt-0.5 uppercase font-bold tracking-tight">
                     {account ? `✓ ID: ${account.loginid}` : '🚨 RESTRICTED'}
                   </span>
                 </div>
               </div>
 
               {/* Status of Automatic Watchdog */}
-              <div className="bg-slate-950/45 border border-slate-800/60 rounded-xl p-4 flex gap-3.5 items-start">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+              <div className="bg-slate-950/45 border border-slate-800/60 rounded-lg p-2.5 flex gap-2.5 items-start">
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border ${
                   autopilotState === 'trading'
-                    ? 'bg-emerald-950/20 border-emerald-900/40 text-emerald-450 animate-pulse'
+                    ? 'bg-emerald-955/20 border-emerald-900/40 text-emerald-450 animate-pulse'
                     : 'bg-slate-900/40 border-slate-800/80 text-slate-550'
                 }`}>
-                  <Shield className={`w-4 h-4 ${autopilotState === 'trading' ? 'text-emerald-400 animate-[pulse_1.5s_infinite]' : 'text-slate-500'}`} />
+                  <Shield className={`w-3.5 h-3.5 ${autopilotState === 'trading' ? 'text-emerald-400 animate-[pulse_1.5s_infinite]' : 'text-slate-500'}`} />
                 </div>
                 <div className="font-mono">
-                  <span className="text-[8.5px] text-slate-500 uppercase block tracking-wider font-extrabold">D: HEALTH WATCHDOG</span>
-                  <span className="text-slate-200 text-xs font-bold leading-none mt-1 block">
+                  <span className="text-[7.5px] text-slate-505 uppercase block tracking-wider font-extrabold">D: HEALTH WATCHDOG</span>
+                  <span className="text-slate-205 text-[11px] font-bold leading-none mt-0.5 block">
                     {watchdogSwapsCount > 0 ? (
                       <span className="text-emerald-400 font-extrabold">{watchdogSwapsCount} HOT-SWAPS</span>
                     ) : (
                       <span>0 SWAPS</span>
                     )} / <span className="text-emerald-400 font-bold">100% AUTO</span>
                   </span>
-                  <span className="text-[8.5px] text-slate-550 block mt-1 uppercase font-bold text-[8px] tracking-tight">
+                  <span className="text-[7.5px] text-slate-550 block mt-0.5 uppercase font-bold tracking-tight">
                     {autopilotState === 'trading' ? '🛡️ GUARDING (<55% WR)' : '⏳ STANDBY'}
                   </span>
                 </div>
@@ -1442,49 +1442,49 @@ export function PremiumTab({
           </div>
 
           {/* Autopilot Real-time Active Telemetry & Trades Panel */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             
             {/* Card 1: Balance & Account Details */}
-            <div className="bg-slate-900/60 border border-slate-850 backdrop-blur-md rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
-              <div className="space-y-4">
+            <div className="bg-slate-900/60 border border-slate-850 backdrop-blur-md rounded-xl p-3.5 relative overflow-hidden flex flex-col justify-between">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-950/40 border border-emerald-900/30 flex items-center justify-center text-emerald-400 font-bold">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-7 h-7 rounded-md bg-emerald-955/20 border border-emerald-900/30 flex items-center justify-center text-emerald-450 font-bold text-xs">
                       $
                     </div>
                     <div className="font-mono text-left leading-none">
-                      <h4 className="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Broker Capital</h4>
-                      <p className="text-[8px] text-slate-500 mt-0.5">Live wallet database sync</p>
+                      <h4 className="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider">Broker Capital</h4>
+                      <p className="text-[7.5px] text-slate-505 mt-0.5">Live wallet database sync</p>
                     </div>
                   </div>
                   
                   {account ? (
-                    <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold font-mono border uppercase tracking-widest ${
+                    <span className={`px-1.5 py-0.5 rounded text-[7.5px] font-bold font-mono border uppercase tracking-wider ${
                       account.is_virtual 
                         ? 'bg-amber-955/20 text-amber-450 border-amber-800/40' 
-                        : 'bg-emerald-955/20 text-emerald-450 border-emerald-800/40'
+                        : 'bg-emerald-955/20 text-emerald-455 border-emerald-800/40'
                     }`}>
                       {account.is_virtual ? 'Virtual' : 'VIP Real'}
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full text-[8px] font-bold font-mono bg-slate-950 text-slate-600 border border-slate-850">
+                    <span className="px-1.5 py-0.5 rounded text-[7.5px] font-bold font-mono bg-slate-950 text-slate-600 border border-slate-850">
                       Unlinked
                     </span>
                   )}
                 </div>
 
-                <div className="py-2 text-left">
+                <div className="py-1 text-left">
                   {account ? (
-                    <div className="flex items-baseline gap-1.5 font-mono">
-                      <span className="text-3xl font-black text-slate-100 tracking-tight">
+                    <div className="flex items-baseline gap-1 font-mono">
+                      <span className="text-xl font-black text-slate-100 tracking-tight">
                         {account.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
-                      <span className="text-xs font-bold text-slate-400 uppercase">{account.currency}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">{account.currency}</span>
                     </div>
                   ) : (
-                    <div className="p-3 bg-slate-950 border border-dashed border-slate-800 rounded-xl flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
-                      <p className="text-[10px] font-mono leading-snug text-slate-400">
+                    <div className="p-2.5 bg-slate-950 border border-dashed border-slate-800 rounded-lg flex items-center gap-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                      <p className="text-[9px] font-mono leading-tight text-slate-400">
                         Please link your Deriv authorization key under credentials controller.
                       </p>
                     </div>
@@ -1492,65 +1492,65 @@ export function PremiumTab({
                 </div>
               </div>
 
-              <div className="border-t border-slate-800/60 pt-3 flex items-center justify-between text-[10px] font-mono text-slate-500">
+              <div className="border-t border-slate-800/60 pt-2 mt-2 flex items-center justify-between text-[9px] font-mono text-slate-500">
                 <span>Account ID:</span>
-                <span className="text-slate-300 font-bold truncate max-w-[150px]">
+                <span className="text-slate-300 font-bold truncate max-w-[125px]">
                   {account ? account.loginid : 'Not Authorized'}
                 </span>
               </div>
             </div>
 
             {/* Card 2 & 3: Active Trade Stream Monitoring */}
-            <div className="bg-slate-900/60 border border-slate-850 backdrop-blur-md rounded-2xl p-5 lg:col-span-2 relative overflow-hidden flex flex-col justify-between">
-              <div className="space-y-4">
+            <div className="bg-slate-900/60 border border-slate-850 backdrop-blur-md rounded-xl p-3.5 lg:col-span-2 relative overflow-hidden flex flex-col justify-between">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${
+                  <div className="flex items-center gap-2">
+                    <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 border ${
                       botState.isRunning 
                         ? 'bg-amber-950/30 border-amber-500/30 text-amber-400 font-bold animate-pulse'
-                        : 'bg-slate-950 border border-slate-850 text-slate-500'
+                        : 'bg-slate-955 border border-slate-850 text-slate-500'
                     }`}>
-                      <Activity className="w-4 h-4" />
+                      <Activity className="w-3.5 h-3.5" />
                     </div>
                     <div className="text-left font-mono">
-                      <h4 className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Automated Execution Monitor</h4>
-                      <p className="text-[8px] text-slate-500 mt-0.5">
+                      <h4 className="text-[9px] uppercase font-bold text-slate-300 tracking-wider">Automated Execution Monitor</h4>
+                      <p className="text-[7.5px] text-slate-505 mt-0.5">
                         {botState.isRunning ? `Managing active trade on ${botState.symbol.toUpperCase()}` : 'System scanner in idle standby'}
                       </p>
                     </div>
                   </div>
 
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[8.5px] font-mono font-black uppercase border tracking-wider leading-none select-none ${
+                  <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-mono font-black uppercase border tracking-wider leading-none select-none ${
                     botState.isRunning
                       ? 'bg-amber-955/20 text-amber-400 border-amber-500/30 animate-pulse'
                       : 'bg-slate-950 text-slate-550 border-slate-850'
                   }`}>
-                    {botState.isRunning && <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />}
+                    {botState.isRunning && <span className="w-1 h-1 rounded-full bg-amber-400 animate-pulse" />}
                     STATUS: {botState.isRunning ? 'Trading' : 'Standby'}
                   </span>
                 </div>
 
                 {/* Sub stats row */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950/50 rounded-xl p-3 border border-slate-800/60">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-950/50 rounded-lg p-2 border border-slate-800/60">
                   <div className="font-mono text-left">
-                    <span className="text-[8px] text-slate-500 uppercase tracking-wide block font-extrabold">Active Stake</span>
-                    <span className="text-xs font-bold text-slate-200 mt-0.5 block font-sans">
+                    <span className="text-[7.5px] text-slate-505 uppercase tracking-wide block font-extrabold">Active Stake</span>
+                    <span className="text-[11px] font-bold text-slate-200 mt-0.5 block font-sans">
                       ${botState.currentStake.toFixed(2)}
                     </span>
                   </div>
                   
                   <div className="font-mono text-left">
-                    <span className="text-[8px] text-slate-500 uppercase tracking-wide block font-extrabold">Session Win/Loss</span>
-                    <span className="text-xs font-bold text-slate-200 mt-0.5 block flex items-center gap-1">
+                    <span className="text-[7.5px] text-slate-505 uppercase tracking-wide block font-extrabold">Win / Loss</span>
+                    <span className="text-[11px] font-bold text-slate-205 mt-0.5 block flex items-center gap-0.5">
                       <span className="text-emerald-400 font-extrabold">{botState.wins}W</span> 
-                      <span className="text-slate-600">/</span> 
+                      <span className="text-slate-655">/</span> 
                       <span className="text-rose-400 font-extrabold">{botState.losses}L</span>
                     </span>
                   </div>
 
                   <div className="font-mono text-left">
-                    <span className="text-[8px] text-slate-500 uppercase tracking-wide block font-extrabold">Net Profit</span>
-                    <span className={`text-xs font-black mt-0.5 block ${
+                    <span className="text-[7.5px] text-slate-505 uppercase tracking-wide block font-extrabold">Net Profit</span>
+                    <span className={`text-[11px] font-black mt-0.5 block ${
                       botState.profit > 0 ? 'text-emerald-400' : botState.profit < 0 ? 'text-rose-455' : 'text-slate-400'
                     }`}>
                       {botState.profit >= 0 ? '+' : ''}${botState.profit.toFixed(2)}
@@ -1558,8 +1558,8 @@ export function PremiumTab({
                   </div>
 
                   <div className="font-mono text-left">
-                    <span className="text-[8px] text-slate-500 uppercase tracking-wide block font-extrabold">Streak Cap</span>
-                    <span className={`text-xs font-bold mt-0.5 block ${
+                    <span className="text-[7.5px] text-slate-505 uppercase tracking-wide block font-extrabold">Streak Cap</span>
+                    <span className={`text-[11px] font-bold mt-0.5 block ${
                       botState.consecutiveLosses > 0 ? 'text-amber-500' : 'text-slate-500'
                     }`}>
                       {botState.consecutiveLosses} / {botConfig.maxLosses}
@@ -1569,34 +1569,34 @@ export function PremiumTab({
               </div>
 
               {/* Quick trade event output */}
-              <div className="border-t border-slate-805/50 pt-2.5 mt-3 text-left">
-                <div className="flex justify-between items-center text-[8px] tracking-wider text-slate-500 uppercase font-extrabold mb-1 font-mono">
+              <div className="border-t border-slate-805/50 pt-2 mt-2 text-left">
+                <div className="flex justify-between items-center text-[7.5px] tracking-wider text-slate-505 uppercase font-extrabold mb-0.5 font-mono">
                   <span>Stream Activity Tracer</span>
                   <button
                     type="button"
                     onClick={() => setShowPremiumConsole(true)}
-                    className="text-amber-550 hover:text-amber-450 font-extrabold uppercase tracking-wider text-[8px] cursor-pointer flex items-center gap-1 transition-all bg-transparent border-0 outline-none p-0 select-none animate-pulse"
+                    className="text-amber-550 hover:text-amber-450 font-extrabold uppercase tracking-wider text-[7.5px] cursor-pointer flex items-center gap-0.5 transition-all bg-transparent border-0 outline-none p-0 select-none animate-pulse"
                   >
-                    <Terminal className="w-2.5 h-2.5 text-amber-500" /> Maximize Console
+                    <Terminal className="w-2 h-2 text-amber-500" /> Maximize Console
                   </button>
                 </div>
-                <div className="h-5 overflow-hidden font-mono text-[9px]">
+                <div className="h-4.5 overflow-hidden font-mono text-[8.5px]">
                   {logs.filter(l => l.type === 'trade' || l.type === 'success' || l.type === 'error').slice(0, 1).map((log) => (
-                    <div key={log.id} className="flex gap-2 items-center text-slate-350">
+                    <div key={log.id} className="flex gap-1.5 items-center text-slate-350">
                       <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${
                         log.type === 'success' ? 'bg-emerald-400' : log.type === 'error' ? 'bg-rose-500' : 'bg-amber-400'
                       }`} />
-                      <span className="text-slate-500 text-[8px]">[{log.timestamp}]</span>
+                      <span className="text-slate-500 text-[7.5px]">[{log.timestamp}]</span>
                       <span className="text-slate-300 truncate font-semibold">{log.message}</span>
                     </div>
                   )).length > 0 ? (
                     logs.filter(l => l.type === 'trade' || l.type === 'success' || l.type === 'error').slice(0, 1).map((log) => (
-                      <div key={log.id} className="flex gap-2 items-center text-slate-350">
-                        <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${
+                      <div key={log.id} className="flex gap-1.5 items-center text-slate-350">
+                        <span className={`shrink-0 w-1 h-1 rounded-full ${
                           log.type === 'success' ? 'bg-emerald-500' : log.type === 'error' ? 'bg-rose-550' : 'bg-amber-400'
                         }`} />
-                        <span className="text-slate-500 text-[8px] shrink-0">[{log.timestamp}]</span>
-                        <span className="text-slate-305 truncate font-semibold leading-relaxed">{log.message}</span>
+                        <span className="text-slate-550 text-[7.5px] shrink-0">[{log.timestamp}]</span>
+                        <span className="text-slate-305 truncate font-semibold leading-none">{log.message}</span>
                       </div>
                     ))
                   ) : (
@@ -1608,36 +1608,35 @@ export function PremiumTab({
             
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
-            <div className="lg:col-span-1 space-y-6">
-              
+            <div className="lg:col-span-1 space-y-4">
               {/* Credentials Section */}
-              <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 space-y-4">
-                <div className="flex items-center gap-2">
-                  <Key className="w-4 h-4 text-amber-500" />
-                  <h3 className="text-xs font-black text-slate-205 uppercase tracking-widest font-sans">Broker Verification</h3>
+              <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-amber-500" />
+                  <h3 className="text-[11px] font-black text-slate-205 uppercase tracking-widest font-sans leading-none">Broker Verification</h3>
                 </div>
 
                 {account ? (
-                  <div className="space-y-4 font-mono text-xs text-slate-400">
-                    <p className="text-[11px] leading-relaxed">Your Deriv brokerage account is mapped securely into the NexScan premium server cloud context.</p>
-                    <div className="p-3 bg-slate-950 rounded-xl border border-slate-850">
-                      <span className="text-[8px] text-slate-500 block uppercase font-extrabold tracking-wider">Authorized Profile</span>
-                      <span className="text-slate-200 font-extrabold block text-xs truncate mt-0.5">{account.fullname}</span>
-                      <span className="text-[9px] text-slate-500 block mt-0.5">ID: {account.loginid} • Currency: {account.currency}</span>
+                  <div className="space-y-3 font-mono text-[11px] text-slate-400">
+                    <p className="text-[10px] leading-relaxed">Your Deriv brokerage account is mapped securely into the NexScan premium server cloud context.</p>
+                    <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-850 text-left">
+                      <span className="text-[7.5px] text-slate-500 block uppercase font-extrabold tracking-wider leading-none">Authorized Profile</span>
+                      <span className="text-slate-200 font-extrabold block text-[11px] truncate mt-1 leading-none">{account.fullname}</span>
+                      <span className="text-[8px] text-slate-500 block mt-1 leading-none">ID: {account.loginid} • Currency: {account.currency}</span>
                     </div>
                     <button
                       type="button"
                       onClick={handlePremiumDisconnect}
-                      className="w-full text-center py-2.5 bg-slate-950 hover:bg-slate-900/60 text-slate-400 hover:text-rose-400 border border-slate-850 hover:border-rose-950/40 rounded-xl cursor-pointer text-[10px] font-bold uppercase tracking-wider transition-colors"
+                      className="w-full text-center py-2 bg-slate-950 hover:bg-slate-900/60 text-slate-400 hover:text-rose-450 border border-slate-850 hover:border-rose-950/40 rounded-lg cursor-pointer text-[9px] font-bold uppercase tracking-wider transition-colors"
                     >
                       Disconnect Ticket
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={handlePremiumAuth} className="space-y-3 font-mono">
-                    <p className="text-[10.5px] text-slate-500 leading-relaxed">
+                  <form onSubmit={handlePremiumAuth} className="space-y-2.5 font-mono">
+                    <p className="text-[9.5px] text-slate-505 leading-normal">
                       Authorize your live account using an active Deriv Trading API token with Read and Trade rights.
                     </p>
                     <input
@@ -1645,24 +1644,24 @@ export function PremiumTab({
                       placeholder="Paste Auth Token Key..."
                       value={tokenInput}
                       onChange={(e) => setTokenInput(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 focus:border-amber-500/50 focus:outline-none px-3.5 py-2.5 rounded-xl font-mono text-xs text-slate-200 placeholder:text-slate-705 transition-colors"
+                      className="w-full bg-slate-950 border border-slate-800 focus:border-amber-500/50 focus:outline-none px-2.5 py-1.5 rounded-lg font-mono text-xs text-slate-200 placeholder:text-slate-705 transition-colors"
                       required
                     />
 
                     {error && (
-                      <p className="text-[9.5px] text-rose-455 font-mono flex items-start gap-1 leading-tight">
-                        <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> {error}
+                      <p className="text-[9px] text-rose-455 font-mono flex items-start gap-1 leading-tight">
+                        <AlertTriangle className="w-3 h-3 shrink-0" /> {error}
                       </p>
                     )}
 
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-2.5 bg-slate-805 hover:bg-slate-755 text-slate-300 hover:text-white rounded-xl text-[10px] uppercase tracking-widest font-extrabold cursor-pointer border border-transparent hover:border-amber-500/30 transition-all flex items-center justify-center gap-1.5"
+                      className="w-full py-2 bg-slate-805 hover:bg-slate-755 text-slate-300 hover:text-white rounded-lg text-[9.5px] uppercase tracking-widest font-extrabold cursor-pointer border border-transparent hover:border-amber-500/30 transition-all flex items-center justify-center gap-1"
                     >
                       {loading ? (
                         <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" /> Link Loading...
+                          <Loader2 className="w-3 h-3 animate-spin" /> Link Loading...
                         </>
                       ) : (
                         'LINK BROKER API KEY'
@@ -1673,24 +1672,24 @@ export function PremiumTab({
               </div>
 
               {/* Recent Autopilot Trades History */}
-              <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 space-y-4 font-mono text-left">
+              <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 space-y-3 font-mono text-left">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <History className="w-4 h-4 text-emerald-500" />
-                    <h3 className="text-xs font-black text-slate-200 uppercase tracking-widest font-sans">Autopilot History</h3>
+                  <div className="flex items-center gap-1.5">
+                    <History className="w-3.5 h-3.5 text-emerald-500" />
+                    <h3 className="text-[11px] font-black text-slate-200 uppercase tracking-widest font-sans leading-none">Autopilot History</h3>
                   </div>
                   {autopilotTrades.length > 0 && (
-                    <span className="text-[8px] font-black tracking-widest bg-emerald-955/20 text-emerald-400 border border-emerald-900/40 px-2 py-0.5 rounded leading-none select-none">
+                    <span className="text-[7.5px] font-black tracking-widest bg-emerald-955/20 text-emerald-400 border border-emerald-900/40 px-1.5 py-0.5 rounded leading-none select-none">
                       {autopilotTrades.length} TRADES
                     </span>
                   )}
                 </div>
 
-                <div className="space-y-2.5 max-h-[310px] overflow-y-auto divide-y divide-slate-900/60 scrollbar-none pr-0.5">
+                <div className="space-y-2 max-h-[220px] overflow-y-auto divide-y divide-slate-900/60 scrollbar-none pr-0.5">
                   {autopilotTrades.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 text-center text-slate-500 select-none">
-                      <History className="w-7 h-7 mb-2 opacity-30 animate-pulse text-slate-500" />
-                      <p className="text-[10px] leading-relaxed max-w-[180px]">
+                    <div className="flex flex-col items-center justify-center py-6 text-center text-slate-500 select-none">
+                      <History className="w-6 h-6 mb-1.5 opacity-30 animate-pulse text-slate-500" />
+                      <p className="text-[9px] leading-relaxed max-w-[150px]">
                         No premium autopilot trades logged on this profile yet.
                       </p>
                     </div>
@@ -1701,19 +1700,19 @@ export function PremiumTab({
                       const displaySym = originalSym ? originalSym.short : trade.symbol.split('_').pop();
                       const formattedTime = new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                       return (
-                        <div key={trade.id} className="pt-2.5 first:pt-0 pb-2 flex items-center justify-between text-[10px] text-slate-300">
-                          <div className="flex items-center gap-2 text-left min-w-0">
-                            <span className={`w-2 h-2 rounded-full shrink-0 ${isWin ? 'bg-emerald-400' : 'bg-rose-550'}`} />
+                        <div key={trade.id} className="pt-2 first:pt-0 pb-1.5 flex items-center justify-between text-[9px] text-slate-300">
+                          <div className="flex items-center gap-1.5 text-left min-w-0">
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isWin ? 'bg-emerald-400' : 'bg-rose-550'}`} />
                             <div className="leading-none text-left min-w-0">
                               <span className="font-extrabold text-slate-200 block truncate">{displaySym}</span>
-                              <span className="text-[8px] text-slate-500 block mt-1">{formattedTime}</span>
+                              <span className="text-[7.5px] text-slate-500 block mt-0.5">{formattedTime}</span>
                             </div>
                           </div>
                           
-                          <div className="text-right flex items-center gap-2 shrink-0">
-                            <span className="text-[8px] text-slate-500">Stk: ${trade.stake.toFixed(2)}</span>
-                            <span className={`px-2 py-0.5 rounded text-[8.5px] font-black tracking-wider uppercase ${
-                              isWin ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30' : 'bg-rose-950/40 text-rose-400 border border-rose-900/30'
+                          <div className="text-right flex items-center gap-1.5 shrink-0">
+                            <span className="text-[7.5px] text-slate-550">Stk: ${trade.stake.toFixed(2)}</span>
+                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black tracking-wider uppercase border ${
+                              isWin ? 'bg-emerald-950/40 text-emerald-450 border-emerald-900/30' : 'bg-rose-950/40 text-rose-455 border-rose-900/30'
                             }`}>
                               {isWin ? `+$${trade.profit.toFixed(2)}` : `-$${Math.abs(trade.profit).toFixed(2)}`}
                             </span>
@@ -1725,9 +1724,9 @@ export function PremiumTab({
                 </div>
 
                 {autopilotTrades.length > 0 && (
-                  <div className="border-t border-slate-900 pt-3 flex justify-between items-center text-[9px] font-black tracking-wider text-slate-500 uppercase">
+                  <div className="border-t border-slate-900 pt-2 mt-2 flex justify-between items-center text-[8.5px] font-black tracking-wider text-slate-505 uppercase">
                     <span>Session PL:</span>
-                    <span className={`font-black text-[11px] ${
+                    <span className={`font-black text-[10px] ${
                       autopilotTrades.reduce((acc, t) => acc + t.profit, 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
                     }`}>
                       ${autopilotTrades.reduce((acc, t) => acc + t.profit, 0).toFixed(2)}
@@ -1739,8 +1738,8 @@ export function PremiumTab({
             </div>
 
             {/* Candidate Pipeline list */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-slate-900/60 border border-slate-800/85 backdrop-blur-md rounded-2xl p-5 space-y-4">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-slate-900/60 border border-slate-800/85 backdrop-blur-md rounded-xl p-4 space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Compass className="w-4.5 h-4.5 text-amber-500 shrink-0" />
@@ -1753,7 +1752,7 @@ export function PremiumTab({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                   {rankedCandidates.slice(0, 6).map((item, index) => {
                     const colorAccent = getVolColor(item.info.vol);
                     const meetsCriteria = item.winRate !== null && item.winRate >= 60.0 && item.score >= 55.0;
@@ -1761,56 +1760,56 @@ export function PremiumTab({
                     return (
                       <div
                         key={item.info.id}
-                        className={`rounded-xl bg-slate-955 border p-4 font-mono transition-all duration-300 relative overflow-hidden flex flex-col justify-between group ${
+                        className={`rounded-lg bg-slate-955 border p-2.5 font-mono transition-all duration-300 relative overflow-hidden flex flex-col justify-between group ${
                           meetsCriteria 
                             ? 'border-amber-500/20 bg-amber-955/10 shadow shadow-amber-500/5 hover:border-amber-500/40' 
                             : 'border-slate-850 hover:border-slate-800'
                         }`}
                       >
-                        <div className="absolute top-0 left-0 bottom-0 w-1" style={{ backgroundColor: colorAccent }} />
+                        <div className="absolute top-0 left-0 bottom-0 w-0.5" style={{ backgroundColor: colorAccent }} />
                         
-                        <div className="flex justify-between items-start pl-1.5">
+                        <div className="flex justify-between items-start pl-1">
                           <div className="leading-none text-left">
-                            <div className="flex items-baseline gap-1.5">
-                              <span className="font-extrabold text-sm text-slate-205">{item.info.short}</span>
-                              <span className="text-[8px] text-slate-500 font-medium truncate max-w-[130px]" title={item.info.name}>({item.info.name})</span>
+                            <div className="flex items-baseline gap-1">
+                              <span className="font-extrabold text-[11px] text-slate-205">{item.info.short}</span>
+                              <span className="text-[7px] text-slate-500 font-medium truncate max-w-[110px]" title={item.info.name}>({item.info.name})</span>
                             </div>
-                            <span className="text-[8px] text-slate-500 uppercase tracking-widest block mt-1 font-bold">
+                            <span className="text-[7.5px] text-slate-505 uppercase tracking-wide block mt-1 font-bold">
                               RANKED POSITION: {index + 1}
                             </span>
                           </div>
 
                           {meetsCriteria ? (
-                            <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-950/45 text-emerald-400 border border-emerald-900/45 tracking-widest leading-none select-none">
+                            <span className="text-[7px] font-black px-1 py-0.5 rounded bg-emerald-955/40 text-emerald-400 border border-emerald-900/45 tracking-wider leading-none select-none">
                               QUALIFIED
                             </span>
                           ) : (
-                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-slate-900 text-slate-500 border border-slate-850 tracking-widest leading-none select-none">
+                            <span className="text-[7px] font-bold px-1 py-0.5 rounded bg-slate-900 text-slate-500 border border-slate-850 tracking-wider leading-none select-none">
                               MONITOR
                             </span>
                           )}
                         </div>
 
                         {/* Stats indicator row */}
-                        <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-900/50 pl-1.5">
+                        <div className="grid grid-cols-3 gap-1.5 mt-2 pt-2 border-t border-slate-900/50 pl-1">
                           <div>
-                            <span className="text-[7.5px] text-slate-655 font-extrabold block uppercase tracking-wider">Win Rate</span>
-                            <span className={`text-xs font-extrabold block mt-0.5 ${item.winRate !== null && item.winRate >= 60.0 ? 'text-emerald-400 font-black' : 'text-slate-400'}`}>
+                            <span className="text-[7px] text-slate-655 font-extrabold block uppercase tracking-wider">Win Rate</span>
+                            <span className={`text-[10.5px] font-extrabold block mt-0.5 ${item.winRate !== null && item.winRate >= 60.0 ? 'text-emerald-450 font-black' : 'text-slate-400'}`}>
                               {item.winRate !== null ? `${item.winRate.toFixed(1)}%` : '—'}
                             </span>
                           </div>
 
                           <div>
-                            <span className="text-[7.5px] text-slate-655 font-extrabold block uppercase tracking-wider">Score</span>
-                            <span className={`text-xs font-extrabold block mt-0.5 ${item.score >= 55.0 ? 'text-indigo-400 font-black' : 'text-slate-400'}`}>
+                            <span className="text-[7px] text-slate-655 font-extrabold block uppercase tracking-wider">Score</span>
+                            <span className={`text-[10.5px] font-extrabold block mt-0.5 ${item.score >= 55.0 ? 'text-indigo-400 font-black' : 'text-slate-400'}`}>
                               {item.score > -1 ? item.score.toFixed(1) : '—'}
                             </span>
                           </div>
 
                           <div>
-                            <span className="text-[7.5px] text-slate-655 font-extrabold block uppercase tracking-wider">Sigs/Ticks</span>
+                            <span className="text-[7px] text-slate-655 font-extrabold block uppercase tracking-wider">Sigs/Ticks</span>
                             <span className="text-[10px] font-semibold text-slate-300 block mt-0.5">
-                              {item.signals} <span className="text-slate-600 text-[8px]">({item.ticks})</span>
+                              {item.signals} <span className="text-slate-600 text-[7.5px]">({item.ticks})</span>
                             </span>
                           </div>
                         </div>
@@ -1819,11 +1818,11 @@ export function PremiumTab({
                   })}
                 </div>
 
-                <div className="p-4 bg-slate-950/50 rounded-xl border border-slate-850 flex gap-3 text-[11px] leading-relaxed text-slate-400 font-mono text-left">
-                  <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5 animate-pulse" />
+                <div className="p-3 bg-slate-950/50 rounded-lg border border-slate-850 flex gap-2.5 text-[10px] leading-relaxed text-slate-400 font-mono text-left">
+                  <Sparkles className="w-4 h-4 text-amber-500 shrink-0 mt-0.5 animate-pulse" />
                   <div>
                     <span className="font-bold text-slate-200">Continuous Assessment Logic Matrix:</span>
-                    <p className="mt-1">
+                    <p className="mt-0.5 font-normal">
                       Candidates must pass strict criteria thresholds dynamically. If no pair passes the target criteria metrics, the autopilot keeps scanning the live markets indefinitely.
                     </p>
                   </div>
