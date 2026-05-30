@@ -1217,6 +1217,8 @@ function initAuthorizedSocket(token: string) {
       });
 
       botConfig.apiToken = token;
+      // Auto-detect account type: mirror is_virtual into isDemo so the toggle reflects reality
+      botConfig.isDemo = auth.is_virtual === 1;
       authorizedWsStatus = 'connected';
       addLog('success', `🔐 ID ${auth.loginid} Authorize Verified (${auth.is_virtual ? 'Demo' : 'Live Real'}).`);
 
@@ -1374,6 +1376,8 @@ function initAuthorizedSocketForUser(userId: string, token: string) {
       });
 
       session.botConfig.apiToken = token;
+      // Auto-detect account type: mirror is_virtual into isDemo so the toggle reflects reality
+      session.botConfig.isDemo = auth.is_virtual === 1;
       session.authorizedWsStatus = 'connected';
       addSessionLog(session, 'success', `🔐 ID ${auth.loginid} Authorize Verified (${auth.is_virtual ? 'Demo' : 'Live Real'}).`);
 
