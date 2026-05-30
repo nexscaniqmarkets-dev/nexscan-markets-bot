@@ -1628,6 +1628,7 @@ async function run() {
     const isDemo = !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_') || session.botConfig.isDemo || session.account?.is_virtual;
     if (isDemo && session.account) {
       saveUserDemoData(userId, session.account.balance, []);
+    }
     addSessionLog(session, 'info', '🗑️ Past trading history cleared.');
     res.json({ success: true });
   });
