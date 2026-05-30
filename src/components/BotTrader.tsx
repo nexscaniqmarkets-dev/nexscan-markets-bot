@@ -293,7 +293,7 @@ export function BotTrader({
                     </div>
                   )}
 
-                  {/* Solid green Connect button — exactly as illustrated */}
+                  {/* Solid green Connect button */}
                   <button type="submit"
                     disabled={!tokenInput.trim() || authorizedWsStatus === 'connecting'}
                     className="w-full py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 disabled:bg-slate-800 disabled:text-slate-600 text-white text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30">
@@ -302,19 +302,89 @@ export function BotTrader({
                       : <><ShieldCheck className="w-4 h-4" /> Connect Account</>
                     }
                   </button>
-
-                  <div className="flex items-center justify-between">
-                    <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noopener noreferrer"
-                      className="text-[11px] text-slate-500 hover:text-slate-300 inline-flex items-center gap-1 transition-colors">
-                      <Key className="w-3 h-3" /> Get API token <ExternalLink className="w-3 h-3" />
-                    </a>
-                    <a href="https://deriv.partners/rx?sidc=C6D4FA86-827B-4AAF-844B-344F9FE57A0F&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU334564"
-                      target="_blank" rel="noopener noreferrer"
-                      className="text-[11px] text-slate-500 hover:text-slate-300 inline-flex items-center gap-1 transition-colors">
-                      No account? Sign up <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
                 </form>
+
+                {/* ── How to get your API token — step-by-step guide ── */}
+                <div className="mt-2 rounded-xl border border-slate-800 overflow-hidden">
+                  <div className="px-4 py-3 bg-slate-800/50 flex items-center gap-2">
+                    <Key className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="text-xs font-bold text-slate-300">How to get your Deriv API token</span>
+                  </div>
+
+                  <div className="p-4 space-y-3">
+                    {/* Step 1 */}
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5">1</div>
+                      <div>
+                        <p className="text-xs font-semibold text-slate-200">Create a free Deriv account</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">If you don't have one yet, sign up at Deriv. It's free and takes under 2 minutes.</p>
+                        <a href="https://deriv.partners/rx?sidc=C6D4FA86-827B-4AAF-844B-344F9FE57A0F&utm_campaign=dynamicworks&utm_medium=affiliate&utm_source=CU334564"
+                          target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+                          Sign up on Deriv <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-800" />
+
+                    {/* Step 2 */}
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5">2</div>
+                      <div>
+                        <p className="text-xs font-semibold text-slate-200">Go to API Token settings</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Log in to Deriv, then navigate to <span className="text-slate-300 font-mono">Account Settings → API Token</span>.</p>
+                        <a href="https://app.deriv.com/account/api-token"
+                          target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 mt-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+                          Open API Token page <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-800" />
+
+                    {/* Step 3 */}
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5">3</div>
+                      <div>
+                        <p className="text-xs font-semibold text-slate-200">Create a token with the right scopes</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Click <span className="text-slate-300 font-semibold">Create new token</span>, give it a name, and enable these two scopes:</p>
+                        <div className="mt-2 space-y-1.5">
+                          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-950/30 border border-emerald-900/40">
+                            <CheckSquare className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span className="text-[11px] font-mono font-bold text-emerald-300">Read</span>
+                            <span className="text-[10px] text-slate-500 ml-1">— view account info &amp; balance</span>
+                          </div>
+                          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-emerald-950/30 border border-emerald-900/40">
+                            <CheckSquare className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span className="text-[11px] font-mono font-bold text-emerald-300">Trade</span>
+                            <span className="text-[10px] text-slate-500 ml-1">— execute buy/sell orders</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-800" />
+
+                    {/* Step 4 */}
+                    <div className="flex gap-3">
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center shrink-0 mt-0.5">4</div>
+                      <div>
+                        <p className="text-xs font-semibold text-slate-200">Copy &amp; paste the token above</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">After creating the token, copy it and paste it into the field above, then tap <span className="text-slate-300 font-semibold">Connect Account</span>.</p>
+                      </div>
+                    </div>
+
+                    {/* Security note */}
+                    <div className="flex gap-2 p-3 rounded-xl bg-amber-950/20 border border-amber-900/30 mt-1">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-slate-400 leading-relaxed">
+                        <span className="text-amber-400 font-semibold">Never share your token.</span> NexScan IQ only stores it in your session to execute trades on your behalf. You can revoke it from Deriv at any time.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </>
             )}
 
