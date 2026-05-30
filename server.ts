@@ -436,8 +436,16 @@ function getSession(userId: string): UserSession {
         scopes: ['read', 'trade'],
       },
       realAccount: null,
-      get account() { return this.botConfig.isDemo ? this.demoAccount : (this.realAccount ?? this.demoAccount); },
-      set account(_v) { /* managed via demoAccount/realAccount */ },
+      // account always points to whichever side is active; updated whenever isDemo or realAccount changes
+      account: {
+        balance: 1000.00,
+        currency: 'USD',
+        email: '',
+        fullname: 'Demo Trader',
+        is_virtual: true,
+        loginid: `DEMO_${userId}`,
+        scopes: ['read', 'trade'],
+      } as AccountInfo | null,
       logs: [],
       pastTrades: [],
       demoPastTrades: [],
@@ -467,8 +475,8 @@ function getSession(userId: string): UserSession {
         session.demoPastTrades = saved.trades;
         // Sync pastTrades with the current active account
         if (session.botConfig.isDemo) session.pastTrades = session.demoPastTrades;
+        syncActiveAccount(session);
         console.log(`✅ Restored demo data for user ${userId}: balance=$${saved.balance}, trades=${saved.trades.length}`);
-        }
       } else {
         // First-time user — save their initial $1000 balance to MongoDB
         saveUserDemoData(userId, 1000.00, []);
@@ -482,6 +490,17 @@ function getSession(userId: string): UserSession {
 // Helper to get userId from request — falls back to 'default' for non-Telegram web access
 function getUserId(req: express.Request): string {
   return (req.body?.tgUserId || req.query?.tgUserId || 'default') as string;
+}
+
+// Sync session.account to point at the correct side based on isDemo flag
+function syncActiveAccount(session: UserSession) {
+  if (session.botConfig.isDemo) {
+    session.account = session.demoAccount;
+    session.pastTrades = session.demoPastTrades;
+  } else {
+    session.account = session.realAccount ?? session.demoAccount;
+    session.pastTrades = session.realPastTrades;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -1385,8 +1404,8 @@ function initAuthorizedSocketForUser(userId: string, token: string) {
       session.realAccount = authorizedAccount;
       // Auto-switch to the appropriate mode based on account type
       session.botConfig.isDemo = auth.is_virtual === 1;
-      // Sync pastTrades to the real side
-      session.pastTrades = session.realPastTrades;
+      // Sync active account pointer and trade history
+      syncActiveAccount(session);
 
       upsertRegistryUser({
         loginid: auth.loginid,
@@ -1514,9 +1533,9 @@ async function run() {
     if (!session.botState.isRunning) {
       session.botState.currentStake = session.botConfig.stake;
     }
-    // If the demo/real toggle changed, swap the active pastTrades view
+    // If the demo/real toggle changed, swap the active account and pastTrades view
     if (prev !== session.botConfig.isDemo) {
-      session.pastTrades = session.botConfig.isDemo ? session.demoPastTrades : session.realPastTrades;
+      syncActiveAccount(session);
     }
     res.json({ success: true, botConfig: session.botConfig });
   });
@@ -1595,7 +1614,7 @@ async function run() {
         scopes: ['read', 'trade'],
       };
       session.botConfig.isDemo = true; // it's still virtual
-      session.pastTrades = session.realPastTrades;
+      syncActiveAccount(session);
 
       upsertRegistryUser({
         loginid: 'VRTC1007421',
@@ -1635,8 +1654,7 @@ async function run() {
     // Clear the real account — demo account is already preserved in demoAccount
     session.realAccount = null;
     session.realPastTrades = [];
-    // Switch active trades view back to demo
-    session.pastTrades = session.demoPastTrades;
+    syncActiveAccount(session);
     addSessionLog(session, 'warning', '🔓 Deriv token disconnected. Switched back to your demo account.');
     res.json({ success: true });
   });
