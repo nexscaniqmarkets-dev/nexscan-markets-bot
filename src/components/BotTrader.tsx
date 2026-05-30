@@ -922,7 +922,7 @@ export function BotTrader({
             const winRate = totalTrades > 0 ? ((botState.wins / totalTrades) * 100) : 0;
             const totalStaked = parseFloat((botState.tradesCount * botConfig.stake).toFixed(2));
             const potentialPayout = parseFloat((botState.currentStake * 1.95).toFixed(2));
-            const totalPayout = parseFloat((botState.profit + totalStaked).toFixed(2));
+            const grossWinnings = parseFloat((botState.wins * botConfig.stake * 1.95).toFixed(2));
             const avgProfit = totalTrades > 0 ? parseFloat((botState.profit / totalTrades).toFixed(2)) : 0;
 
             return (
@@ -969,13 +969,13 @@ export function BotTrader({
                     <span className="text-[8px] font-mono text-slate-600 block mt-0.5">this session</span>
                   </div>
 
-                  {/* Total Payout received */}
+                  {/* Total gross winnings */}
                   <div className="p-3 text-center bg-slate-950/30 select-none">
-                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block leading-none mb-1.5">Paid Out</span>
-                    <span className={`text-sm font-black font-mono ${totalPayout >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      ${Math.max(0, totalPayout).toFixed(2)}
+                    <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block leading-none mb-1.5">Gross Winnings</span>
+                    <span className={`text-sm font-black font-mono ${grossWinnings > 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                      {grossWinnings > 0 ? `$${grossWinnings.toFixed(2)}` : '—'}
                     </span>
-                    <span className="text-[8px] font-mono text-slate-600 block mt-0.5">received</span>
+                    <span className="text-[8px] font-mono text-slate-600 block mt-0.5">from wins</span>
                   </div>
 
                   {/* Avg per trade */}
