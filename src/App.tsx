@@ -21,7 +21,9 @@ import {
   playWinChime, playLossChime, playTargetReachedChime 
 } from './utils/audio';
 import { 
-  ShieldAlert, AlertCircle, RefreshCw, X
+  Brain, TrendingUp, Cpu, Crown, History, Wallet, Trophy, Compass,
+  Zap, ShieldAlert, Sparkles, AlertCircle, RefreshCw, Coins, X,
+  ChevronUp, Activity
 } from 'lucide-react';
 
 const STORAGE_KEY_TOKEN = 'mamba_deriv_token';
@@ -42,7 +44,7 @@ function getOrCreateWebSessionId(): string {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'intelligence' | 'trader' | 'history' | 'wallet' | 'premium'>('intelligence');
-  const [intelligenceSubTab, setIntelligenceSubTab] = useState<'scanner' | 'leaderboard'>('leaderboard');
+  const [intelligenceSubTab, setIntelligenceSubTab] = useState<'leaderboard' | 'scanner'>('leaderboard');
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
   const [pastTrades, setPastTrades] = useState<PastTrade[]>([]);
   const [termsAccepted, setTermsAccepted] = useState<boolean>(() => {
@@ -618,69 +620,125 @@ export default function App() {
         </div>
       ) : (
         /* Main Container Layout */
-        <div className="flex-1 max-w-7xl w-full mx-auto px-4 pt-4 pb-40 md:px-8 space-y-0">
+        <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col">
 
-          {/* ── Tab Content Router ── */}
+          {/* Tab Content — padded bottom to clear HUD + bottom nav */}
+          <div className="flex-1 px-4 pt-4 pb-40 md:px-8 space-y-4">
 
-          {/* INTELLIGENCE — Scanner + Leaderboard with sub-tabs */}
-          {activeTab === 'intelligence' && (
-            <div className="space-y-4">
-              {/* Sub-tab pills */}
-              <div className="flex gap-2 p-1 bg-slate-900 rounded-2xl border border-slate-800">
-                <button
-                  onClick={() => setIntelligenceSubTab('leaderboard')}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    intelligenceSubTab === 'leaderboard'
-                      ? 'bg-indigo-600 text-white shadow'
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  🏆 Leaderboard
-                </button>
-                <button
-                  onClick={() => setIntelligenceSubTab('scanner')}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    intelligenceSubTab === 'scanner'
-                      ? 'bg-indigo-600 text-white shadow'
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  📡 Live Scanner
-                </button>
+            {/* Intelligence Tab */}
+            {activeTab === 'intelligence' && (
+              <div className="space-y-4">
+                {/* Sub-tab pills */}
+                <div className="flex bg-slate-900/60 border border-slate-800/80 rounded-2xl p-1 gap-1">
+                  <button
+                    onClick={() => setIntelligenceSubTab('leaderboard')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-mono text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      intelligenceSubTab === 'leaderboard'
+                        ? 'bg-slate-950 text-indigo-400 border border-slate-800'
+                        : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    <Trophy className="w-3.5 h-3.5" /> Leaderboard
+                  </button>
+                  <button
+                    onClick={() => setIntelligenceSubTab('scanner')}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-mono text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                      intelligenceSubTab === 'scanner'
+                        ? 'bg-slate-950 text-indigo-400 border border-slate-800'
+                        : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    <Compass className="w-3.5 h-3.5" /> Global Grid
+                  </button>
+                </div>
+
+                {intelligenceSubTab === 'leaderboard' && (
+                  <LeaderboardTab
+                    symbolsState={symbolsState}
+                    onSelectSymbolForTrading={handleSelectSymbolForTrading}
+                    activeTradingSymbolId={botState.symbol}
+                    botRunning={botState.isRunning}
+                    sessionUptime={sessionUptime}
+                  />
+                )}
+                {intelligenceSubTab === 'scanner' && (
+                  <ScannerTab
+                    symbolsState={symbolsState}
+                    onSelectSymbolForTrading={handleSelectSymbolForTrading}
+                    activeTradingSymbolId={botState.symbol}
+                    botRunning={botState.isRunning}
+                    sessionUptime={sessionUptime}
+                    onRestartScanning={handleRestartScanning}
+                  />
+                )}
               </div>
+            )}
 
-              {intelligenceSubTab === 'leaderboard' && (
-                <LeaderboardTab
+            {/* Trader Tab */}
+            {activeTab === 'trader' && (
+              <>
+                <BotTrader
+                  activeSymbol={activeTradingSymbol}
                   symbolsState={symbolsState}
                   onSelectSymbolForTrading={handleSelectSymbolForTrading}
-                  activeTradingSymbolId={botState.symbol}
-                  botRunning={botState.isRunning}
+                  account={account}
+                  demoAccount={demoAccount}
+                  realAccount={realAccount}
+                  botConfig={botConfig}
+                  onUpdateConfig={handleUpdateConfig}
+                  onAuthorize={handleAuthorize}
+                  onDeauthorize={handleDeauthorize}
+                  onStartBot={handleStartBot}
+                  onStopBot={handleStopBot}
+                  botState={botState}
+                  logs={logs}
+                  onClearLogs={handleClearLogs}
+                  authorizedWsStatus={authorizedWsStatus}
                   sessionUptime={sessionUptime}
+                  autoTriggerScan={autoTriggerScan}
+                  onScanReset={() => setAutoTriggerScan(false)}
+                  autoTriggerResume={autoTriggerResume}
+                  onResumeReset={() => setAutoTriggerResume(false)}
+                  onResumeWithSymbol={handleResumeWithSymbol}
+                  isAdvancedMode={isAdvancedMode}
+                  onToggleAdvancedMode={(val) => {
+                    setIsAdvancedMode(val);
+                    handleUpdateConfig({ tradingMode: val ? 'advanced' : 'normal' });
+                  }}
+                  onResetDemoBalance={handleResetDemoBalance}
                 />
-              )}
-              {intelligenceSubTab === 'scanner' && (
-                <ScannerTab
-                  symbolsState={symbolsState}
-                  onSelectSymbolForTrading={handleSelectSymbolForTrading}
-                  activeTradingSymbolId={botState.symbol}
-                  botRunning={botState.isRunning}
-                  sessionUptime={sessionUptime}
-                  onRestartScanning={handleRestartScanning}
+                <TermsAgreementModal
+                  isOpen={!termsAccepted}
+                  onAccept={handleAcceptTerms}
                 />
-              )}
-            </div>
-          )}
+              </>
+            )}
 
-          {/* TRADER */}
-          {activeTab === 'trader' && (
-            <>
-              <BotTrader
-                activeSymbol={activeTradingSymbol}
-                symbolsState={symbolsState}
-                onSelectSymbolForTrading={handleSelectSymbolForTrading}
+            {/* History Tab */}
+            {activeTab === 'history' && (
+              <HistoryTab
+                pastTrades={pastTrades}
+                onClearHistory={handleClearTrades}
+                sessionUptime={sessionUptime}
+              />
+            )}
+
+            {/* Wallet Tab — account management + cashier */}
+            {activeTab === 'wallet' && (
+              <CashierTab
                 account={account}
-                demoAccount={demoAccount}
-                realAccount={realAccount}
+                pastTrades={pastTrades}
+                onAuthorize={handleAuthorize}
+                authorizedWsStatus={authorizedWsStatus}
+                apiToken={botConfig.apiToken}
+              />
+            )}
+
+            {/* Premium Tab */}
+            {activeTab === 'premium' && (
+              <PremiumTab
+                symbolsState={symbolsState}
+                account={account}
                 botConfig={botConfig}
                 onUpdateConfig={handleUpdateConfig}
                 onAuthorize={handleAuthorize}
@@ -689,226 +747,172 @@ export default function App() {
                 onStopBot={handleStopBot}
                 botState={botState}
                 logs={logs}
-                onClearLogs={handleClearLogs}
-                authorizedWsStatus={authorizedWsStatus}
                 sessionUptime={sessionUptime}
-                autoTriggerScan={autoTriggerScan}
-                onScanReset={() => setAutoTriggerScan(false)}
-                autoTriggerResume={autoTriggerResume}
-                onResumeReset={() => setAutoTriggerResume(false)}
-                onResumeWithSymbol={handleResumeWithSymbol}
-                isAdvancedMode={isAdvancedMode}
-                onToggleAdvancedMode={(val) => {
-                  setIsAdvancedMode(val);
-                  handleUpdateConfig({ tradingMode: val ? 'advanced' : 'normal' });
-                }}
-                onResetDemoBalance={handleResetDemoBalance}
+                pastTrades={pastTrades}
               />
-              <TermsAgreementModal
-                isOpen={!termsAccepted}
-                onAccept={handleAcceptTerms}
-              />
-            </>
-          )}
-
-          {/* HISTORY */}
-          {activeTab === 'history' && (
-            <HistoryTab
-              pastTrades={pastTrades}
-              onClearHistory={handleClearTrades}
-              sessionUptime={sessionUptime}
-            />
-          )}
-
-          {/* WALLET — Cashier + Account management */}
-          {activeTab === 'wallet' && (
-            <CashierTab
-              account={account}
-              pastTrades={pastTrades}
-              onAuthorize={handleAuthorize}
-              authorizedWsStatus={authorizedWsStatus}
-              apiToken={botConfig.apiToken}
-            />
-          )}
-
-          {/* PREMIUM */}
-          {activeTab === 'premium' && (
-            <PremiumTab
-              symbolsState={symbolsState}
-              account={account}
-              botConfig={botConfig}
-              onUpdateConfig={handleUpdateConfig}
-              onAuthorize={handleAuthorize}
-              onDeauthorize={handleDeauthorize}
-              onStartBot={handleStartBot}
-              onStopBot={handleStopBot}
-              botState={botState}
-              logs={logs}
-              sessionUptime={sessionUptime}
-              pastTrades={pastTrades}
-            />
-          )}
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════════════════
-          LIVE PERFORMANCE HUD — floats above bottom nav
-          always visible when bot is running
-          ══════════════════════════════════════════════════════ */}
-      {botState.isRunning && (
-        <button
-          onClick={() => setActiveTab('trader')}
-          className="fixed bottom-[72px] left-0 right-0 z-40 mx-3"
-        >
-          <div className="bg-slate-900 border border-indigo-800/60 rounded-2xl px-4 py-3 shadow-2xl shadow-indigo-950/60 flex items-center gap-3">
-            {/* Live pulse */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-              </span>
-              <span className="text-[10px] font-black font-mono text-emerald-400 uppercase tracking-wider">Live</span>
-            </div>
-
-            <div className="w-px h-6 bg-slate-700 shrink-0" />
-
-            {/* P&L */}
-            <div className="text-center shrink-0">
-              <span className="text-[9px] font-mono text-slate-500 block uppercase">P&amp;L</span>
-              <span className={`text-sm font-black font-mono ${botState.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {botState.profit >= 0 ? '+' : ''}${botState.profit.toFixed(2)}
-              </span>
-            </div>
-
-            <div className="w-px h-6 bg-slate-700 shrink-0" />
-
-            {/* Potential payout */}
-            <div className="text-center shrink-0">
-              <span className="text-[9px] font-mono text-slate-500 block uppercase">Payout</span>
-              <span className="text-sm font-black font-mono text-amber-400">
-                +${(botState.currentStake * 0.95).toFixed(2)}
-              </span>
-            </div>
-
-            <div className="w-px h-6 bg-slate-700 shrink-0" />
-
-            {/* W / L */}
-            <div className="text-center shrink-0">
-              <span className="text-[9px] font-mono text-slate-500 block uppercase">W / L</span>
-              <span className="text-sm font-black font-mono text-slate-200">
-                <span className="text-emerald-400">{botState.wins}</span>
-                <span className="text-slate-600 mx-0.5">/</span>
-                <span className="text-red-400">{botState.losses}</span>
-              </span>
-            </div>
-
-            <div className="w-px h-6 bg-slate-700 shrink-0" />
-
-            {/* Stake */}
-            <div className="text-center shrink-0">
-              <span className="text-[9px] font-mono text-slate-500 block uppercase">Stake</span>
-              <span className="text-sm font-black font-mono text-indigo-400">
-                ${botState.currentStake.toFixed(2)}
-              </span>
-            </div>
-
-            {/* Tap hint */}
-            <div className="ml-auto text-[9px] font-mono text-slate-600 shrink-0">tap →</div>
-          </div>
-        </button>
-      )}
-
-      {/* ══════════════════════════════════════════════════════
-          BOTTOM NAVIGATION BAR
-          ══════════════════════════════════════════════════════ */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-slate-950 border-t border-slate-800 safe-area-pb">
-        <div className="max-w-7xl mx-auto flex items-end justify-around px-2 pt-2 pb-3">
-
-          {/* Intelligence */}
-          <button
-            onClick={() => setActiveTab('intelligence')}
-            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all min-w-[56px] ${
-              activeTab === 'intelligence' ? 'text-indigo-400' : 'text-slate-600 hover:text-slate-400'
-            }`}
-          >
-            <span className="text-lg">🧠</span>
-            <span className="text-[9px] font-bold font-mono uppercase tracking-wide">Intel</span>
-            {activeTab === 'intelligence' && <span className="w-4 h-0.5 rounded-full bg-indigo-400 mt-0.5" />}
-          </button>
-
-          {/* History */}
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all min-w-[56px] relative ${
-              activeTab === 'history' ? 'text-indigo-400' : 'text-slate-600 hover:text-slate-400'
-            }`}
-          >
-            <span className="text-lg">📋</span>
-            <span className="text-[9px] font-bold font-mono uppercase tracking-wide">History</span>
-            {pastTrades.length > 0 && (
-              <span className="absolute -top-0.5 right-1.5 w-4 h-4 bg-indigo-600 rounded-full text-[9px] font-black text-white flex items-center justify-center">
-                {pastTrades.length > 9 ? '9+' : pastTrades.length}
-              </span>
             )}
-            {activeTab === 'history' && <span className="w-4 h-0.5 rounded-full bg-indigo-400 mt-0.5" />}
-          </button>
-
-          {/* TRADER — raised center button */}
-          <div className="flex flex-col items-center -mt-5">
-            <button
-              onClick={() => setActiveTab('trader')}
-              className={`relative w-16 h-16 rounded-2xl flex flex-col items-center justify-center gap-0.5 shadow-2xl transition-all active:scale-95 ${
-                activeTab === 'trader'
-                  ? 'bg-gradient-to-br from-indigo-500 to-violet-600 shadow-indigo-900/60 scale-105'
-                  : 'bg-gradient-to-br from-indigo-600 to-violet-700 shadow-indigo-900/40 hover:scale-105'
-              }`}
-            >
-              <span className="text-xl">📈</span>
-              {/* Live pulse ring */}
-              {botState.isRunning && (
-                <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-slate-950" />
-                </span>
-              )}
-            </button>
-            <span className={`text-[9px] font-bold font-mono uppercase tracking-wide mt-1.5 ${
-              activeTab === 'trader' ? 'text-indigo-400' : 'text-slate-500'
-            }`}>Trader</span>
-            {activeTab === 'trader' && <span className="w-4 h-0.5 rounded-full bg-indigo-400 mt-0.5" />}
           </div>
 
-          {/* Wallet */}
-          <button
-            onClick={() => setActiveTab('wallet')}
-            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all min-w-[56px] ${
-              activeTab === 'wallet' ? 'text-emerald-400' : 'text-slate-600 hover:text-slate-400'
-            }`}
-          >
-            <span className="text-lg">💰</span>
-            <span className="text-[9px] font-bold font-mono uppercase tracking-wide">Wallet</span>
-            {activeTab === 'wallet' && <span className="w-4 h-0.5 rounded-full bg-emerald-400 mt-0.5" />}
-          </button>
+          {/* ── Live Performance HUD ── fixed above bottom nav, visible on all tabs */}
+          {(botState.isRunning || botState.tradesCount > 0) && (
+            <div
+              className="fixed bottom-[68px] left-0 right-0 z-40 px-3 pb-1 cursor-pointer"
+              onClick={() => setActiveTab('trader')}
+            >
+              <div className={`mx-auto max-w-lg rounded-2xl border px-4 py-2.5 flex items-center gap-3 shadow-2xl backdrop-blur-sm transition-all ${
+                botState.isRunning
+                  ? 'bg-slate-900/95 border-indigo-800/50 shadow-indigo-950/60'
+                  : 'bg-slate-900/90 border-slate-800/60'
+              }`}>
+                {/* Status dot */}
+                <div className="shrink-0">
+                  {botState.isRunning ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-[9px] font-mono font-black text-emerald-400 uppercase tracking-widest">Live</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-slate-600" />
+                      <span className="text-[9px] font-mono font-black text-slate-500 uppercase tracking-widest">Idle</span>
+                    </span>
+                  )}
+                </div>
 
-          {/* Premium */}
-          <button
-            onClick={() => setActiveTab('premium')}
-            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all min-w-[56px] ${
-              activeTab === 'premium' ? 'text-amber-400' : 'text-slate-600 hover:text-slate-400'
-            }`}
-          >
-            <span className="text-lg">👑</span>
-            <span className="text-[9px] font-bold font-mono uppercase tracking-wide">Premium</span>
-            {activeTab === 'premium' && <span className="w-4 h-0.5 rounded-full bg-amber-400 mt-0.5" />}
-          </button>
+                <div className="h-3 w-px bg-slate-700 shrink-0" />
 
+                {/* P&L */}
+                <div className="shrink-0 text-center">
+                  <span className="text-[8px] font-mono text-slate-500 block leading-none">P&L</span>
+                  <span className={`text-xs font-mono font-black leading-none mt-0.5 block ${botState.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {botState.profit >= 0 ? '+' : ''}${botState.profit.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="h-3 w-px bg-slate-700 shrink-0" />
+
+                {/* Next Payout */}
+                <div className="shrink-0 text-center">
+                  <span className="text-[8px] font-mono text-slate-500 block leading-none">Payout</span>
+                  <span className="text-xs font-mono font-black text-indigo-400 leading-none mt-0.5 block">
+                    ~${(botState.currentStake * 0.95).toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="h-3 w-px bg-slate-700 shrink-0" />
+
+                {/* W/L */}
+                <div className="shrink-0 text-center">
+                  <span className="text-[8px] font-mono text-slate-500 block leading-none">W / L</span>
+                  <span className="text-xs font-mono font-black text-slate-200 leading-none mt-0.5 block">
+                    <span className="text-emerald-400">{botState.wins}</span>
+                    <span className="text-slate-600 mx-0.5">/</span>
+                    <span className="text-rose-400">{botState.losses}</span>
+                  </span>
+                </div>
+
+                <div className="h-3 w-px bg-slate-700 shrink-0" />
+
+                {/* Stake */}
+                <div className="shrink-0 text-center">
+                  <span className="text-[8px] font-mono text-slate-500 block leading-none">Stake</span>
+                  <span className="text-xs font-mono font-black text-slate-300 leading-none mt-0.5 block">
+                    ${botState.currentStake.toFixed(2)}
+                  </span>
+                </div>
+
+                {/* Tap hint */}
+                <ChevronUp className="w-3.5 h-3.5 text-slate-600 ml-auto shrink-0" />
+              </div>
+            </div>
+          )}
+
+          {/* ── Fixed Bottom Navigation ── */}
+          <div className="fixed bottom-0 left-0 right-0 z-50">
+            <div className="bg-slate-950/95 backdrop-blur-md border-t border-slate-800/80 px-2 pb-safe">
+              <div className="max-w-lg mx-auto flex items-end justify-around">
+
+                {/* Intelligence */}
+                <button
+                  onClick={() => setActiveTab('intelligence')}
+                  className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all cursor-pointer ${
+                    activeTab === 'intelligence' ? 'text-indigo-400' : 'text-slate-600 hover:text-slate-400'
+                  }`}
+                >
+                  <Brain className={`w-5 h-5 transition-all ${activeTab === 'intelligence' ? 'scale-110' : ''}`} />
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">Intel</span>
+                  {activeTab === 'intelligence' && <span className="w-1 h-1 rounded-full bg-indigo-400 mt-0.5" />}
+                </button>
+
+                {/* Wallet */}
+                <button
+                  onClick={() => setActiveTab('wallet')}
+                  className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all cursor-pointer ${
+                    activeTab === 'wallet' ? 'text-emerald-400' : 'text-slate-600 hover:text-slate-400'
+                  }`}
+                >
+                  <Wallet className={`w-5 h-5 transition-all ${activeTab === 'wallet' ? 'scale-110' : ''}`} />
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">Wallet</span>
+                  {activeTab === 'wallet' && <span className="w-1 h-1 rounded-full bg-emerald-400 mt-0.5" />}
+                </button>
+
+                {/* Trader — raised center button */}
+                <button
+                  onClick={() => setActiveTab('trader')}
+                  className="flex flex-col items-center gap-1 -mt-5 px-2 min-w-0 flex-1 cursor-pointer"
+                >
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl transition-all relative ${
+                    activeTab === 'trader'
+                      ? 'bg-indigo-600 shadow-indigo-900/60 scale-105'
+                      : 'bg-slate-800 hover:bg-slate-700 shadow-slate-950/60'
+                  }`}>
+                    <Cpu className="w-6 h-6 text-white" />
+                    {botState.isRunning && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-950 animate-pulse" />
+                    )}
+                  </div>
+                  <span className={`text-[9px] font-mono font-bold uppercase tracking-wide leading-none mt-1 ${
+                    activeTab === 'trader' ? 'text-indigo-400' : 'text-slate-500'
+                  }`}>Trader</span>
+                  {activeTab === 'trader' && <span className="w-1 h-1 rounded-full bg-indigo-400" />}
+                </button>
+
+                {/* History */}
+                <button
+                  onClick={() => setActiveTab('history')}
+                  className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all cursor-pointer relative ${
+                    activeTab === 'history' ? 'text-indigo-400' : 'text-slate-600 hover:text-slate-400'
+                  }`}
+                >
+                  <div className="relative">
+                    <History className={`w-5 h-5 transition-all ${activeTab === 'history' ? 'scale-110' : ''}`} />
+                    {pastTrades.length > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-indigo-500 rounded-full text-[7px] font-black text-white flex items-center justify-center">
+                        {pastTrades.length > 9 ? '9+' : pastTrades.length}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">History</span>
+                  {activeTab === 'history' && <span className="w-1 h-1 rounded-full bg-indigo-400 mt-0.5" />}
+                </button>
+
+                {/* Premium */}
+                <button
+                  onClick={() => setActiveTab('premium')}
+                  className={`flex flex-col items-center gap-1 py-3 px-3 min-w-0 flex-1 transition-all cursor-pointer ${
+                    activeTab === 'premium' ? 'text-amber-400' : 'text-slate-600 hover:text-slate-400'
+                  }`}
+                >
+                  <Crown className={`w-5 h-5 transition-all ${activeTab === 'premium' ? 'scale-110 fill-amber-400/20' : ''}`} />
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">Premium</span>
+                  {activeTab === 'premium' && <span className="w-1 h-1 rounded-full bg-amber-400 mt-0.5" />}
+                </button>
+
+              </div>
+            </div>
+          </div>
         </div>
-      </nav>
-
-      {/* Global footer */}
-      <footer className="bg-slate-950 border-t border-slate-900 py-4 text-center text-slate-700 text-[9px] font-mono select-none pb-28">
-        NEXSCAN IQ MARKETS • SECURE DERIV INTEGRATION • PERSISTENT BACKGROUND BROKER
-      </footer>
+      )}
 
       {/* Interstitial Ad Display block */}
       <AdContainer
