@@ -283,6 +283,25 @@ export function BotTrader({
               </div>
             </div>
           )}
+
+          {/* Insufficient demo balance warning */}
+          {isOnDemo && !botState.isRunning && demoBalance < (botConfig.stake ?? 0.35) && (
+            <div className="mx-3 mt-2.5 p-3 rounded-lg bg-red-950/30 border border-red-700/50 text-[10px] text-slate-200 flex items-start gap-2 text-left">
+              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <div className="space-y-1.5">
+                <span className="font-bold text-red-300 block text-xs">Insufficient Demo Balance</span>
+                <p className="text-slate-400 leading-relaxed">
+                  Your demo balance of <span className="text-white font-mono font-bold">${demoBalance.toFixed(2)}</span> is not enough to cover the <span className="text-white font-mono font-bold">${(botConfig.stake ?? 0.35).toFixed(2)}</span> stake. Reset your demo balance to continue practising.
+                </p>
+                <button
+                  onClick={onResetDemoBalance}
+                  className="mt-1 flex items-center gap-1.5 py-1.5 px-3 rounded-lg bg-red-700 hover:bg-red-600 text-white text-[10px] font-bold transition-colors"
+                >
+                  <RotateCcw className="w-3 h-3" /> Reset Demo to $1,000
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Master Double-Panel Desktop/Mobile Grid */}
