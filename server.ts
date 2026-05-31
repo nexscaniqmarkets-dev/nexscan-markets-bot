@@ -541,11 +541,18 @@ function getRankedCandidates() {
     const totalSim = state.wins + state.losses;
     const winRate = totalSim >= 3 ? (state.wins / totalSim) * 100 : null;
     const signalFreq = state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0;
-    
-    // Balanced Score = (65% Win-Rate Weight) + (35% Volume Weight)
-    const score = winRate !== null 
-      ? winRate * 0.65 + Math.min(signalFreq * 5.0, 100) * 0.35 
+
+    // Confidence weight: scales from 0→1 as sample size grows from 3→30
+    // Prevents low-sample pairs (3-5 trades) from outranking well-tested pairs
+    const confidence = totalSim >= 3 ? Math.min(totalSim / 30, 1.0) : 0;
+
+    // Score = (65% win rate + 35% signal frequency) weighted by confidence
+    // Pairs with < 3 trades get score -1 and sink to the bottom
+    const rawScore = winRate !== null
+      ? winRate * 0.65 + Math.min(signalFreq * 5.0, 100) * 0.35
       : -1;
+
+    const score = winRate !== null ? rawScore * confidence + rawScore * (1 - confidence) * 0.5 : -1;
 
     return {
       ...state,
@@ -626,7 +633,8 @@ function startAutopilotLoop() {
       const eligible = ranked.filter(c => 
         c.winRate !== null && 
         c.winRate >= 60.0 && 
-        c.score >= 55.0
+        c.score >= 55.0 &&
+        (c.wins + c.losses) >= 8  // minimum 8 sim trades for statistical confidence
       );
       
       if (eligible.length > 0) {
@@ -684,21 +692,23 @@ function startAutopilotLoop() {
         
         if (activeSymbolState) {
           const simTotal = activeSymbolState.wins + activeSymbolState.losses;
-          const simWinRate = simTotal >= 3 ? (activeSymbolState.wins / simTotal) * 100 : null;
+          const simWinRate = simTotal >= 8 ? (activeSymbolState.wins / simTotal) * 100 : null;
           
           const botTotal = botState.wins + botState.losses;
-          const botWinRate = botTotal >= 3 ? (botState.wins / botTotal) * 100 : null;
+          const botWinRate = botTotal >= 8 ? (botState.wins / botTotal) * 100 : null;
           
-          const isSimUnhealthy = simWinRate !== null && simWinRate < 55.0;
-          const isBotUnhealthy = botWinRate !== null && botWinRate < 55.0;
+          // Watchdog fires when win rate drops below 60% — matches the 60% entry gate
+          // so the bot doesn't stay on a pair it would never have selected in the first place
+          const isSimUnhealthy = simWinRate !== null && simWinRate < 60.0;
+          const isBotUnhealthy = botWinRate !== null && botWinRate < 60.0;
           
           if (isSimUnhealthy || isBotUnhealthy) {
             const now = Date.now();
             // Throttle swaps: minimum 30 seconds between mid-session adjustments to avoid trading noise
             if (!autopilotState.lastWatchdogSwapAt || (now - autopilotState.lastWatchdogSwapAt) > 30000) {
               const reason = isSimUnhealthy 
-                ? `Scanner simulation win-rate fell to ${simWinRate?.toFixed(1)}% (< 55.0%)`
-                : `Active session live trade win-rate fell to ${botWinRate?.toFixed(1)}% (< 55.0%)`;
+                ? `Scanner simulation win-rate fell to ${simWinRate?.toFixed(1)}% (below 60.0% entry gate)`
+                : `Active session live trade win-rate fell to ${botWinRate?.toFixed(1)}% (below 60.0% entry gate)`;
               
               addPremiumLog(`🛡️ WATCHDOG ACTIVATED: Mid-session pair-health deterioration detected on [${activeSymbolState.info.short}]! (${reason})`);
               
@@ -707,12 +717,20 @@ function startAutopilotLoop() {
                 c.info.id !== activeSymbol && 
                 c.winRate !== null && 
                 c.winRate >= 60.0 && 
-                c.score >= 55.0
+                c.score >= 55.0 &&
+                (c.wins + c.losses) >= 8
               );
               
               let goldenChoice = alternatives[0];
               if (!goldenChoice) {
-                const backups = ranked.filter(c => c.info.id !== activeSymbol && c.winRate !== null && c.winRate > 55.0);
+                // No 60%+ pair available — accept a 58%+ pair as a fallback
+                // 58% still gives positive EV on 95% payout: (0.58×0.95)-(0.42×1.0) = +0.131
+                const backups = ranked.filter(c =>
+                  c.info.id !== activeSymbol &&
+                  c.winRate !== null &&
+                  c.winRate >= 58.0 &&
+                  (c.wins + c.losses) >= 8
+                );
                 if (backups.length > 0) {
                   goldenChoice = backups[0];
                 }
@@ -919,8 +937,10 @@ function initPublicSocket() {
       let { wins, losses, signals, pendingSignal, lastSignalTick } = s;
       const currentTickId = s.ticks + 1;
 
-      // Process simulated results for scanner performance
-      if (pendingSignal !== null) {
+      // ── Resolve previous signal on THIS tick ──
+      // Exit digit must come from a strictly later tick than the entry tick
+      // This prevents the entry digit itself from counting as the result
+      if (pendingSignal !== null && currentTickId > pendingSignal.tickId) {
         if (newDigit > pendingSignal.barrier) {
           wins++;
         } else {
@@ -929,10 +949,14 @@ function initPublicSocket() {
         pendingSignal = null;
       }
 
-      // Scanner entry condition matching
-      const isEntry = direction === 'rise' && (newDigit === 4 || newDigit === 5);
+      // ── Scanner entry condition ──
+      // Entry fires when: price is rising AND last digit is 4 or 5
+      // Guard: only register a new signal if no signal is already pending
+      // (prevents double-counting on back-to-back entry digits)
+      const isEntry = direction === 'rise' && (newDigit === 4 || newDigit === 5) && pendingSignal === null;
       if (isEntry) {
         signals++;
+        // tickId stored so resolution enforces currentTickId > tickId
         pendingSignal = { barrier: 4, tickId: currentTickId };
         lastSignalTick = currentTickId;
         globalSignals++;
@@ -963,19 +987,21 @@ function initPublicSocket() {
       };
 
       // Advanced mode only — Pair credibility check per session
+      // Pauses when win rate drops below 60% (matches the 60% entry gate)
+      // Requires minimum 8 sim trades before making any judgment
       for (const session of userSessions.values()) {
         if (session.botConfig.tradingMode === 'advanced' && session.botState.isRunning && symId === session.botState.symbol) {
           const activeState = symbolsState[symId];
           const totalSim = activeState.wins + activeState.losses;
-          if (totalSim >= 5) {
+          if (totalSim >= 8) {
             const liveWinRate = (activeState.wins / totalSim) * 100;
-            if (liveWinRate < 55.0) {
+            if (liveWinRate < 60.0) {
               session.botState = {
                 ...session.botState,
                 isRunning: false,
                 status: 'paused_low_winrate',
               };
-              addSessionLog(session, 'warning', `⚠️ PAIR CREDIBILITY LOST: ${symId} win rate dropped to ${liveWinRate.toFixed(1)}% (below 55%). Session paused. Scanning for next best qualifying pair...`);
+              addSessionLog(session, 'warning', `⚠️ PAIR CREDIBILITY LOST: ${symId} win rate dropped to ${liveWinRate.toFixed(1)}% (below 60% entry gate). Session paused. Scanning for next best qualifying pair...`);
             }
           }
         }
