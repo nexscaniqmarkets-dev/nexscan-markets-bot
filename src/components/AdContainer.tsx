@@ -74,7 +74,7 @@ export function AdContainer({ isOpen, onClose }: AdContainerProps) {
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-indigo-500" />
 
         <div className="flex justify-between items-start">
-          <div className="bg-slate-950/80 border border-slate-850 rounded-lg px-2.5 py-1 flex items-center gap-1.5 select-none font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+          <div className="bg-slate-950/80 border border-slate-850 rounded-lg px-2.5 py-1 flex items-center gap-1.5 select-none font-mono text-[11px] font-bold text-slate-400 uppercase tracking-widest">
             <Star className="w-3 h-3 text-amber-500 fill-current animate-pulse" /> SPONSOR ADVERTISEMENT BLOCK
           </div>
           
@@ -90,7 +90,7 @@ export function AdContainer({ isOpen, onClose }: AdContainerProps) {
           <div className="absolute top-0 right-0 w-36 h-36 bg-white/5 rounded-full blur-2xl -mr-12 -mt-12" />
           
           <div className="space-y-1">
-            <span className="font-mono text-[8px] tracking-widest uppercase bg-black/30 border border-white/10 text-white font-extrabold px-1.5 py-0.5 rounded-full block w-fit">
+            <span className="font-mono text-[10px] tracking-widest uppercase bg-black/30 border border-white/10 text-white font-extrabold px-1.5 py-0.5 rounded-full block w-fit">
               {ad.metric}
             </span>
             <h3 className="font-sans font-black text-white text-base md:text-lg tracking-tight pt-1 leading-none uppercase">
