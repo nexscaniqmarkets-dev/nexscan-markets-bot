@@ -781,12 +781,12 @@ export function PremiumTab({
               <div className={`bg-slate-955/70 border ${activeTheme.borderColor} p-4 rounded-xl text-center space-y-1 animate-fade-in shadow-inner`}>
                 <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block font-mono">Premium Autopilot License</span>
                 <span className={`text-2xl font-black font-sans ${activeTheme.textAccent} tracking-tight`}>${premiumSubscriptionPrice.toFixed(2)} USD</span>
-                <span className="text-[9px] text-slate-400 block font-mono">Billed monthly • SECURED SIMULATION PROCESS</span>
+                <span className="text-[11px] text-slate-400 block font-mono">Billed monthly • SECURED SIMULATION PROCESS</span>
               </div>
 
               <div className="space-y-3.5">
                 <div className="space-y-1">
-                  <label className="text-[9.5px] uppercase font-bold text-slate-450 tracking-wider">Cardholder Full Name</label>
+                  <label className="text-[11px] uppercase font-bold text-slate-450 tracking-wider">Cardholder Full Name</label>
                   <input
                     type="text"
                     placeholder="e.g. John Doe"
@@ -798,7 +798,7 @@ export function PremiumTab({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[9.5px] uppercase font-bold text-slate-450 tracking-wider">Credit Card Number</label>
+                  <label className="text-[11px] uppercase font-bold text-slate-450 tracking-wider">Credit Card Number</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -828,7 +828,7 @@ export function PremiumTab({
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[9.5px] uppercase font-bold text-slate-450 tracking-wider">Expiration Date</label>
+                    <label className="text-[11px] uppercase font-bold text-slate-450 tracking-wider">Expiration Date</label>
                     <input
                       type="text"
                       maxLength={5}
@@ -846,7 +846,7 @@ export function PremiumTab({
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[9.5px] uppercase font-bold text-slate-450 tracking-wider">CVC security code</label>
+                    <label className="text-[11px] uppercase font-bold text-slate-450 tracking-wider">CVC security code</label>
                     <input
                       type="password"
                       maxLength={3}
@@ -861,7 +861,7 @@ export function PremiumTab({
 
                 <div className="space-y-1 border-t border-slate-805/85 pt-3">
                   <div className="flex items-center justify-between">
-                    <label className={`text-[9.5px] uppercase font-bold ${activeTheme.textAccent} tracking-wider`}>Your Deriv API Token (Saved Safely)</label>
+                    <label className={`text-[11px] uppercase font-bold ${activeTheme.textAccent} tracking-wider`}>Your Deriv API Token (Saved Safely)</label>
                   </div>
                   <div className="relative">
                     <input
@@ -874,7 +874,7 @@ export function PremiumTab({
                     />
                     <Key className={`w-4 h-4 ${activeTheme.textAccent} absolute left-3 top-1/2 -translate-y-1/2`} />
                   </div>
-                  <span className="text-[8px] text-slate-500 block leading-normal pt-1 bg-slate-950/40 p-2 rounded border border-slate-900">
+                  <span className="text-[10px] text-slate-500 block leading-normal pt-1 bg-slate-950/40 p-2 rounded border border-slate-900">
                     💡 **To get your token:** Log into Deriv.com, navigate to **Account Settings &gt; API Token**, generate a token named "NexScan Autopilot" with **Read** and **Trade** scopes, copy it and paste it here!
                   </span>
                 </div>
@@ -912,7 +912,7 @@ export function PremiumTab({
             /* Traditional VIP User Access Portal form */
             <form onSubmit={handlePremiumLoginSubmit} className="space-y-4 text-left font-mono">
               <div className="space-y-1">
-                <label className={`text-[9.5px] uppercase font-bold ${activeTheme.textAccent} tracking-wider`}>VIP Subscriber ID</label>
+                <label className={`text-[11px] uppercase font-bold ${activeTheme.textAccent} tracking-wider`}>VIP Subscriber ID</label>
                 <input
                   type="text"
                   placeholder="Enter subscriber username..."
@@ -924,7 +924,7 @@ export function PremiumTab({
               </div>
 
               <div className="space-y-1">
-                <label className={`text-[9.5px] uppercase font-bold ${activeTheme.textAccent} tracking-wider`}>Access Passcode</label>
+                <label className={`text-[11px] uppercase font-bold ${activeTheme.textAccent} tracking-wider`}>Access Passcode</label>
                 <input
                   type="password"
                   placeholder="Enter account passcode..."
@@ -956,9 +956,9 @@ export function PremiumTab({
                 )}
               </button>
 
-              <div className="p-3.5 bg-slate-950/40 border border-slate-855 rounded-xl space-y-3 font-mono text-[9px] leading-relaxed text-slate-400 mt-2">
+              <div className="p-3.5 bg-slate-950/40 border border-slate-855 rounded-xl space-y-3 font-mono text-[11px] leading-relaxed text-slate-400 mt-2">
                 <div className="space-y-1">
-                  <div className={`flex items-center gap-1.5 ${activeTheme.textAccent} font-bold uppercase text-[9px]`}>
+                  <div className={`flex items-center gap-1.5 ${activeTheme.textAccent} font-bold uppercase text-[11px]`}>
                     <Shield className="w-3.5 h-3.5 font-extrabold" /> Restricted Premium Access
                   </div>
                   <p className="text-slate-300">
@@ -967,7 +967,7 @@ export function PremiumTab({
                 </div>
 
                 <div className="space-y-1 pt-1.5 border-t border-slate-900">
-                  <div className="flex items-center gap-1.5 text-slate-400 font-bold uppercase text-[9px]">
+                  <div className="flex items-center gap-1.5 text-slate-400 font-bold uppercase text-[11px]">
                     <Smartphone className="w-3.5 h-3.5 font-extrabold" /> Enforced Device Safety Lock
                   </div>
                   <p>
@@ -1064,7 +1064,7 @@ export function PremiumTab({
                       />
                       <span className="flex items-center justify-center bg-slate-900 px-2.5 border border-slate-800 rounded-lg text-[11px] text-slate-400 font-mono">%</span>
                     </div>
-                    <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-md p-2 text-[9px] text-emerald-400 leading-tight flex items-start gap-1">
+                    <div className="bg-emerald-950/20 border border-emerald-900/30 rounded-md p-2 text-[11px] text-emerald-400 leading-tight flex items-start gap-1">
                       <CheckCircle2 className="w-3 h-3 mt-0.5 shrink-0" />
                       <div>
                         Initial Stake Lock: <span className="font-extrabold underline">${(getComputedStake()).toFixed(2)} USD</span> based on synced broker balance.
@@ -1109,7 +1109,7 @@ export function PremiumTab({
                     onChange={(e) => setCustomMaxWins(parseInt(e.target.value, 10) || 1)}
                     className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-150 font-mono"
                   />
-                  <p className="text-[8px] text-slate-500">Stops and resets scanning when reaching this number of successful wins in a single loop run.</p>
+                  <p className="text-[10px] text-slate-500">Stops and resets scanning when reaching this number of successful wins in a single loop run.</p>
                 </div>
 
                 <div className="space-y-1 text-left">
@@ -1124,7 +1124,7 @@ export function PremiumTab({
                     onChange={(e) => setCustomMaxLosses(parseInt(e.target.value, 10) || 1)}
                     className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-150 font-mono"
                   />
-                  <p className="text-[8px] text-slate-500">Capital Protection: Forces 30-minute cooldown protection lockdown if this consecutive losses limit is hit.</p>
+                  <p className="text-[10px] text-slate-500">Capital Protection: Forces 30-minute cooldown protection lockdown if this consecutive losses limit is hit.</p>
                 </div>
 
                 <div className="space-y-1 text-left">
@@ -1139,7 +1139,7 @@ export function PremiumTab({
                     onChange={(e) => setCustomMartingale(parseFloat(e.target.value) || 2.0)}
                     className="w-full bg-slate-900 border border-slate-800 focus:border-amber-500/40 focus:outline-none rounded-lg px-2.5 py-1.5 text-[11px] text-slate-150 font-mono"
                   />
-                  <p className="text-[8px] text-slate-500">Martingale factor to recover former spot loss exposures automatically.</p>
+                  <p className="text-[10px] text-slate-500">Martingale factor to recover former spot loss exposures automatically.</p>
                 </div>
               </div>
 
@@ -1183,7 +1183,7 @@ export function PremiumTab({
             
             <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full ${activeTheme.badgeText} text-[8px] font-mono font-bold uppercase tracking-wider mb-2 leading-none select-none`}>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full ${activeTheme.badgeText} text-[10px] font-mono font-bold uppercase tracking-wider mb-2 leading-none select-none`}>
                   <Crown className="w-3 h-3 fill-current animate-pulse" /> Premium VIP Copilot Running
                 </span>
                 <h2 className="text-base md:text-lg font-black font-sans text-slate-100 uppercase tracking-wide">
@@ -1195,7 +1195,7 @@ export function PremiumTab({
 
                 <div className="mt-3 flex items-center flex-wrap gap-2 text-[10.5px] font-mono">
                   <span className="text-slate-500 uppercase text-[7.5px] tracking-widest font-extrabold font-sans">Session:</span>
-                  <span className={`font-extrabold ${activeTheme.textAccent} ${activeTheme.borderColor} bg-slate-950 px-2 py-0.5 rounded leading-none text-[9.5px]`}>
+                  <span className={`font-extrabold ${activeTheme.textAccent} ${activeTheme.borderColor} bg-slate-950 px-2 py-0.5 rounded leading-none text-[11px]`}>
                     {premiumUsername}
                   </span>
                   <button
@@ -1453,7 +1453,7 @@ export function PremiumTab({
                       $
                     </div>
                     <div className="font-mono text-left leading-none">
-                      <h4 className="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider">Broker Capital</h4>
+                      <h4 className="text-[11px] uppercase font-extrabold text-slate-400 tracking-wider">Broker Capital</h4>
                       <p className="text-[7.5px] text-slate-505 mt-0.5">Live wallet database sync</p>
                     </div>
                   </div>
@@ -1484,7 +1484,7 @@ export function PremiumTab({
                   ) : (
                     <div className="p-2.5 bg-slate-950 border border-dashed border-slate-800 rounded-lg flex items-center gap-1.5">
                       <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                      <p className="text-[9px] font-mono leading-tight text-slate-400">
+                      <p className="text-[11px] font-mono leading-tight text-slate-400">
                         Please link your Deriv authorization key under credentials controller.
                       </p>
                     </div>
@@ -1492,7 +1492,7 @@ export function PremiumTab({
                 </div>
               </div>
 
-              <div className="border-t border-slate-800/60 pt-2 mt-2 flex items-center justify-between text-[9px] font-mono text-slate-500">
+              <div className="border-t border-slate-800/60 pt-2 mt-2 flex items-center justify-between text-[11px] font-mono text-slate-500">
                 <span>Account ID:</span>
                 <span className="text-slate-300 font-bold truncate max-w-[125px]">
                   {account ? account.loginid : 'Not Authorized'}
@@ -1513,14 +1513,14 @@ export function PremiumTab({
                       <Activity className="w-3.5 h-3.5" />
                     </div>
                     <div className="text-left font-mono">
-                      <h4 className="text-[9px] uppercase font-bold text-slate-300 tracking-wider">Automated Execution Monitor</h4>
+                      <h4 className="text-[11px] uppercase font-bold text-slate-300 tracking-wider">Automated Execution Monitor</h4>
                       <p className="text-[7.5px] text-slate-505 mt-0.5">
                         {botState.isRunning ? `Managing active trade on ${botState.symbol.toUpperCase()}` : 'System scanner in idle standby'}
                       </p>
                     </div>
                   </div>
 
-                  <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-mono font-black uppercase border tracking-wider leading-none select-none ${
+                  <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-black uppercase border tracking-wider leading-none select-none ${
                     botState.isRunning
                       ? 'bg-amber-955/20 text-amber-400 border-amber-500/30 animate-pulse'
                       : 'bg-slate-950 text-slate-550 border-slate-850'
@@ -1624,19 +1624,19 @@ export function PremiumTab({
                     <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-850 text-left">
                       <span className="text-[7.5px] text-slate-500 block uppercase font-extrabold tracking-wider leading-none">Authorized Profile</span>
                       <span className="text-slate-200 font-extrabold block text-[11px] truncate mt-1 leading-none">{account.fullname}</span>
-                      <span className="text-[8px] text-slate-500 block mt-1 leading-none">ID: {account.loginid} • Currency: {account.currency}</span>
+                      <span className="text-[10px] text-slate-500 block mt-1 leading-none">ID: {account.loginid} • Currency: {account.currency}</span>
                     </div>
                     <button
                       type="button"
                       onClick={handlePremiumDisconnect}
-                      className="w-full text-center py-2 bg-slate-950 hover:bg-slate-900/60 text-slate-400 hover:text-rose-450 border border-slate-850 hover:border-rose-950/40 rounded-lg cursor-pointer text-[9px] font-bold uppercase tracking-wider transition-colors"
+                      className="w-full text-center py-2 bg-slate-950 hover:bg-slate-900/60 text-slate-400 hover:text-rose-450 border border-slate-850 hover:border-rose-950/40 rounded-lg cursor-pointer text-[11px] font-bold uppercase tracking-wider transition-colors"
                     >
                       Disconnect Ticket
                     </button>
                   </div>
                 ) : (
                   <form onSubmit={handlePremiumAuth} className="space-y-2.5 font-mono">
-                    <p className="text-[9.5px] text-slate-505 leading-normal">
+                    <p className="text-[11px] text-slate-505 leading-normal">
                       Authorize your live account using an active Deriv Trading API token with Read and Trade rights.
                     </p>
                     <input
@@ -1649,7 +1649,7 @@ export function PremiumTab({
                     />
 
                     {error && (
-                      <p className="text-[9px] text-rose-455 font-mono flex items-start gap-1 leading-tight">
+                      <p className="text-[11px] text-rose-455 font-mono flex items-start gap-1 leading-tight">
                         <AlertTriangle className="w-3 h-3 shrink-0" /> {error}
                       </p>
                     )}
@@ -1657,7 +1657,7 @@ export function PremiumTab({
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-2 bg-slate-805 hover:bg-slate-755 text-slate-300 hover:text-white rounded-lg text-[9.5px] uppercase tracking-widest font-extrabold cursor-pointer border border-transparent hover:border-amber-500/30 transition-all flex items-center justify-center gap-1"
+                      className="w-full py-2 bg-slate-805 hover:bg-slate-755 text-slate-300 hover:text-white rounded-lg text-[11px] uppercase tracking-widest font-extrabold cursor-pointer border border-transparent hover:border-amber-500/30 transition-all flex items-center justify-center gap-1"
                     >
                       {loading ? (
                         <>
@@ -1689,7 +1689,7 @@ export function PremiumTab({
                   {autopilotTrades.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-6 text-center text-slate-500 select-none">
                       <History className="w-6 h-6 mb-1.5 opacity-30 animate-pulse text-slate-500" />
-                      <p className="text-[9px] leading-relaxed max-w-[150px]">
+                      <p className="text-[11px] leading-relaxed max-w-[150px]">
                         No premium autopilot trades logged on this profile yet.
                       </p>
                     </div>
@@ -1700,7 +1700,7 @@ export function PremiumTab({
                       const displaySym = originalSym ? originalSym.short : trade.symbol.split('_').pop();
                       const formattedTime = new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                       return (
-                        <div key={trade.id} className="pt-2 first:pt-0 pb-1.5 flex items-center justify-between text-[9px] text-slate-300">
+                        <div key={trade.id} className="pt-2 first:pt-0 pb-1.5 flex items-center justify-between text-[11px] text-slate-300">
                           <div className="flex items-center gap-1.5 text-left min-w-0">
                             <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isWin ? 'bg-emerald-400' : 'bg-rose-550'}`} />
                             <div className="leading-none text-left min-w-0">
@@ -1711,7 +1711,7 @@ export function PremiumTab({
                           
                           <div className="text-right flex items-center gap-1.5 shrink-0">
                             <span className="text-[7.5px] text-slate-550">Stk: ${trade.stake.toFixed(2)}</span>
-                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-black tracking-wider uppercase border ${
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-black tracking-wider uppercase border ${
                               isWin ? 'bg-emerald-950/40 text-emerald-450 border-emerald-900/30' : 'bg-rose-950/40 text-rose-455 border-rose-900/30'
                             }`}>
                               {isWin ? `+$${trade.profit.toFixed(2)}` : `-$${Math.abs(trade.profit).toFixed(2)}`}
@@ -1747,7 +1747,7 @@ export function PremiumTab({
                       Autopilot Leaderboard Grid
                     </h3>
                   </div>
-                  <span className="inline-block text-[8px] font-mono font-bold text-slate-500 border border-slate-800/60 px-2 py-0.5 rounded bg-slate-950 tracking-widest uppercase">
+                  <span className="inline-block text-[10px] font-mono font-bold text-slate-500 border border-slate-800/60 px-2 py-0.5 rounded bg-slate-950 tracking-widest uppercase">
                     WIN RATE &gt;= 60% • SCORE &gt;= 55%
                   </span>
                 </div>
@@ -1867,7 +1867,7 @@ export function PremiumTab({
               </div>
               
               <div className="flex items-center gap-3">
-                <span className="font-mono text-[8px] text-slate-500 flex items-center gap-1 bg-slate-900 px-1.5 py-0.5 rounded leading-none border border-slate-850">
+                <span className="font-mono text-[10px] text-slate-500 flex items-center gap-1 bg-slate-900 px-1.5 py-0.5 rounded leading-none border border-slate-850">
                   <span className={`w-1.5 h-1.5 rounded-full ${autopilotState !== 'idle' ? 'bg-amber-400 animate-pulse' : 'bg-slate-705'}`} />
                   {autopilotState !== 'idle' ? 'AUTOPILOT ON' : 'STANDBY'}
                 </span>
@@ -1910,7 +1910,7 @@ export function PremiumTab({
                   >
                     Auto Trades
                     {autopilotTrades.length > 0 && (
-                      <span className="bg-amber-550 text-slate-950 px-1.5 py-0.5 rounded text-[8px] font-black shrink-0 leading-none">
+                      <span className="bg-amber-550 text-slate-950 px-1.5 py-0.5 rounded text-[10px] font-black shrink-0 leading-none">
                         {autopilotTrades.length}
                       </span>
                     )}
@@ -1924,7 +1924,7 @@ export function PremiumTab({
                       localStorage.removeItem('mamba_premium_autopilot_trades');
                       addPremiumLog('🗑️ RESET: Autopilot trade history tracker cleared.');
                     }}
-                    className="text-[9px] font-black uppercase text-slate-500 hover:text-rose-455 transition-colors cursor-pointer tracking-wider"
+                    className="text-[11px] font-black uppercase text-slate-500 hover:text-rose-455 transition-colors cursor-pointer tracking-wider"
                   >
                     Clear History
                   </button>
@@ -1965,12 +1965,12 @@ export function PremiumTab({
                                 <span className={`w-2 h-2 rounded-full ${isWin ? 'bg-emerald-400' : 'bg-rose-550'}`} />
                                 <div className="leading-none text-left">
                                   <span className="font-extrabold text-slate-200 block text-left">{displaySym}</span>
-                                  <span className="text-[8px] text-slate-500 block mt-1 text-left">{formattedTime}</span>
+                                  <span className="text-[10px] text-slate-500 block mt-1 text-left">{formattedTime}</span>
                                 </div>
                               </div>
                               
                               <div className="text-right flex items-center gap-2.5 shrink-0">
-                                <span className="text-[8px] text-slate-500">Stk: ${trade.stake.toFixed(2)}</span>
+                                <span className="text-[10px] text-slate-500">Stk: ${trade.stake.toFixed(2)}</span>
                                 <span className={`px-2 py-0.5 rounded text-[8.5px] font-black tracking-wider uppercase ${
                                   isWin ? 'bg-emerald-950/45 text-emerald-455 border border-emerald-900/40' : 'bg-rose-950/45 text-rose-455 border border-rose-900/40'
                                 }`}>
@@ -1985,7 +1985,7 @@ export function PremiumTab({
                     
                     {autopilotTrades.length > 0 && (
                       <div className="border-t border-slate-900 pt-3 shrink-0 text-left mt-3">
-                        <div className="flex justify-between text-[9px] font-black tracking-wider text-slate-500 uppercase">
+                        <div className="flex justify-between text-[11px] font-black tracking-wider text-slate-500 uppercase">
                           <span>Session Total Profit / Loss</span>
                           <span className={`font-black text-xs ${
                             autopilotTrades.reduce((acc, t) => acc + t.profit, 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'
@@ -2000,7 +2000,7 @@ export function PremiumTab({
               </div>
             </div>
 
-            <div className="border-t border-slate-900 pt-4 mt-4 text-center text-[9px] font-mono text-slate-650 select-none shrink-0">
+            <div className="border-t border-slate-900 pt-4 mt-4 text-center text-[11px] font-mono text-slate-650 select-none shrink-0">
               Autopilot Tracker • Verified safe token co-routing
             </div>
           </div>
