@@ -85,28 +85,28 @@ export function OnboardingGuide({ isOpen, onClose }: OnboardingGuideProps) {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
             <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-850/80">
-              <h5 className="font-mono text-[9px] text-slate-400 uppercase tracking-wider font-extrabold mb-1">💸 Base Stake</h5>
+              <h5 className="font-mono text-[11px] text-slate-400 uppercase tracking-wider font-extrabold mb-1">💸 Base Stake</h5>
               <p className="text-xs text-slate-500">
                 Starting trade level. Typically 1% of your overall account capacity (e.g. $1.00 on a $100.00 balance). Minimum is $0.35.
               </p>
             </div>
             
             <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-850/80">
-              <h5 className="font-mono text-[9px] text-slate-400 uppercase tracking-wider font-extrabold mb-1">⚡ Martingale Multiplier</h5>
+              <h5 className="font-mono text-[11px] text-slate-400 uppercase tracking-wider font-extrabold mb-1">⚡ Martingale Multiplier</h5>
               <p className="text-xs text-slate-500">
                 On losses, stakes are automatically multiplied to recover deficits. Default is 2.0x. Resets to base stake immediately after a win.
               </p>
             </div>
 
             <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-850/80">
-              <h5 className="font-mono text-[9px] text-emerald-400 uppercase tracking-wider font-extrabold mb-1">🏁 Win Target Limit</h5>
+              <h5 className="font-mono text-[11px] text-emerald-400 uppercase tracking-wider font-extrabold mb-1">🏁 Win Target Limit</h5>
               <p className="text-xs text-slate-500">
                 The bot automatically stops executing and disarms itself after hitting this amount of wins. Safe standard is 2 or 3 wins.
               </p>
             </div>
 
             <div className="bg-slate-950/50 p-3 rounded-xl border border-slate-850/80">
-              <h5 className="font-mono text-[9px] text-rose-400 uppercase tracking-wider font-extrabold mb-1">🚨 Consecutive Loss Cap</h5>
+              <h5 className="font-mono text-[11px] text-rose-400 uppercase tracking-wider font-extrabold mb-1">🚨 Consecutive Loss Cap</h5>
               <p className="text-xs text-slate-500">
                 Ultimate circuit-breaker. Stops automated trading if consecutive losses reach this limit, protecting your remaining capital.
               </p>
@@ -211,7 +211,7 @@ export function OnboardingGuide({ isOpen, onClose }: OnboardingGuideProps) {
           <div className="flex items-center gap-3">
             {steps[currentStep].icon}
             <div>
-              <span className="text-[9px] font-mono font-bold text-indigo-400 uppercase tracking-widest block leading-none">
+              <span className="text-[11px] font-mono font-bold text-indigo-400 uppercase tracking-widest block leading-none">
                 Interactive Onboarding Guide (Step {currentStep + 1} of {steps.length})
               </span>
               <h3 className="text-sm md:text-base font-bold text-white tracking-tight mt-1.5 leading-none">
