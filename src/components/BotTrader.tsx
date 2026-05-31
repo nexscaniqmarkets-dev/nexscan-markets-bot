@@ -218,7 +218,7 @@ export function BotTrader({
               <Cpu className="w-3.5 h-3.5" />
             </div>
             <div className="text-left">
-              <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest block leading-none">ORDER DESK CONTRACT</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block leading-none">ORDER DESK CONTRACT</span>
               <div className="flex items-center gap-1.5 mt-0.5 leading-none">
                 <span className="text-[12.5px] font-extrabold text-slate-100 leading-none">{activeSymbol.name}</span>
                 <span className="bg-indigo-950 text-indigo-400 px-1 py-0.5 rounded text-[7.5px] font-mono font-bold border border-indigo-900/40 leading-none">DIGIT OVER 4</span>
@@ -231,7 +231,7 @@ export function BotTrader({
               <button 
                 onClick={handleSearchAndLoad}
                 disabled={isScanning || botState.isRunning || isCalibrating}
-                className="px-2.5 py-1 rounded-lg border border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-400 text-[9px] font-mono font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1"
+                className="px-2.5 py-1 rounded-lg border border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-400 text-[11px] font-mono font-bold disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1"
               >
                 {isScanning ? (
                   <>
@@ -310,11 +310,11 @@ export function BotTrader({
           {/* Panel 1: Order Ticket Parameters & Actions */}
           <div className="bg-slate-950/20 border border-slate-800/50 p-3 rounded-xl space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest">ORDER DECK PARAMETERS</span>
+              <span className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-widest">ORDER DECK PARAMETERS</span>
               <button 
                 onClick={() => onToggleAdvancedMode(!isAdvancedMode)} 
                 disabled={botState.isRunning}
-                className={`flex items-center gap-1 text-[8px] font-mono font-black px-1.5 py-0.5 rounded border transition-all disabled:opacity-40 cursor-pointer ${
+                className={`flex items-center gap-1 text-[10px] font-mono font-black px-1.5 py-0.5 rounded border transition-all disabled:opacity-40 cursor-pointer ${
                   isAdvancedMode ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25' : 'bg-slate-900 text-slate-500 border-slate-800 hover:text-slate-300'
                 }`}
               >
@@ -326,7 +326,7 @@ export function BotTrader({
             {/* Parameter Inputs Grid */}
             <div className="grid grid-cols-2 gap-2.5">
               <div className="space-y-0.5 text-left">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block">STAKE AMOUNT</span>
+                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">STAKE AMOUNT</span>
                 <div className="relative">
                   <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-500">$</span>
                   <input 
@@ -342,7 +342,7 @@ export function BotTrader({
               </div>
 
               <div className="space-y-0.5 text-left">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block">MARTINGALE MULT ×</span>
+                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">MARTINGALE MULT ×</span>
                 <input 
                   type="number" 
                   step="0.1" 
@@ -355,7 +355,7 @@ export function BotTrader({
               </div>
 
               <div className="space-y-0.5 text-left">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block">MAX WINS (TARGET)</span>
+                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">MAX WINS (TARGET)</span>
                 <input 
                   type="number" 
                   step="1" 
@@ -368,7 +368,7 @@ export function BotTrader({
               </div>
 
               <div className="space-y-0.5 text-left">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block">MAX CONSEC LOSSES</span>
+                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">MAX CONSEC LOSSES</span>
                 <input 
                   type="number" 
                   step="1" 
@@ -383,7 +383,7 @@ export function BotTrader({
 
             {/* Quick Strategic Presets */}
             <div className="space-y-1 text-left">
-              <span className="text-[8px] font-mono text-slate-650 uppercase tracking-widest block font-bold">STRATEGY PRESETS</span>
+              <span className="text-[10px] font-mono text-slate-650 uppercase tracking-widest block font-bold">STRATEGY PRESETS</span>
               <div className="grid grid-cols-3 gap-1.55">
                 {[
                   { label: 'CONSERVATIVE', stake: 0.35, mult: 2.0, cls: 'text-amber-400 border-amber-955 bg-amber-500/5 hover:bg-amber-500/10' },
@@ -444,8 +444,8 @@ export function BotTrader({
           {/* Panel 2: Live Analytics & Performance telemetry */}
           <div className="bg-slate-950/20 border border-slate-800/40 p-3 rounded-xl flex flex-col justify-between space-y-3.5">
             <div className="flex items-center justify-between">
-              <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest">LIVE ANALYTICS ENGINE</span>
-              <span className={`text-[8px] font-mono font-extrabold px-1.5 py-0.5 rounded border ${
+              <span className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-widest">LIVE ANALYTICS ENGINE</span>
+              <span className={`text-[10px] font-mono font-extrabold px-1.5 py-0.5 rounded border ${
                 botState.isRunning
                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25'
                   : 'bg-slate-900 text-slate-400 border-slate-805'
@@ -498,7 +498,7 @@ export function BotTrader({
             {/* Matrix Progress bars / Threshold bounds */}
             <div className="space-y-2 pt-1 text-left">
               <div>
-                <div className="flex justify-between items-center text-[8px] font-mono mb-0.5 leading-none">
+                <div className="flex justify-between items-center text-[10px] font-mono mb-0.5 leading-none">
                   <span className="text-slate-500 uppercase">PROFIT LEVEL</span>
                   <span className="font-extrabold text-emerald-450 text-emerald-400">{botState.wins} / {botConfig.maxWins} W</span>
                 </div>
@@ -508,7 +508,7 @@ export function BotTrader({
                 </div>
               </div>
               <div>
-                <div className="flex justify-between items-center text-[8px] font-mono mb-0.5 leading-none">
+                <div className="flex justify-between items-center text-[10px] font-mono mb-0.5 leading-none">
                   <span className="text-slate-500 uppercase font-bold">MAX LOSS LIMIT</span>
                   <span className="font-extrabold text-rose-450 text-rose-500">{botState.consecutiveLosses} / {botConfig.maxLosses} L</span>
                 </div>
@@ -526,7 +526,7 @@ export function BotTrader({
           <button 
             type="button"
             onClick={() => setIsConsoleExpanded(!isConsoleExpanded)}
-            className="w-full px-3.5 py-2.5 flex items-center justify-between text-slate-400 hover:text-slate-100 transition-colors font-mono text-[9px] font-bold cursor-pointer leading-none"
+            className="w-full px-3.5 py-2.5 flex items-center justify-between text-slate-400 hover:text-slate-100 transition-colors font-mono text-[11px] font-bold cursor-pointer leading-none"
           >
             <div className="flex items-center gap-1.5 leading-none">
               <Terminal className="w-3.5 h-3.5 text-indigo-400" />
@@ -537,7 +537,7 @@ export function BotTrader({
           </button>
 
           {isConsoleExpanded && (
-            <div className="border-t border-slate-800/40 bg-slate-950/95 p-3 space-y-2 font-mono text-[9px] leading-relaxed select-all text-left">
+            <div className="border-t border-slate-800/40 bg-slate-950/95 p-3 space-y-2 font-mono text-[11px] leading-relaxed select-all text-left">
               <div ref={terminalContainerRef} className="h-28 overflow-y-auto space-y-1 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent text-left">
                 {logs.length > 0 ? logs.map(log => (
                   <div key={log.id} className="flex gap-2 border-l border-slate-900 pl-1.5 py-0.5">
