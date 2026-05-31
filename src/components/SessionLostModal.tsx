@@ -109,15 +109,15 @@ export function SessionLostModal({
           {/* Stats */}
           <div className="grid grid-cols-3 gap-2.5 mb-4 relative z-10">
             <div className="bg-slate-950/70 border border-emerald-900/40 rounded-xl p-3 text-center">
-              <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block mb-1">WINS</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block mb-1">WINS</span>
               <span className="text-2xl font-black font-mono text-emerald-400">{wins}</span>
             </div>
             <div className="bg-slate-950/70 border border-rose-900/40 rounded-xl p-3 text-center">
-              <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block mb-1">LOSSES</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block mb-1">LOSSES</span>
               <span className="text-2xl font-black font-mono text-rose-400">{losses}</span>
             </div>
             <div className="bg-slate-950/70 border border-indigo-900/40 rounded-xl p-3 text-center">
-              <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block mb-1">STAKE</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block mb-1">STAKE</span>
               <span className="text-2xl font-black font-mono text-indigo-400">${stake}</span>
             </div>
           </div>
@@ -131,7 +131,7 @@ export function SessionLostModal({
           </div>
 
           {/* Reset note */}
-          <p className="text-center text-[9px] font-mono text-slate-500 mb-3 relative z-10">
+          <p className="text-center text-[11px] font-mono text-slate-500 mb-3 relative z-10">
             Clicking OK resets performance stats for a fresh session. Scanner keeps running.
           </p>
 
