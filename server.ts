@@ -1034,9 +1034,9 @@ function triggerBotEntry(session: UserSession, symId: string, entryDigit: number
   const activeStake = parseFloat(session.botState.currentStake.toFixed(2));
   addSessionLog(session, 'trade', `🎯 Background Trigger Locked: Last decimal was ${entryDigit} on ${symId}. Evaluating trade params...`);
 
-  const acct = session.account;
-  // isDemo is true if: no account linked, on a free DEMO_ account, user toggled demo mode on, or account is virtual (Deriv demo)
-  const isDemo = !acct || acct.loginid?.startsWith('DEMO_') || session.botConfig.isDemo || acct.is_virtual;
+  // isDemo is true if: user toggled demo mode on, no real account authorized yet, or authorized account is virtual (Deriv demo)
+  // NOTE: session.account is a derived pointer that falls back to demoAccount even in live mode — never use it for this check
+  const isDemo = session.botConfig.isDemo || !session.realAccount || session.realAccount.is_virtual;
 
   // ── Demo balance pre-check ──
   // Stop before placing a trade if demo balance can't cover the stake
@@ -1070,7 +1070,7 @@ function triggerBotEntry(session: UserSession, symId: string, entryDigit: number
             amount: activeStake,
             basis: 'stake',
             contract_type: 'DIGITOVER',
-            currency: acct.currency || 'USD',
+            currency: session.realAccount.currency || 'USD',
             duration: 1,
             duration_unit: 't',
             barrier: '4',
@@ -1166,7 +1166,7 @@ function settleContract(userId: string, session: UserSession, status: 'won' | 'l
   };
 
   // Update balance and trade history for the correct account side
-  const isDemo = session.botConfig.isDemo || !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_') || session.account?.is_virtual;
+  const isDemo = session.botConfig.isDemo || !session.realAccount || session.realAccount.is_virtual;
 
   if (isDemo) {
     // ── Demo balance guard ──
