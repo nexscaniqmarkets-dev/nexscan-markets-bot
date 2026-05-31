@@ -166,7 +166,7 @@ export function LeaderboardTab({
                   }
                 }}
                 disabled={botRunning && activeTradingSymbolId !== topPair.info.id}
-                className={`w-full sm:w-auto py-1.5 px-3.5 font-mono text-[9px] font-extrabold tracking-wider rounded-lg transition-all duration-100 uppercase border ${
+                className={`w-full sm:w-auto py-1.5 px-3.5 font-mono text-[11px] font-extrabold tracking-wider rounded-lg transition-all duration-100 uppercase border ${
                   activeTradingSymbolId === topPair.info.id
                     ? 'bg-indigo-950/30 text-indigo-400 border-indigo-500/30 cursor-default'
                     : botRunning
@@ -254,7 +254,7 @@ export function LeaderboardTab({
                 {/* Lead Candidate Label */}
                 <div className="flex justify-between items-center mb-1.5 leading-none">
                   <span className="text-[7px] font-mono text-slate-550 uppercase tracking-wider font-bold">Top Match:</span>
-                  <span className="font-mono text-[9px] font-black text-slate-200 bg-slate-900 border border-slate-850 px-1 py-0.5 rounded leading-none" style={{ color: getVolColor(topPair.info.vol) }}>
+                  <span className="font-mono text-[11px] font-black text-slate-200 bg-slate-900 border border-slate-850 px-1 py-0.5 rounded leading-none" style={{ color: getVolColor(topPair.info.vol) }}>
                     {topPair.info.short}
                   </span>
                 </div>
@@ -309,13 +309,13 @@ export function LeaderboardTab({
       {/* Leaderboard Rankings List */}
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-          <h3 className="font-mono text-[9px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-1 my-1">
+          <h3 className="font-mono text-[11px] text-slate-500 uppercase tracking-widest font-bold flex items-center gap-1 my-1">
             <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" /> PERFORMANCE LEADERBOARD (RANKED BY SCORING ENGINE)
           </h3>
           
           <div className="flex items-center gap-1.5 justify-between sm:justify-end">
             {refreshedToast && (
-              <span className="font-mono text-[8px] text-emerald-400 bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-800/30 animate-in fade-in duration-100 flex items-center gap-1">
+              <span className="font-mono text-[10px] text-emerald-400 bg-emerald-950/30 px-1.5 py-0.5 rounded border border-emerald-800/30 animate-in fade-in duration-100 flex items-center gap-1">
                 <span className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />
                 Rankings Updated
               </span>
@@ -324,7 +324,7 @@ export function LeaderboardTab({
               id="refreshLeaderboardBtn"
               onClick={handleManualRefresh}
               disabled={lockDisabled}
-              className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-950 hover:bg-slate-900 border border-slate-850 hover:border-slate-750 text-[9px] font-mono font-bold text-slate-400 hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-97 transition-all leading-none"
+              className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-950 hover:bg-slate-900 border border-slate-850 hover:border-slate-750 text-[11px] font-mono font-bold text-slate-400 hover:text-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-97 transition-all leading-none"
             >
               <RefreshCw className={`w-3 h-3 ${lockDisabled ? 'animate-spin text-indigo-400' : ''}`} />
               <span>{lockDisabled ? 'SCANNING...' : 'REFRESH LIST'}</span>
@@ -377,7 +377,7 @@ export function LeaderboardTab({
                         </span>
                       )}
                     </div>
-                    <div className="text-[9.5px] text-slate-500 font-medium mt-0.5 leading-none">{sym.info.name}</div>
+                    <div className="text-[11px] text-slate-500 font-medium mt-0.5 leading-none">{sym.info.name}</div>
                   </div>
                 </div>
 
@@ -390,7 +390,7 @@ export function LeaderboardTab({
 
                   <div className="text-center min-w-[50px]">
                     <span className="text-[6.5px] font-mono text-slate-500 uppercase tracking-wider block leading-none">W / L</span>
-                    <span className="font-mono text-[9px] font-extrabold block mt-0.5">
+                    <span className="font-mono text-[11px] font-extrabold block mt-0.5">
                       <span className="text-emerald-450">{sym.wins}</span>
                       <span className="text-slate-700 px-0.5">/</span>
                       <span className="text-rose-455">{sym.losses}</span>
