@@ -1038,6 +1038,16 @@ function triggerBotEntry(session: UserSession, symId: string, entryDigit: number
   // isDemo is true if: no account linked, on a free DEMO_ account, user toggled demo mode on, or account is virtual (Deriv demo)
   const isDemo = !acct || acct.loginid?.startsWith('DEMO_') || session.botConfig.isDemo || acct.is_virtual;
 
+  // ── Demo balance pre-check ──
+  // Stop before placing a trade if demo balance can't cover the stake
+  if (isDemo && session.demoAccount.balance < activeStake) {
+    session.botState.isRunning = false;
+    session.botState.status = 'lost_limit';
+    addSessionLog(session, 'error', `⚠️ INSUFFICIENT DEMO BALANCE: $${session.demoAccount.balance.toFixed(2)} available — not enough to place $${activeStake.toFixed(2)} stake. Please reset your demo balance to $1,000 to continue.`);
+    syncActiveAccount(session);
+    return;
+  }
+
   // Simple sandbox simulator mode matching live market outcome rules exactly
   if (isDemo) {
     session.botState.status = 'trading';
@@ -1159,13 +1169,36 @@ function settleContract(userId: string, session: UserSession, status: 'won' | 'l
   const isDemo = session.botConfig.isDemo || !session.botConfig.apiToken || session.account?.loginid?.startsWith('DEMO_') || session.account?.is_virtual;
 
   if (isDemo) {
+    // ── Demo balance guard ──
+    // Before applying a loss, check if there's enough balance to cover the stake
+    if (!isWin && session.demoAccount.balance < buyPrice) {
+      // Insufficient balance — stop the bot and notify user
+      session.botState = {
+        ...session.botState,
+        isRunning: false,
+        status: 'lost_limit',
+      };
+      addSessionLog(session, 'error', `⚠️ INSUFFICIENT DEMO BALANCE: $${session.demoAccount.balance.toFixed(2)} remaining — not enough to cover $${buyPrice.toFixed(2)} stake. Please reset your demo balance to continue.`);
+      syncActiveAccount(session);
+      return;
+    }
+
     // Update demo account balance and demo trade list
     session.demoAccount.balance = parseFloat((session.demoAccount.balance + profitValue).toFixed(2));
+    // Clamp to zero — never go negative
+    if (session.demoAccount.balance < 0) session.demoAccount.balance = 0;
     session.demoPastTrades.unshift(newTrade);
     session.pastTrades = session.demoPastTrades;
+    syncActiveAccount(session);
     saveUserDemoData(userId, session.demoAccount.balance, session.demoPastTrades);
   } else {
-    // Real account balance is updated live from the Deriv balance subscription — just track trades
+    // Real account — balance is updated live via Deriv's balance subscription
+    // We manually apply the delta here as well so the UI reflects it instantly
+    // before the next balance push arrives from Deriv
+    if (session.realAccount) {
+      session.realAccount.balance = parseFloat((session.realAccount.balance + profitValue).toFixed(2));
+      session.account = session.realAccount;
+    }
     session.realPastTrades.unshift(newTrade);
     session.pastTrades = session.realPastTrades;
   }
@@ -1297,6 +1330,13 @@ function initAuthorizedSocket(token: string) {
     else if (msgType === 'balance') {
       if (account) {
         account.balance = parseFloat(data.balance.balance);
+      }
+      // Also push update to any session using this global account
+      for (const session of userSessions.values()) {
+        if (session.realAccount && !session.botConfig.isDemo) {
+          session.realAccount.balance = parseFloat(data.balance.balance);
+          session.account = session.realAccount;
+        }
       }
     }
 
@@ -1460,6 +1500,10 @@ function initAuthorizedSocketForUser(userId: string, token: string) {
     else if (msgType === 'balance') {
       if (session.realAccount) {
         session.realAccount.balance = parseFloat(data.balance.balance);
+        // Also sync session.account so the UI polling picks up the updated balance
+        if (!session.botConfig.isDemo) {
+          session.account = session.realAccount;
+        }
       }
     }
 
