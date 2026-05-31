@@ -123,6 +123,24 @@
   --indigo-800: #004d66;
   --indigo-900: #01223d; /* Darkest space blue highlights */
   --indigo-950: #011124; /* Rich cyber gradient background fill card */
+
+  /* Cyber-specific: shift wins to teal so they don't compete with neon cyan */
+  --color-emerald-300: #4dd9c0;
+  --color-emerald-400: #00bfa5;
+  --color-emerald-500: #00bfa5;
+  --color-emerald-550: #00a896;
+  --color-emerald-600: #008f80;
+  --color-emerald-650: #00a896;
+  --color-emerald-700: #00756a;
+
+  /* Cyber-specific: shift losses to cooler crimson so they read distinctly */
+  --color-rose-300: #ff6b8a;
+  --color-rose-400: #e8334a;
+  --color-rose-500: #e8334a;
+  --color-rose-550: #c0253a;
+  --color-rose-600: #b02035;
+  --color-rose-650: #c0253a;
+  --color-rose-700: #8f1828;
 }
 
 @layer base {
