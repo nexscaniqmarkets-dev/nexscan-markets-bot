@@ -77,7 +77,7 @@ export function CashierTab({
         <div className="space-y-0.5 relative z-10">
           <div className="flex items-center gap-1">
             <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[8px] font-mono tracking-widest text-emerald-400 font-bold uppercase">
+            <span className="text-[10px] font-mono tracking-widest text-emerald-400 font-bold uppercase">
               Capital &amp; Account Security Protocol
             </span>
           </div>
@@ -107,7 +107,7 @@ export function CashierTab({
           <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden" id="accountConfigBox">
             <div className="p-2 px-3 border-b border-slate-800/60 bg-slate-950/40 flex justify-between items-center">
               <span className="text-[8.5px] font-mono font-bold text-slate-300 tracking-wider uppercase">SELECT TRADING PROFILE</span>
-              <span className="text-[8px] font-mono text-slate-500">Auto-saves locally</span>
+              <span className="text-[10px] font-mono text-slate-500">Auto-saves locally</span>
             </div>
 
             {/* Toggle Switch */}
@@ -163,7 +163,7 @@ export function CashierTab({
                     <span className="text-xl font-mono font-black text-white leading-none">
                       ${demoBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
-                    <span className="text-[9px] font-mono font-bold text-slate-500">USD</span>
+                    <span className="text-[11px] font-mono font-bold text-slate-500">USD</span>
                   </div>
                   <p className={`text-[8.5px] font-mono font-semibold ${demoBalance >= 1000 ? 'text-emerald-450 text-emerald-450' : 'text-red-400'} leading-none mt-1`}>
                     {demoBalance >= 1000 ? '📈 Profit surplus: +' : '📉 Deficit margin: -'}${Math.abs(demoBalance - 1000).toFixed(2)} USD
@@ -176,13 +176,13 @@ export function CashierTab({
                     type="button"
                     onClick={onResetDemoBalance}
                     disabled={botState.isRunning}
-                    className="w-full py-1 border border-slate-800 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-slate-205 text-[9.5px] font-mono rounded-md transition-all flex items-center justify-center gap-1 font-bold uppercase"
+                    className="w-full py-1 border border-slate-800 hover:bg-slate-850 disabled:opacity-40 text-slate-400 hover:text-slate-205 text-[11px] font-mono rounded-md transition-all flex items-center justify-center gap-1 font-bold uppercase"
                   >
                     <RotateCcw className="w-2.5 h-2.5" /> RESET DEMO TO $1,000.00
                   </button>
                 )}
 
-                <div className="flex gap-1.5 p-2 rounded-lg bg-indigo-950/10 border border-indigo-900/25 text-[9px] text-slate-450 leading-relaxed">
+                <div className="flex gap-1.5 p-2 rounded-lg bg-indigo-950/10 border border-indigo-900/25 text-[11px] text-slate-450 leading-relaxed">
                   <span className="font-bold text-indigo-400 text-xs leading-none select-none">i</span>
                   <span>
                     Your Demo portfolio starts with a $1,000.00 virtual base. Performance replicates live volatile price feeds without capital exposure.
@@ -209,7 +209,7 @@ export function CashierTab({
 
                     <form onSubmit={handleAuthSubmit} className="space-y-2">
                       <div>
-                        <label className="text-[8px] font-mono text-slate-450 block mb-0.5">PASTE YOUR DERIV API KEY</label>
+                        <label className="text-[10px] font-mono text-slate-450 block mb-0.5">PASTE YOUR DERIV API KEY</label>
                         <div className="relative">
                           <input
                             type={showToken ? 'text' : 'password'}
@@ -264,7 +264,7 @@ export function CashierTab({
                         <span className="text-[11px] font-bold text-slate-350">Secure Integration Setup Instructions</span>
                       </div>
 
-                      <div className="space-y-2 font-mono text-[9px] text-slate-450 leading-relaxed">
+                      <div className="space-y-2 font-mono text-[11px] text-slate-450 leading-relaxed">
                         <div className="flex gap-1.5">
                           <span className="text-indigo-400 font-bold shrink-0">[1]</span>
                           <span>
@@ -334,11 +334,11 @@ export function CashierTab({
 
                       <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-slate-800/40 text-[7.5px] font-mono text-slate-405">
                         <div>
-                          <span className="text-slate-500 block font-bold text-[8px]">BROKER LOGIN</span>
+                          <span className="text-slate-500 block font-bold text-[10px]">BROKER LOGIN</span>
                           <span className="text-slate-300 font-bold">{realAccount.loginid}</span>
                         </div>
                         <div>
-                          <span className="text-slate-500 block font-bold text-[8px]">EMAIL ID</span>
+                          <span className="text-slate-500 block font-bold text-[10px]">EMAIL ID</span>
                           <span className="text-slate-350 truncate block max-w-[125px]">{realAccount.email || 'N/A'}</span>
                         </div>
                       </div>
@@ -364,13 +364,13 @@ export function CashierTab({
             <div>
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold text-slate-100 leading-none">Broker Cashier Access</h3>
-                <span className={`px-2 py-0.5 rounded text-[8px] font-mono font-bold uppercase tracking-wider ${
+                <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
                   isOnDemo ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 }`}>
                   {isOnDemo ? 'Practice Mode' : 'Live Real Mode'}
                 </span>
               </div>
-              <p className="text-[9.5px] text-slate-500 mt-1 leading-normal">
+              <p className="text-[11px] text-slate-500 mt-1 leading-normal">
                 {isOnDemo 
                   ? 'Simulate and manage practice funds inside your demo environment, or toggle to Live Mode for certified real routing.' 
                   : 'Deposit or withdraw capital securely to/from your linked Deriv account via certified secure cashier gateways.'}
@@ -384,12 +384,12 @@ export function CashierTab({
                   <span className="w-5 h-5 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5 text-amber-400 text-[10px] font-black">!</span>
                   <div className="space-y-1">
                     <p className="text-[10px] font-bold text-amber-300">Virtual funds — no real money</p>
-                    <p className="text-[9.5px] text-slate-400 leading-relaxed">
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
                       Your demo account uses virtual funds for practice only. Deposits and withdrawals are not available in demo mode — there are no real funds to move.
                     </p>
                   </div>
                 </div>
-                <p className="text-[9px] text-slate-500 leading-relaxed">
+                <p className="text-[11px] text-slate-500 leading-relaxed">
                   To deposit or withdraw real funds, switch to <span className="text-emerald-400 font-semibold">Real mode</span> and connect your Deriv account.
                 </p>
               </div>
@@ -402,7 +402,7 @@ export function CashierTab({
                   </div>
                   <div className="space-y-0.5 max-w-sm mx-auto">
                     <p className="text-[10px] font-bold text-slate-400">Cashier Offline for Current Profile</p>
-                    <p className="text-[9px] text-slate-500 leading-relaxed">
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
                       You are in Real Profile mode but have not linked your account. Please paste your secure Trade Token above to active.
                     </p>
                   </div>
@@ -422,11 +422,11 @@ export function CashierTab({
                       <ArrowDownLeft className="w-3 h-3" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-1 font-mono text-[9px] font-bold text-indigo-300 uppercase leading-none">
+                      <div className="flex items-center gap-1 font-mono text-[11px] font-bold text-indigo-300 uppercase leading-none">
                         Deposit Real
                         <ExternalLink className="w-2 h-2 opacity-60" />
                       </div>
-                      <p className="text-[8px] text-slate-500 mt-0.5 leading-none">Add actual wallet balance</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5 leading-none">Add actual wallet balance</p>
                     </div>
                   </a>
 
@@ -442,18 +442,18 @@ export function CashierTab({
                       <ArrowUpRight className="w-3 h-3" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-1 font-mono text-[9px] font-bold text-emerald-300 uppercase leading-none">
+                      <div className="flex items-center gap-1 font-mono text-[11px] font-bold text-emerald-300 uppercase leading-none">
                         Withdraw Real
                         <ExternalLink className="w-2 h-2 opacity-60" />
                       </div>
-                      <p className="text-[8px] text-slate-500 mt-0.5 leading-none font-sans">Transfer assets back to local</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5 leading-none font-sans">Transfer assets back to local</p>
                     </div>
                   </a>
                 </div>
               )
             )}
 
-            <div className="flex items-start gap-1 text-[8px] text-slate-500 font-mono bg-slate-950/40 p-2 rounded-md border border-slate-900 leading-normal">
+            <div className="flex items-start gap-1 text-[10px] text-slate-500 font-mono bg-slate-950/40 p-2 rounded-md border border-slate-900 leading-normal">
               <Clock className="w-3 h-3 text-slate-600 shrink-0 mt-0.5" />
               <span>
                 Standard automated processing time is 1 to 24 hours depending strictly on your regional payment gateway. NexScan does not collect transaction fees.
@@ -480,12 +480,12 @@ export function CashierTab({
             {/* Net profit widget */}
             <div className="relative overflow-hidden bg-slate-950/60 rounded-lg p-3 border border-slate-800/60">
               <div className={`absolute inset-0 opacity-10 ${totalNetProfit >= 0 ? 'bg-gradient-to-br from-emerald-500 to-transparent' : 'bg-gradient-to-br from-rose-500 to-transparent'} pointer-events-none`} />
-              <span className="text-[9px] font-mono text-slate-500 block uppercase font-bold tracking-wider">Net Realized Margin</span>
+              <span className="text-[11px] font-mono text-slate-500 block uppercase font-bold tracking-wider">Net Realized Margin</span>
               <div className="flex items-baseline gap-1 mt-0.5">
                 <span className={`text-xl font-mono font-black ${totalNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                   {totalNetProfit >= 0 ? '+' : '-'}${Math.abs(totalNetProfit).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </span>
-                <span className="text-[9px] font-mono text-slate-500 uppercase font-bold">{activeCurrency}</span>
+                <span className="text-[11px] font-mono text-slate-500 uppercase font-bold">{activeCurrency}</span>
               </div>
               <span className="text-[8.5px] font-mono text-slate-550 text-slate-500 block mt-0.5">
                 Across {totalTrades} executed transactions in active view
@@ -495,7 +495,7 @@ export function CashierTab({
             {/* Win rate indicator */}
             {totalTrades > 0 && (
               <div className="space-y-1.5">
-                <div className="flex justify-between text-[9px] font-mono">
+                <div className="flex justify-between text-[11px] font-mono">
                   <span className="text-slate-400">Win rate indicator: <strong className="text-emerald-400">{winRate.toFixed(1)}%</strong></span>
                   <span className="text-slate-500">{winCount}W — {lossCount}L</span>
                 </div>
@@ -530,14 +530,14 @@ export function CashierTab({
           {/* Privacy & Guarding Checklist */}
           <div className="bg-slate-900/40 border border-slate-800 p-3.5 rounded-xl space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[9px] font-mono text-indigo-400 tracking-wider font-extrabold uppercase">SYSTEM PROTOCOL DEPLOYMENT</span>
+              <span className="text-[11px] font-mono text-indigo-400 tracking-wider font-extrabold uppercase">SYSTEM PROTOCOL DEPLOYMENT</span>
               <span className="text-[7.5px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold uppercase font-mono flex items-center gap-1">
                 <span className="w-1 h-1 bg-emerald-400 rounded-full" />
                 VERIFIED CORE
               </span>
             </div>
 
-            <ul className="space-y-2.5 text-[9.5px] font-mono text-slate-400">
+            <ul className="space-y-2.5 text-[11px] font-mono text-slate-400">
               <li className="flex items-start gap-2 leading-relaxed">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
                 <span>All broker orders are handled via official secure API keys stored directly inside local user browser cache.</span>
