@@ -39,9 +39,6 @@ export function CashierTab({
   const [showToken, setShowToken] = useState(false);
   const [animBalance, setAnimBalance] = useState(false);
   const [activeAction, setActiveAction] = useState<null | 'deposit' | 'withdraw'>(null);
-  const [simAmount, setSimAmount] = useState('500');
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [simError, setSimError] = useState('');
 
   // Animate balance on mount
   useEffect(() => {
@@ -49,56 +46,6 @@ export function CashierTab({
       setTimeout(() => setAnimBalance(true), 150);
     }
   }, [account]);
-
-  const handleSimulateDeposit = async () => {
-    const val = parseFloat(simAmount);
-    if (isNaN(val) || val <= 0) {
-      setSimError('Please specify a positive valid amount.');
-      return;
-    }
-    setSimError('');
-    setIsSimulating(true);
-    try {
-      const res = await fetch('/api/simulate-deposit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: val }),
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        setSimError(d.error || 'Failed containing simulation deposit.');
-      }
-    } catch(e) {
-      setSimError('Network connection failed.');
-    } finally {
-      setIsSimulating(false);
-    }
-  };
-
-  const handleSimulateWithdraw = async () => {
-    const val = parseFloat(simAmount);
-    if (isNaN(val) || val <= 0) {
-      setSimError('Please specify a positive valid amount.');
-      return;
-    }
-    setSimError('');
-    setIsSimulating(true);
-    try {
-      const res = await fetch('/api/simulate-withdraw', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: val }),
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        setSimError(d.error || 'Insufficient practice balance or error.');
-      }
-    } catch(e) {
-      setSimError('Network connection failed.');
-    } finally {
-      setIsSimulating(false);
-    }
-  };
 
   const isOnDemo = botConfig.isDemo;
   const demoBalance = demoAccount?.balance ?? 1000;
@@ -430,74 +377,21 @@ export function CashierTab({
               </p>
             </div>
 
-            {/* DEMO INTERACTIVE SIMULATOR */}
+            {/* DEMO — no cashier actions, just clear info */}
             {isOnDemo ? (
-              <div className="p-3 bg-slate-950/45 border border-slate-850 rounded-lg space-y-3">
-                <div className="space-y-1.5">
-                  <label className="text-[8.5px] font-mono text-slate-400 uppercase tracking-widest block font-bold">
-                    Practice Transaction Simulator Amount ($ USD)
-                  </label>
-                  <div className="flex gap-1.5">
-                    <input
-                      type="number"
-                      min="10"
-                      max="100000"
-                      value={simAmount}
-                      onChange={(e) => setSimAmount(e.target.value)}
-                      placeholder="Amount..."
-                      className="flex-1 px-2.5 py-1.5 rounded bg-slate-900 border border-slate-800 focus:border-indigo-500/60 text-[10.5px] text-slate-200 font-mono outline-none"
-                    />
-                    <div className="flex gap-1">
-                      {['100', '500', '1000', '5000'].map((preset) => (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => setSimAmount(preset)}
-                          className={`px-2 py-1 text-[8.5px] font-mono rounded border transition-all ${
-                            simAmount === preset 
-                              ? 'bg-indigo-500/15 border-indigo-505 text-indigo-300 font-extrabold' 
-                              : 'bg-slate-900 border-slate-800/80 text-slate-500 hover:text-slate-350 hover:border-slate-700'
-                          }`}
-                        >
-                          ${preset}
-                        </button>
-                      ))}
-                    </div>
+              <div className="p-3 bg-slate-950/45 border border-slate-800 rounded-lg space-y-3">
+                <div className="flex gap-2.5 p-3 rounded-lg bg-amber-950/20 border border-amber-900/30">
+                  <span className="w-5 h-5 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0 mt-0.5 text-amber-400 text-[10px] font-black">!</span>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-amber-300">Virtual funds — no real money</p>
+                    <p className="text-[9.5px] text-slate-400 leading-relaxed">
+                      Your demo account uses virtual funds for practice only. Deposits and withdrawals are not available in demo mode — there are no real funds to move.
+                    </p>
                   </div>
                 </div>
-
-                {simError && (
-                  <p className="text-[8.5px] font-mono text-rose-400 bg-rose-500/5 p-1.5 rounded border border-rose-500/15">
-                    ⚠️ {simError}
-                  </p>
-                )}
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    disabled={isSimulating}
-                    onClick={handleSimulateDeposit}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-gradient-to-r from-indigo-900/50 to-indigo-950 hover:to-indigo-900 border border-indigo-850 hover:border-indigo-600 rounded-lg text-indigo-400 font-mono text-[9.5px] font-bold transition-all active:scale-97 select-none cursor-pointer duration-200"
-                  >
-                    <ArrowDownLeft className="w-3.5 h-3.5 animate-bounce" />
-                    Simulate Deposit
-                  </button>
-
-                  <button
-                    type="button"
-                    disabled={isSimulating}
-                    onClick={handleSimulateWithdraw}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 bg-gradient-to-r from-emerald-900/40 to-emerald-950 hover:to-emerald-900 border border-emerald-900/35 hover:border-emerald-650 rounded-lg text-emerald-400 font-mono text-[9.5px] font-bold transition-all active:scale-97 select-none cursor-pointer duration-200"
-                  >
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                    Simulate Withdraw
-                  </button>
-                </div>
-
-                <div className="text-[8px] text-slate-550 leading-relaxed text-slate-550 flex items-center gap-1 bg-slate-900/30 p-1.5 rounded">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500/50 shrink-0" />
-                  <span>These actions dynamically modify your virtual demo account balance hosted securely inside your session database.</span>
-                </div>
+                <p className="text-[9px] text-slate-500 leading-relaxed">
+                  To deposit or withdraw real funds, switch to <span className="text-emerald-400 font-semibold">Real mode</span> and connect your Deriv account.
+                </p>
               </div>
             ) : (
               // REAL MODE ACCOUNT SECTIONS
