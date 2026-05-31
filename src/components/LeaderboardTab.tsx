@@ -28,23 +28,22 @@ export function LeaderboardTab({
   // Compute stats and performance scores
   const rankedSymbols = Object.values(symbolsState)
     .map((state) => {
-      const info = state.info;
       const totalSim = state.wins + state.losses;
       const winRate = totalSim >= 3 ? (state.wins / totalSim) * 100 : null;
       const signalFreq = state.ticks > 10 ? (state.signals / state.ticks) * 100 : 0;
-      
-      // Score represents a balance of high win-rate + adequate signal volume
-      const score = winRate !== null 
-        ? winRate * 0.65 + Math.min(signalFreq * 5.0, 100) * 0.35 
+
+      // Confidence weight: scales from 0→1 as sample grows from 3→30
+      const confidence = totalSim >= 3 ? Math.min(totalSim / 30, 1.0) : 0;
+
+      const rawScore = winRate !== null
+        ? winRate * 0.65 + Math.min(signalFreq * 5.0, 100) * 0.35
         : -1;
 
-      return {
-        ...state,
-        winRate,
-        signalFreq,
-        score,
-        totalSim,
-      };
+      const score = winRate !== null
+        ? rawScore * confidence + rawScore * (1 - confidence) * 0.5
+        : -1;
+
+      return { ...state, winRate, signalFreq, score, totalSim };
     })
     .sort((a, b) => b.score - a.score);
 
@@ -69,7 +68,12 @@ export function LeaderboardTab({
   };
 
   const topPair = rankedSymbols[0];
-  const meetsCriteria = !isCalibrationActive && topPair && topPair.winRate !== null && topPair.winRate >= 55.0 && topPair.signals >= 5;
+  const meetsCriteria = !isCalibrationActive && topPair &&
+    topPair.winRate !== null &&
+    topPair.winRate >= 55.0 &&
+    topPair.score >= 50.0 &&
+    topPair.signals >= 5 &&
+    (topPair.wins + topPair.losses) >= 5;
 
   const handleManualRefresh = () => {
     setCountdown(180);
