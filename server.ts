@@ -146,7 +146,7 @@ async function loadPremiumCredentials() {
   const c = col('premiumCredentials');
   if (!c) return;
   try {
-    premiumCredentials = (await c.find({}, { projection: { _id: 0 } }).toArray()) as PremiumCredential[];
+    premiumCredentials = (await c.find({}, { projection: { _id: 0 } }).toArray()) as unknown as PremiumCredential[];
     console.log(`Loaded ${premiumCredentials.length} premium credentials from MongoDB.`);
   } catch (err) { console.error('Failed to load premium credentials:', err); }
 }
@@ -164,7 +164,7 @@ async function loadPremiumSubmissions() {
   const c = col('premiumSubmissions');
   if (!c) return;
   try {
-    premiumSubmissions = (await c.find({}, { projection: { _id: 0 } }).toArray()) as PremiumSubmission[];
+    premiumSubmissions = (await c.find({}, { projection: { _id: 0 } }).toArray()) as unknown as PremiumSubmission[];
     console.log(`Loaded ${premiumSubmissions.length} premium submissions from MongoDB.`);
   } catch (err) { console.error('Failed to load premium submissions:', err); }
 }
@@ -194,7 +194,7 @@ async function loadUserRegistry() {
   const c = col('users');
   if (!c) return;
   try {
-    registeredUsers = (await c.find({}, { projection: { _id: 0 } }).toArray()) as RegistryUser[];
+    registeredUsers = (await c.find({}, { projection: { _id: 0 } }).toArray()) as unknown as RegistryUser[];
     console.log(`Loaded ${registeredUsers.length} users from MongoDB.`);
   } catch (err) { console.error('Failed to load user registry:', err); }
 }
