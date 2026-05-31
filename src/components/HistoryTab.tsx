@@ -78,7 +78,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
           <div className="space-y-0.5 text-left">
             <p className="text-[7.5px] uppercase font-mono tracking-wider text-slate-500 leading-none font-bold">Contract Tickets</p>
             <p className="text-lg font-bold font-mono tracking-tight text-white mt-0.5 leading-none">{totalTrades}</p>
-            <p className="text-[8px] text-slate-400 mt-1 leading-none">Processed trades</p>
+            <p className="text-[10px] text-slate-400 mt-1 leading-none">Processed trades</p>
           </div>
           <div className="p-1.5 rounded bg-indigo-500/10 border border-indigo-500/15 text-indigo-400">
             <BarChart2 className="w-3.5 h-3.5" />
@@ -90,9 +90,9 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
           <div className="space-y-0.5 text-left">
             <p className="text-[7.5px] uppercase font-mono tracking-wider text-slate-500 leading-none font-bold">Win Rate Ratio</p>
             <p className="text-lg font-bold font-mono tracking-tight text-emerald-400 mt-0.5 leading-none">
-              {winRate.toFixed(1)}<span className="text-[9px] text-slate-400 font-sans ml-0.5">%</span>
+              {winRate.toFixed(1)}<span className="text-[11px] text-slate-400 font-sans ml-0.5">%</span>
             </p>
-            <p className="text-[8px] text-slate-400 mt-1 leading-none">
+            <p className="text-[10px] text-slate-400 mt-1 leading-none">
               {winCount}W / {lossTrades.length}L
             </p>
           </div>
@@ -108,7 +108,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
             <p className={`text-lg font-bold font-mono tracking-tight mt-0.5 leading-none ${totalNetProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {totalNetProfit >= 0 ? '+' : '-'}${Math.abs(totalNetProfit).toFixed(2)}
             </p>
-            <p className="text-[8px] text-slate-400 mt-1 leading-none">Net active margin</p>
+            <p className="text-[10px] text-slate-400 mt-1 leading-none">Net active margin</p>
           </div>
           <div className={`p-1.5 rounded border ${
             totalNetProfit >= 0 
@@ -126,7 +126,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
             <p className="text-lg font-bold font-mono tracking-tight text-slate-200 mt-0.5 leading-none">
               ${totalStakeValue.toFixed(2)}
             </p>
-            <p className="text-[8px] text-slate-400 mt-1 leading-none">Aggregate stake</p>
+            <p className="text-[10px] text-slate-400 mt-1 leading-none">Aggregate stake</p>
           </div>
           <div className="p-1.5 rounded bg-slate-800 border border-slate-700 text-slate-400">
             <CircleDollarSign className="w-3.5 h-3.5" />
@@ -157,7 +157,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
               <button
                 key={filter}
                 onClick={() => setOutcomeFilter(filter)}
-                className={`py-0.5 rounded text-[8px] font-bold uppercase transition-all tracking-wider ${
+                className={`py-0.5 rounded text-[10px] font-bold uppercase transition-all tracking-wider ${
                   outcomeFilter === filter
                     ? 'bg-indigo-505 bg-indigo-500/10 border border-indigo-500/15 text-indigo-400'
                     : 'text-slate-500 hover:text-slate-300'
@@ -189,7 +189,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
             <button
               onClick={handleClearTrigger}
               disabled={pastTrades.length === 0 || isClearing}
-              className="w-full md:w-auto p-1.5 bg-slate-950 hover:bg-rose-950/20 border border-slate-805 hover:border-rose-900 text-slate-400 hover:text-rose-450 rounded-md transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed text-center flex items-center justify-center gap-1.5 h-8 font-mono text-[9px] uppercase font-bold"
+              className="w-full md:w-auto p-1.5 bg-slate-950 hover:bg-rose-950/20 border border-slate-805 hover:border-rose-900 text-slate-400 hover:text-rose-450 rounded-md transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed text-center flex items-center justify-center gap-1.5 h-8 font-mono text-[11px] uppercase font-bold"
               title="Purge past trades history"
             >
               <Trash2 className="w-3 h-3 text-slate-500" />
@@ -206,7 +206,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse" id="historyTable">
             <thead>
-              <tr className="bg-slate-900/60 border-b border-slate-800/95 text-slate-500 text-[8px] font-mono uppercase tracking-wider">
+              <tr className="bg-slate-900/60 border-b border-slate-800/95 text-slate-500 text-[10px] font-mono uppercase tracking-wider">
                 <th className="py-1 px-2.5 font-bold">Ticket ID</th>
                 <th className="py-1 px-2.5 font-bold">Volatility Asset Pin</th>
                 <th className="py-1 px-2.5 font-bold">Time Initiated (Local)</th>
@@ -216,7 +216,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
                 <th className="py-1 px-2.5 text-center font-bold">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/40 text-[9.5px] font-mono text-slate-350">
+            <tbody className="divide-y divide-slate-800/40 text-[11px] font-mono text-slate-350">
               {filteredTrades.length > 0 ? (
                 filteredTrades.map((trade) => {
                   const isWin = trade.outcome === 'win';
@@ -236,7 +236,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
                           <span className="text-[7.5px] bg-slate-950 px-1 py-0.5 rounded font-bold border border-slate-800 text-indigo-405 text-indigo-400 group-hover:border-slate-700 transition-all">
                             {getSymbolShort(trade.symbol)}
                           </span>
-                          <span className="text-slate-400 font-sans font-medium text-[9.5px] hidden sm:inline">
+                          <span className="text-slate-400 font-sans font-medium text-[11px] hidden sm:inline">
                             {getSymbolName(trade.symbol)}
                           </span>
                         </div>
@@ -244,17 +244,17 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
 
                       {/* Formatted Date & Time */}
                       <td className="py-1 px-2.5 text-slate-400">
-                        <div className="flex items-center gap-1 text-slate-550 text-slate-500 font-mono text-[9px]">
+                        <div className="flex items-center gap-1 text-slate-550 text-slate-500 font-mono text-[11px]">
                           <Calendar className="w-2.5 h-2.5 text-slate-600" />
                           {new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                          <span className="text-[8px] text-slate-600 ml-0.5">
+                          <span className="text-[10px] text-slate-600 ml-0.5">
                             {new Date(trade.timestamp).toLocaleDateString([], { month: '2-digit', day: '2-digit' })}
                           </span>
                         </div>
                       </td>
 
                       {/* Trade Contract Long Description */}
-                      <td className="py-1 px-2.5 text-slate-300 font-sans max-w-xs overflow-hidden text-ellipsis whitespace-nowrap text-[9px]" title={trade.description}>
+                      <td className="py-1 px-2.5 text-slate-300 font-sans max-w-xs overflow-hidden text-ellipsis whitespace-nowrap text-[11px]" title={trade.description}>
                         {trade.description}
                       </td>
 
@@ -264,7 +264,7 @@ export function HistoryTab({ pastTrades, onClearHistory, sessionUptime }: Histor
                       </td>
 
                       {/* Realized Win/Loss Profit */}
-                      <td className={`py-1 px-2.5 text-right font-mono font-bold text-[9.5px] ${isWin ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      <td className={`py-1 px-2.5 text-right font-mono font-bold text-[11px] ${isWin ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {isWin ? '+' : ''}${trade.profit.toFixed(2)}
                       </td>
 
