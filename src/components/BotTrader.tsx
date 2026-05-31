@@ -133,7 +133,12 @@ export function BotTrader({
   const activeWinRate = activeTotalSim >= 3 ? (activeState.wins / activeTotalSim) * 100 : null;
   const activeSignals = activeState?.signals ?? 0;
   const isCalibrating = typeof sessionUptime === 'number' && sessionUptime < 300;
-  const meetsConditions = !isCalibrating && activeWinRate !== null && activeWinRate >= 55 && activeSignals >= 5;
+  // Requires: ≥5 sim trades, ≥55% win rate, ≥5 signals — matches server scoring gate
+  const meetsConditions = !isCalibrating &&
+    activeWinRate !== null &&
+    activeWinRate >= 55 &&
+    activeSignals >= 5 &&
+    activeTotalSim >= 5;
   const totalTrades = botState.wins + botState.losses;
   const sessionWinRate = totalTrades > 0 ? (botState.wins / totalTrades) * 100 : 0;
   const isOnDemo = botConfig.isDemo;
