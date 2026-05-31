@@ -617,6 +617,7 @@ export default function App() {
         tgUser={tgUser}
         theme={theme}
         onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'cyber' : 'dark'))}
+        onboardingCompleted={onboardingOpen === false}
       />
 
       {maintenanceMode ? (
@@ -654,7 +655,7 @@ export default function App() {
                 <div className="flex bg-slate-900/60 border border-slate-800/80 rounded-2xl p-1 gap-1">
                   <button
                     onClick={() => setIntelligenceSubTab('leaderboard')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-mono text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                       intelligenceSubTab === 'leaderboard'
                         ? 'bg-slate-950 text-indigo-400 border border-slate-800'
                         : 'text-slate-500 hover:text-slate-300'
@@ -664,7 +665,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={() => setIntelligenceSubTab('scanner')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-mono text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl font-mono text-[11px] font-bold uppercase tracking-wider transition-all cursor-pointer ${
                       intelligenceSubTab === 'scanner'
                         ? 'bg-slate-950 text-indigo-400 border border-slate-800'
                         : 'text-slate-500 hover:text-slate-300'
@@ -798,12 +799,12 @@ export default function App() {
                   {botState.isRunning ? (
                     <span className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-[9px] font-mono font-black text-emerald-400 uppercase tracking-widest">Live</span>
+                      <span className="text-[11px] font-mono font-black text-emerald-400 uppercase tracking-widest">Live</span>
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-slate-600" />
-                      <span className="text-[9px] font-mono font-black text-slate-500 uppercase tracking-widest">Idle</span>
+                      <span className="text-[11px] font-mono font-black text-slate-500 uppercase tracking-widest">Idle</span>
                     </span>
                   )}
                 </div>
@@ -812,7 +813,7 @@ export default function App() {
 
                 {/* P&L */}
                 <div className="shrink-0 text-center">
-                  <span className="text-[8px] font-mono text-slate-500 block leading-none">P&L</span>
+                  <span className="text-[10px] font-mono text-slate-500 block leading-none">P&L</span>
                   <span className={`text-xs font-mono font-black leading-none mt-0.5 block ${botState.profit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {botState.profit >= 0 ? '+' : ''}${botState.profit.toFixed(2)}
                   </span>
@@ -822,7 +823,7 @@ export default function App() {
 
                 {/* Next Payout */}
                 <div className="shrink-0 text-center">
-                  <span className="text-[8px] font-mono text-slate-500 block leading-none">Payout</span>
+                  <span className="text-[10px] font-mono text-slate-500 block leading-none">Payout</span>
                   <span className="text-xs font-mono font-black text-indigo-400 leading-none mt-0.5 block">
                     ~${(botState.currentStake * 0.95).toFixed(2)}
                   </span>
@@ -832,7 +833,7 @@ export default function App() {
 
                 {/* W/L */}
                 <div className="shrink-0 text-center">
-                  <span className="text-[8px] font-mono text-slate-500 block leading-none">W / L</span>
+                  <span className="text-[10px] font-mono text-slate-500 block leading-none">W / L</span>
                   <span className="text-xs font-mono font-black text-slate-200 leading-none mt-0.5 block">
                     <span className="text-emerald-400">{botState.wins}</span>
                     <span className="text-slate-600 mx-0.5">/</span>
@@ -844,7 +845,7 @@ export default function App() {
 
                 {/* Stake */}
                 <div className="shrink-0 text-center">
-                  <span className="text-[8px] font-mono text-slate-500 block leading-none">Stake</span>
+                  <span className="text-[10px] font-mono text-slate-500 block leading-none">Stake</span>
                   <span className="text-xs font-mono font-black text-slate-300 leading-none mt-0.5 block">
                     ${botState.currentStake.toFixed(2)}
                   </span>
@@ -869,7 +870,7 @@ export default function App() {
                   }`}
                 >
                   <Brain className={`w-5 h-5 transition-all ${activeTab === 'intelligence' ? 'scale-110' : ''}`} />
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">Intel</span>
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wide leading-none">Intel</span>
                   {activeTab === 'intelligence' && <span className="w-1 h-1 rounded-full bg-indigo-400 mt-0.5" />}
                 </button>
 
@@ -881,7 +882,7 @@ export default function App() {
                   }`}
                 >
                   <Wallet className={`w-5 h-5 transition-all ${activeTab === 'wallet' ? 'scale-110' : ''}`} />
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">Wallet</span>
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wide leading-none">Wallet</span>
                   {activeTab === 'wallet' && <span className="w-1 h-1 rounded-full bg-emerald-400 mt-0.5" />}
                 </button>
 
@@ -900,7 +901,7 @@ export default function App() {
                       <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-950 animate-pulse" />
                     )}
                   </div>
-                  <span className={`text-[9px] font-mono font-bold uppercase tracking-wide leading-none mt-1 ${
+                  <span className={`text-[11px] font-mono font-bold uppercase tracking-wide leading-none mt-1 ${
                     activeTab === 'trader' ? 'text-indigo-400' : 'text-slate-500'
                   }`}>Trader</span>
                   {activeTab === 'trader' && <span className="w-1 h-1 rounded-full bg-indigo-400" />}
@@ -921,7 +922,7 @@ export default function App() {
                       </span>
                     )}
                   </div>
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">History</span>
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wide leading-none">History</span>
                   {activeTab === 'history' && <span className="w-1 h-1 rounded-full bg-indigo-400 mt-0.5" />}
                 </button>
 
@@ -933,7 +934,7 @@ export default function App() {
                   }`}
                 >
                   <Crown className={`w-5 h-5 transition-all ${activeTab === 'premium' ? 'scale-110 fill-amber-400/20' : ''}`} />
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wide leading-none">Premium</span>
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wide leading-none">Premium</span>
                   {activeTab === 'premium' && <span className="w-1 h-1 rounded-full bg-amber-400 mt-0.5" />}
                 </button>
 
