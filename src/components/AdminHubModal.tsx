@@ -378,7 +378,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
             <div>
               <h2 className="text-base font-bold text-slate-100 tracking-tight flex items-center gap-2">
                 Creator & Broker Console
-                <span className="text-[9px] font-mono font-bold tracking-widest bg-indigo-950 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-800">
+                <span className="text-[11px] font-mono font-bold tracking-widest bg-indigo-950 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-800">
                   MARKUP ADMIN
                 </span>
               </h2>
@@ -512,7 +512,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                     <span className="text-[11px] font-bold font-mono">
                       {maintenanceMode ? '🚨 SYSTEM CALIBRATION ACTIVE' : '🏆 ONLINE TRADING PERMITTED'}
                     </span>
-                    <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${maintenanceMode ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-950 text-slate-400'}`}>
+                    <span className={`text-[11px] font-extrabold px-1.5 py-0.5 rounded ${maintenanceMode ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-950 text-slate-400'}`}>
                       {maintenanceMode ? 'BLOCKED' : 'READY'}
                     </span>
                   </button>
@@ -545,7 +545,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                   <button
                     type="button"
                     onClick={handleClearUsers}
-                    className="text-[9px] font-mono font-bold text-rose-400 hover:text-rose-300 border border-rose-950/50 hover:border-rose-900 px-2 py-0.5 rounded bg-rose-955/10 cursor-pointer transition-colors"
+                    className="text-[11px] font-mono font-bold text-rose-400 hover:text-rose-300 border border-rose-950/50 hover:border-rose-900 px-2 py-0.5 rounded bg-rose-955/10 cursor-pointer transition-colors"
                   >
                     WIPE ALL RECORDS
                   </button>
@@ -559,7 +559,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
               ) : (
                 <div className="overflow-x-auto border border-slate-850 rounded-xl max-h-48 overflow-y-auto">
                   <table className="w-full text-left text-[11px] font-mono">
-                    <thead className="bg-slate-900 text-slate-400 border-b border-slate-800 text-[9px] uppercase tracking-wider sticky top-0 z-10">
+                    <thead className="bg-slate-900 text-slate-400 border-b border-slate-800 text-[11px] uppercase tracking-wider sticky top-0 z-10">
                       <tr>
                         <th className="p-2.5">Client Username</th>
                         <th className="p-2.5">Email / Activity</th>
@@ -572,14 +572,14 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                         <tr key={item.loginid} className="hover:bg-slate-900/30">
                           <td className="p-2.5">
                             <span className="text-slate-205 block font-semibold">{item.fullname}</span>
-                            <span className="text-[9px] text-slate-500">{item.loginid} • {item.is_virtual ? 'DEMO' : 'LIVE'}</span>
+                            <span className="text-[11px] text-slate-500">{item.loginid} • {item.is_virtual ? 'DEMO' : 'LIVE'}</span>
                           </td>
                           <td className="p-2.5">
                             <span className="text-slate-405 block truncate max-w-[140px]">{item.email || 'N/A'}</span>
-                            <span className="text-[9px] text-slate-500">Connected: {new Date(item.lastActive).toLocaleTimeString()}</span>
+                            <span className="text-[11px] text-slate-500">Connected: {new Date(item.lastActive).toLocaleTimeString()}</span>
                           </td>
                           <td className="p-2.5">
-                            <span className="px-1 py-0.5 rounded font-bold text-[9px] bg-slate-900 text-slate-400 border border-slate-800">
+                            <span className="px-1 py-0.5 rounded font-bold text-[11px] bg-slate-900 text-slate-400 border border-slate-800">
                               {item.currency}
                             </span>
                           </td>
@@ -615,7 +615,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
               ) : (
                 <div className="overflow-x-auto border border-slate-900 rounded-xl max-h-48 overflow-y-auto">
                   <table className="w-full text-left text-[11px] font-mono">
-                    <thead className="bg-slate-900 text-slate-400 border-b border-slate-850 text-[8px] uppercase tracking-wider sticky top-0 z-10">
+                    <thead className="bg-slate-900 text-slate-400 border-b border-slate-850 text-[10px] uppercase tracking-wider sticky top-0 z-10">
                       <tr>
                         <th className="p-2.5">Subscriber Cardholder</th>
                         <th className="p-2.5">Submitted Token</th>
@@ -627,7 +627,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                         <tr key={sub.id} className="hover:bg-slate-900/30">
                           <td className="p-2.5">
                             <span className="text-slate-200 block font-bold">{sub.cardholderName}</span>
-                            <span className="text-[9px] text-slate-500">Paid: ${sub.amount} • {new Date(sub.timestamp).toLocaleDateString()}</span>
+                            <span className="text-[11px] text-slate-500">Paid: ${sub.amount} • {new Date(sub.timestamp).toLocaleDateString()}</span>
                           </td>
                           <td className="p-2.5">
                             <input
@@ -641,7 +641,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                               className="bg-slate-950 font-mono text-[10px] border border-slate-800 rounded px-1.5 py-0.5 text-slate-300 w-32 cursor-pointer focus:outline-none"
                               title="Click to reveal token"
                             />
-                            <span className="text-[8px] text-emerald-500 block">Click to reveal</span>
+                            <span className="text-[10px] text-emerald-500 block">Click to reveal</span>
                           </td>
                           <td className="p-2.5 text-right space-x-1 whitespace-nowrap">
                             <button
@@ -654,7 +654,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                                 setSuccess(`Prefilled subscription form for ${sub.cardholderName}! Customize and register active subscriber key above.`);
                                 setTimeout(() => setSuccess(''), 4500);
                               }}
-                              className="text-[9px] font-bold text-emerald-400 bg-emerald-950/20 hover:bg-emerald-950 px-2 py-1 rounded cursor-pointer transition-colors uppercase border border-emerald-900/40 inline-block"
+                              className="text-[11px] font-bold text-emerald-400 bg-emerald-950/20 hover:bg-emerald-950 px-2 py-1 rounded cursor-pointer transition-colors uppercase border border-emerald-900/40 inline-block"
                             >
                               Auto-Prefill
                             </button>
@@ -665,7 +665,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                                   handleDeleteSubmission(sub.id);
                                 }
                               }}
-                              className="text-[9px] font-bold text-rose-500 hover:text-rose-450 px-1.5 py-1 rounded cursor-pointer inline-block"
+                              className="text-[11px] font-bold text-rose-500 hover:text-rose-450 px-1.5 py-1 rounded cursor-pointer inline-block"
                             >
                               Dismiss
                             </button>
@@ -689,7 +689,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                 <button
                   type="button"
                   onClick={suggestRandomCredentials}
-                  className="text-[9px] font-mono font-bold text-amber-400 hover:text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded bg-amber-955/20 flex items-center gap-1 cursor-pointer"
+                  className="text-[11px] font-mono font-bold text-amber-400 hover:text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded bg-amber-955/20 flex items-center gap-1 cursor-pointer"
                 >
                   <RefreshCw className="w-3 h-3 text-amber-450 animate-pulse" /> Randomize Combo
                 </button>
@@ -699,7 +699,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
               <form onSubmit={handleGeneratePremium} className="space-y-3">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-[9px] font-mono tracking-wider text-slate-550 uppercase block">Subscriber Username</label>
+                    <label className="text-[11px] font-mono tracking-wider text-slate-550 uppercase block">Subscriber Username</label>
                     <input
                       type="text"
                       placeholder="e.g. golden_miner_5"
@@ -710,7 +710,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[9px] font-mono tracking-wider text-slate-555 uppercase block">Secure Client Passcode</label>
+                    <label className="text-[11px] font-mono tracking-wider text-slate-555 uppercase block">Secure Client Passcode</label>
                     <input
                       type="text"
                       placeholder="Create secure passcode..."
@@ -722,7 +722,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[9px] font-mono tracking-wider text-amber-500 uppercase block">Linked Deriv API Token (Optional - Bypasses Client Token Requirement)</label>
+                  <label className="text-[11px] font-mono tracking-wider text-amber-500 uppercase block">Linked Deriv API Token (Optional - Bypasses Client Token Requirement)</label>
                   <input
                     type="password"
                     placeholder="e.g. jhs8dYshJkd9Ahs (Will save securely on premium profile)..."
@@ -752,7 +752,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                 ) : (
                   <div className="overflow-x-auto border border-slate-900 rounded-xl max-h-48 overflow-y-auto">
                     <table className="w-full text-left text-[11px] font-mono">
-                      <thead className="bg-slate-900 text-slate-400 border-b border-slate-850 text-[8px] uppercase tracking-wider sticky top-0 z-10">
+                      <thead className="bg-slate-900 text-slate-400 border-b border-slate-850 text-[10px] uppercase tracking-wider sticky top-0 z-10">
                         <tr>
                           <th className="p-2">Client User</th>
                           <th className="p-2">Active Device Lock</th>
@@ -766,7 +766,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                             <tr key={item.username} className="hover:bg-slate-900/30">
                               <td className="p-2">
                                 <span className="text-amber-400 font-bold block">{item.username}</span>
-                                <span className="text-[9.5px] text-slate-500 font-semibold block leading-tight">Passcode: <span className="text-slate-305 select-all font-sans bg-slate-900 px-1 py-0.5 rounded border border-slate-850">{item.password}</span></span>
+                                <span className="text-[11px] text-slate-500 font-semibold block leading-tight">Passcode: <span className="text-slate-305 select-all font-sans bg-slate-900 px-1 py-0.5 rounded border border-slate-850">{item.password}</span></span>
                                 {item.derivApiToken ? (
                                   <div className="mt-1 flex items-center gap-1 text-[8.5px] text-emerald-400 font-sans">
                                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400" /> Linked Token: <span className="text-[8.5px] select-all font-mono text-emerald-300 bg-emerald-955/20 border border-emerald-500/10 px-1 rounded">***{item.derivApiToken.slice(-5)}</span>
@@ -778,15 +778,15 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                               <td className="p-2">
                                 {isOnline ? (
                                   <div className="space-y-1">
-                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 text-[9px] font-bold leading-none">
+                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-900/40 text-[11px] font-bold leading-none">
                                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Live Device Connected
                                     </span>
                                     {item.lastActive && (
-                                      <span className="text-[8px] text-slate-500 block leading-tight">Ping: {new Date(item.lastActive).toLocaleTimeString()}</span>
+                                      <span className="text-[10px] text-slate-500 block leading-tight">Ping: {new Date(item.lastActive).toLocaleTimeString()}</span>
                                     )}
                                   </div>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-900 text-slate-500 border border-slate-850 text-[9px] font-bold leading-none">
+                                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-900 text-slate-500 border border-slate-850 text-[11px] font-bold leading-none">
                                     Offline
                                   </span>
                                 )}
@@ -796,7 +796,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                                   <button
                                     type="button"
                                     onClick={() => handleKickPremium(item.username)}
-                                    className="text-[9px] font-bold text-amber-500 hover:text-amber-400 bg-amber-950/15 border border-amber-900/30 px-1.5 py-0.5 rounded cursor-pointer uppercase tracking-wider transition-colors inline-block"
+                                    className="text-[11px] font-bold text-amber-500 hover:text-amber-400 bg-amber-950/15 border border-amber-900/30 px-1.5 py-0.5 rounded cursor-pointer uppercase tracking-wider transition-colors inline-block"
                                     title="Unlocks single device locking of this profile"
                                   >
                                     Kick Session
@@ -805,7 +805,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                                 <button
                                   type="button"
                                   onClick={() => handleDeletePremium(item.username)}
-                                  className="text-[9px] font-bold text-rose-500 hover:text-rose-450 hover:bg-rose-950/10 px-1.5 py-0.5 rounded cursor-pointer uppercase transition-colors inline-block"
+                                  className="text-[11px] font-bold text-rose-500 hover:text-rose-450 hover:bg-rose-950/10 px-1.5 py-0.5 rounded cursor-pointer uppercase transition-colors inline-block"
                                 >
                                   Suspend
                                 </button>
@@ -842,7 +842,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                     className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-2.5 font-mono text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none transition-colors"
                     required
                   />
-                  <span className="text-[9px] text-slate-500 block">Default mock fallback is 1089. Replace this with your personal App ID.</span>
+                  <span className="text-[11px] text-slate-500 block">Default mock fallback is 1089. Replace this with your personal App ID.</span>
                 </div>
 
                 {/* Markup Percent */}
@@ -862,7 +862,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                       {markupPercent.toFixed(1)}%
                     </span>
                   </div>
-                  <span className="text-[9px] text-slate-500 block">The percentage commission tracking rate of customer volumes.</span>
+                  <span className="text-[11px] text-slate-500 block">The percentage commission tracking rate of customer volumes.</span>
                 </div>
               </div>
 
@@ -877,7 +877,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                     onChange={(e) => setAffiliateToken(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-2.5 font-mono text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none transition-colors"
                   />
-                  <span className="text-[9px] text-slate-500 block">Allows you to track affiliated signup metrics from your clients.</span>
+                  <span className="text-[11px] text-slate-500 block">Allows you to track affiliated signup metrics from your clients.</span>
                 </div>
 
                 {/* Subscription Price */}
@@ -895,7 +895,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                       required
                     />
                   </div>
-                  <span className="text-[9px] text-slate-500 block">Configurable monthly VIP charge required to unlock premium indicators.</span>
+                  <span className="text-[11px] text-slate-500 block">Configurable monthly VIP charge required to unlock premium indicators.</span>
                 </div>
               </div>
 
@@ -932,7 +932,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                   </div>
                   
                   {/* Step instructions */}
-                  <div className="text-[9.5px] text-slate-400 space-y-1 pt-1 ml-1 bg-slate-950/50 p-3 rounded-lg border border-slate-800/80">
+                  <div className="text-[11px] text-slate-400 space-y-1 pt-1 ml-1 bg-slate-950/50 p-3 rounded-lg border border-slate-800/80">
                     <p className="font-semibold text-slate-300">How to generate your Creator API Token:</p>
                     <ol className="list-decimal list-inside space-y-1 leading-relaxed text-slate-400">
                       <li>Log in to the Deriv account that should collect markups in the developer panel.</li>
@@ -940,7 +940,7 @@ export function AdminHubModal({ isOpen, onClose, sequenceCompleted, onLockConsol
                       <li>Create a token named <span className="text-indigo-400 font-mono italic">"NexScan Live Commission"</span>.</li>
                       <li>
                         Select permissions: <span className="text-slate-300 font-semibold">"Read"</span>, <span className="text-slate-300 font-semibold">"Trade"</span>, <span className="text-slate-300 font-semibold">"Payments"</span>, and <span className="text-rose-400 font-bold underline">"Admin" (CRITICAL: Mandated by Deriv to register custom apps)</span>.
-                        <p className="text-[9px] text-rose-300/95 mt-0.5 ml-4 font-sans bg-rose-950/40 px-2 py-1 rounded border border-rose-900/40">
+                        <p className="text-[11px] text-rose-300/95 mt-0.5 ml-4 font-sans bg-rose-950/40 px-2 py-1 rounded border border-rose-900/40">
                           ⚠️ <strong>CRITICAL NOTE:</strong> If you do not select the <strong>"Admin"</strong> scope checkbox, Deriv's API server will reject the registration request with <em>"Permission denied, requires admin scope(s)"</em>.
                         </p>
                       </li>
