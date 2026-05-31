@@ -64,6 +64,18 @@ export function BotTrader({
   const [maxWinsInput, setMaxWinsInput] = useState(botConfig.maxWins.toString());
   const [maxLossesInput, setMaxLossesInput] = useState(botConfig.maxLosses.toString());
 
+  // Local UI feedback logs (not synced to server, just for in-component toasts)
+  const [localLogs, setLocalLogs] = useState<Array<{ id: string; type: 'success' | 'error' | 'warning'; message: string }>>([]);
+
+  // Append a local toast log
+  const addLocalLog = (type: 'success' | 'error' | 'warning', message: string) => {
+    setLocalLogs(prev => [...prev, { id: Math.random().toString(36).slice(2), type, message }].slice(-5));
+    // Auto-clear after 4s
+    setTimeout(() => {
+      setLocalLogs(prev => prev.slice(1));
+    }, 4000);
+  };
+
   useEffect(() => { if (autoTriggerScan) { onScanReset(); handleSearchAndLoad(); } }, [autoTriggerScan]);
   useEffect(() => { if (autoTriggerResume) { isResumeModeRef.current = true; onResumeReset(); handleSearchAndLoad(); } }, [autoTriggerResume]);
 
@@ -196,14 +208,55 @@ export function BotTrader({
           </div>
         </div>
 
-        <button 
-          type="button"
-          onClick={onNavigateToWallet}
-          className="px-2 py-1 bg-slate-950 hover:bg-slate-850 active:scale-97 text-slate-350 hover:text-white font-mono text-[8.5px] font-black rounded-lg border border-slate-805 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
-        >
-          <Wallet className="w-3 h-3 text-indigo-400" />
-          MANAGE
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          {/* ── Demo/Live Toggle Switch ── */}
+          <div className="flex items-center gap-1.5">
+            <span className={`text-[8px] font-mono font-bold uppercase tracking-wider transition-colors ${isOnDemo ? 'text-indigo-400' : 'text-slate-600'}`}>
+              DEMO
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                // Switching to real? Check that realAccount exists
+                if (!isOnDemo && !realAccount) {
+                  addLocalLog('error', '⚠️ No real account linked. Please authorize your real account in Wallet first.');
+                  onNavigateToWallet();
+                  return;
+                }
+                // Switching while bot is running? Warn and block
+                if (botState.isRunning) {
+                  addLocalLog('warning', '⛔ Cannot switch accounts while bot is running. Stop the bot first.');
+                  return;
+                }
+                onUpdateConfig({ isDemo: !isOnDemo });
+                addLocalLog('success', `📋 Switched to ${!isOnDemo ? 'REAL TRADING' : 'DEMO PRACTICE'} mode.`);
+              }}
+              disabled={botState.isRunning}
+              className={`relative w-11 h-5.5 rounded-full transition-all duration-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-1 focus:ring-indigo-500/40 ${
+                !isOnDemo ? 'bg-emerald-500/80' : 'bg-slate-800'
+              }`}
+              title={!isOnDemo ? 'Currently using real account' : 'Currently using demo account'}
+            >
+              <span
+                className={`absolute top-0.5 w-4.5 h-4.5 rounded-full bg-white shadow-md transition-all duration-200 ${
+                  !isOnDemo ? 'left-[22px]' : 'left-0.5'
+                }`}
+              />
+            </button>
+            <span className={`text-[8px] font-mono font-bold uppercase tracking-wider transition-colors ${!isOnDemo ? 'text-emerald-400' : 'text-slate-600'}`}>
+              LIVE
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={onNavigateToWallet}
+            className="px-2 py-1 bg-slate-950 hover:bg-slate-850 active:scale-97 text-slate-350 hover:text-white font-mono text-[8.5px] font-black rounded-lg border border-slate-805 transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            <Wallet className="w-3 h-3 text-indigo-400" />
+            MANAGE
+          </button>
+        </div>
       </div>
 
       {/* ══════════════════════════════════════════
@@ -405,7 +458,18 @@ export function BotTrader({
             </div>
 
             {/* Execute Button Tray */}
-            <div className="pt-1">
+            <div className="pt-1 space-y-2">
+              {/* Local toast feedback for mode/account changes */}
+              {localLogs.map(log => (
+                <div key={log.id} className={`text-[10px] font-mono font-bold px-3 py-1.5 rounded-lg text-left animate-fade-in ${
+                  log.type === 'error' ? 'bg-rose-950/40 border border-rose-900/40 text-rose-400' :
+                  log.type === 'warning' ? 'bg-amber-950/20 border border-amber-900/30 text-amber-400' :
+                  'bg-emerald-950/20 border border-emerald-900/30 text-emerald-400'
+                }`}>
+                  {log.message}
+                </div>
+              ))}
+
               {canTrade ? (
                 botState.isRunning ? (
                   <button 
@@ -429,14 +493,39 @@ export function BotTrader({
                     <span>{isCalibrating ? 'CALIBRATING SYSTEM' : meetsConditions ? 'INITIATE AUTO-EXECUTION' : 'AWAITING FAV SIGNAL'}</span>
                   </button>
                 )
-              ) : (
-                <button 
-                  onClick={() => onUpdateConfig({ isDemo: false })}
-                  className="w-full py-2 rounded-lg border border-dashed border-slate-805 hover:border-indigo-500 hover:text-indigo-400 text-slate-500 text-[10.5px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1 leading-none h-[36px]"
+              ) : realAccount ? (
+                // Real account exists — show clear "Switch to Real Trading" button
+                <button
+                  onClick={() => {
+                    if (botState.isRunning) {
+                      addLocalLog('warning', '⛔ Stop the bot before switching to live mode.');
+                      return;
+                    }
+                    onUpdateConfig({ isDemo: false });
+                    addLocalLog('success', `✅ Real account (${realAccount.loginid}) activated. You are now trading LIVE.`);
+                  }}
+                  className="w-full py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-400/50 text-emerald-400 text-[10.5px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 leading-none h-[36px]"
                 >
-                  <Key className="w-3 h-3" />
-                  <span>AUTHORIZE REAL BOT ACCOUNT</span>
+                  <Shield className="w-3 h-3" />
+                  <span>SWITCH TO LIVE TRADING (${realAccount.loginid})</span>
                 </button>
+              ) : (
+                // No real account linked — guide user to Wallet
+                <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      addLocalLog('error', '⚠️ No real account found. Please link your real Deriv account in the Wallet tab.');
+                      onNavigateToWallet();
+                    }}
+                    className="w-full py-2 rounded-lg border border-dashed border-amber-500/40 hover:border-amber-500 hover:text-amber-400 text-amber-400/70 text-[10.5px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 leading-none h-[36px]"
+                  >
+                    <Key className="w-3 h-3" />
+                    <span>LINK REAL ACCOUNT TO TRADE LIVE</span>
+                  </button>
+                  <p className="text-[9px] text-slate-600 text-center font-mono">
+                    Go to <button onClick={onNavigateToWallet} className="text-indigo-400 underline hover:text-indigo-300">Wallet → Manage</button> to link your real Deriv API token.
+                  </p>
+                </div>
               )}
             </div>
           </div>
