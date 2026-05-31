@@ -172,7 +172,7 @@ export function ScannerTab({
                       return (
                         <div
                           key={idx}
-                          className="w-[18px] h-[18px] rounded-md flex items-center justify-center font-mono text-[9px] font-bold border leading-none"
+                          className="w-[18px] h-[18px] rounded-md flex items-center justify-center font-mono text-[11px] font-bold border leading-none"
                           style={{
                             backgroundColor: `${c}10`,
                             borderColor: `${c}35`,
@@ -184,7 +184,7 @@ export function ScannerTab({
                       );
                     })
                   ) : (
-                    <span className="text-[9.5px] font-mono text-slate-600">Waiting for data...</span>
+                    <span className="text-[11px] font-mono text-slate-600">Waiting for data...</span>
                   )}
                 </div>
               </div>
