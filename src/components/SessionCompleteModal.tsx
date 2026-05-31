@@ -136,15 +136,15 @@ export function SessionCompleteModal({
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 mb-5 relative z-10">
             <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-center">
-              <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block">Wins</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">Wins</span>
               <span className="text-lg font-black font-mono text-emerald-400">{wins}</span>
             </div>
             <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-center">
-              <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block">Losses</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">Losses</span>
               <span className="text-lg font-black font-mono text-rose-400">{losses}</span>
             </div>
             <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 text-center">
-              <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider block">Stake</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">Stake</span>
               <span className="text-lg font-black font-mono text-indigo-400">${stake}</span>
             </div>
           </div>
